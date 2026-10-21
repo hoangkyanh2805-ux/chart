@@ -77,30 +77,42 @@ export const ChartCanvas: React.FC = () => {
 
     // 3. Watermark: XAUUSD · Timeframe
     ctx.save();
-    ctx.font = 'bold 24px sans-serif';
+    const activeFont = settings.fontFamily || 'Montserrat';
+    ctx.font = `bold 22px "${activeFont}", sans-serif`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.fillText(`${settings.symbol || 'XAUUSD'} · ${settings.timeframe || 'M15'}`, 30, 48);
+    ctx.fillText(`${settings.symbol || 'XAUUSD'} · ${settings.timeframe || 'M15'}`, 24, 42);
 
-    // 3b. Azzam Ops Viral Video Hook Banner (for TikTok / Shorts)
+    // 3b. High-Impact Video Hook Banner (Custom English text for Shorts/TikTok)
     if (settings.bannerHook) {
-      const bannerText = settings.bannerHook;
-      ctx.font = '900 12px sans-serif';
-      const textWidth = ctx.measureText(bannerText).width;
-      const bannerX = (chartWidth - textWidth) / 2 - 12;
-      const bannerY = 18;
+      const bannerText = settings.bannerHook.toUpperCase();
+      const fontSize = settings.bannerFontSize || 12;
+      ctx.font = `900 ${fontSize}px "${activeFont}", sans-serif`;
+      
+      const metrics = ctx.measureText(bannerText);
+      const textWidth = metrics.width;
+      const paddingX = 16;
+      const pillWidth = Math.min(chartWidth - 24, textWidth + paddingX * 2);
+      const bannerX = (chartWidth - pillWidth) / 2;
+      const bannerY = 16;
+      const pillHeight = fontSize + 16;
 
-      // Banner background
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      // Banner Pill Container
+      ctx.fillStyle = settings.bannerBgColor || 'rgba(15, 23, 42, 0.94)';
       ctx.strokeStyle = '#EAB308';
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = 'rgba(234, 179, 8, 0.25)';
+      ctx.shadowBlur = 8;
       ctx.beginPath();
-      ctx.roundRect(bannerX, bannerY, textWidth + 24, 28, 6);
+      ctx.roundRect(bannerX, bannerY, pillWidth, pillHeight, 8);
       ctx.fill();
       ctx.stroke();
+      ctx.shadowBlur = 0; // reset shadow
 
-      // Banner text
-      ctx.fillStyle = '#FDE047';
-      ctx.fillText(bannerText, bannerX + 12, bannerY + 18);
+      // Banner Text (Centered)
+      ctx.fillStyle = settings.bannerTextColor || '#FDE047';
+      ctx.textAlign = 'center';
+      ctx.fillText(bannerText, bannerX + pillWidth / 2, bannerY + pillHeight / 2 + fontSize * 0.35);
+      ctx.textAlign = 'left'; // reset alignment
     }
     ctx.restore();
 
@@ -143,7 +155,7 @@ export const ChartCanvas: React.FC = () => {
 
         // Level tag
         if (overlay.label) {
-          ctx.font = 'bold 10px monospace';
+          ctx.font = `bold 10px "${activeFont}", monospace`;
           ctx.fillStyle = overlay.color || '#F59E0B';
           ctx.fillText(overlay.label, startX, yLine - 6);
         }
@@ -171,11 +183,11 @@ export const ChartCanvas: React.FC = () => {
 
         // Label + C.E. text
         if (overlay.label) {
-          ctx.font = 'bold 10px sans-serif';
+          ctx.font = `bold 10px "${activeFont}", sans-serif`;
           ctx.fillStyle = overlay.color || '#00F5A0';
           ctx.globalAlpha = 0.9;
           ctx.fillText(overlay.label, startX + 6, boxY + 14);
-          ctx.font = '9px monospace';
+          ctx.font = `9px "${activeFont}", monospace`;
           ctx.fillText('50% C.E.', startX + 6, midY - 3);
         }
       } else if (overlay.type === 'LONG_SHORT') {
@@ -204,7 +216,7 @@ export const ChartCanvas: React.FC = () => {
         ctx.lineTo(startX + boxWidth, entryY);
         ctx.stroke();
 
-        ctx.font = 'bold 10px monospace';
+        ctx.font = `bold 10px "${activeFont}", monospace`;
         ctx.fillStyle = '#FFFFFF';
         ctx.fillText(`ENTRY: $${overlay.priceStart.toFixed(2)}`, startX + 6, entryY - 4);
         ctx.fillStyle = '#00F5A0';
@@ -223,7 +235,7 @@ export const ChartCanvas: React.FC = () => {
         ctx.strokeRect(startX, boxY, boxWidth, boxHeight);
 
         if (overlay.label) {
-          ctx.font = 'bold 10px sans-serif';
+          ctx.font = `bold 10px "${activeFont}", sans-serif`;
           ctx.fillStyle = overlay.color || '#6366F1';
           ctx.fillText(overlay.label, startX + 6, boxY + 14);
         }

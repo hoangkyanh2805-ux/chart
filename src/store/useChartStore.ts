@@ -21,6 +21,7 @@ interface ChartState {
   
   addOverlay: (overlay: Omit<Overlay, 'id'>) => void;
   removeOverlay: (id: string) => void;
+  updateOverlayLabel: (id: string, label: string) => void;
   
   setCurrentTime: (time: number) => void;
   setIsPlaying: (playing: boolean) => void;
@@ -70,6 +71,11 @@ export const useChartStore = create<ChartState>((set, get) => ({
   settings: {
     symbol: 'XAUUSD',
     timeframe: 'M15',
+    bannerHook: 'HOW TO TRADE XAUUSD LIKE BANKS (ICT SETUP)',
+    fontFamily: 'Montserrat',
+    bannerFontSize: 13,
+    bannerBgColor: 'rgba(15, 23, 42, 0.94)',
+    bannerTextColor: '#FDE047',
     aspectRatio: '9:16',
     revealSpeed: 0.5,
     bullishColor: '#00F5A0',
@@ -136,6 +142,11 @@ export const useChartStore = create<ChartState>((set, get) => ({
   removeOverlay: (id) =>
     set((state) => ({
       overlays: state.overlays.filter((o) => o.id !== id),
+    })),
+
+  updateOverlayLabel: (id, label) =>
+    set((state) => ({
+      overlays: state.overlays.map((o) => (o.id === id ? { ...o, label } : o)),
     })),
 
   setCurrentTime: (time) => set({ currentTime: time }),

@@ -30,6 +30,10 @@ export interface ChartSettings {
   symbol: string;
   timeframe: string;
   bannerHook?: string;
+  fontFamily: string;
+  bannerFontSize: number;
+  bannerBgColor: string;
+  bannerTextColor: string;
   aspectRatio: AspectRatio;
   revealSpeed: number; // milliseconds per candle
   bullishColor: string;
