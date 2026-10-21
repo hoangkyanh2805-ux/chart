@@ -26,36 +26,61 @@ export const ChartCanvas: React.FC = () => {
 
     const width = rect.width;
     const height = rect.height;
+    const priceAxisWidth = 65;
+    const chartWidth = width - priceAxisWidth;
 
     // 1. Clear background
     ctx.fillStyle = '#0B0E14';
     ctx.fillRect(0, 0, width, height);
 
-    // 2. Render Subtle Background Grid
+    if (candles.length === 0) return;
+
+    // Calculate dynamic price range with 4% padding
+    const allPrices = candles.flatMap((c) => [c.high, c.low]);
+    const minPrice = Math.min(...allPrices) * 0.995;
+    const maxPrice = Math.max(...allPrices) * 1.005;
+
+    // 2. Render Subtle Background Grid & Price Axis Levels
     if (settings.showGrid) {
       ctx.strokeStyle = '#141B28';
       ctx.lineWidth = 1;
-      const gridStep = 45;
-      for (let x = 0; x < width; x += gridStep) {
+
+      // Price grid lines & axis labels
+      const priceSteps = 6;
+      const priceDiff = (maxPrice - minPrice) / priceSteps;
+
+      for (let i = 0; i <= priceSteps; i++) {
+        const p = minPrice + i * priceDiff;
+        const y = priceToCanvasY(p, minPrice, maxPrice, height);
+
+        ctx.strokeStyle = '#141B28';
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(chartWidth, y);
+        ctx.stroke();
+
+        // Right Price Axis text
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#64748B';
+        ctx.fillText(p.toFixed(2), chartWidth + 6, y + 3);
+      }
+
+      // Vertical time grid lines
+      const gridStepX = 50;
+      for (let x = 0; x < chartWidth; x += gridStepX) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, height);
         ctx.stroke();
       }
-      for (let y = 0; y < height; y += gridStep) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-      }
     }
 
-    if (candles.length === 0) return;
-
-    // Calculate dynamic price range with 5% padding
-    const allPrices = candles.flatMap((c) => [c.high, c.low]);
-    const minPrice = Math.min(...allPrices) * 0.97;
-    const maxPrice = Math.max(...allPrices) * 1.03;
+    // 3. Watermark: XAUUSD · Timeframe
+    ctx.save();
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.fillText(`${settings.symbol || 'XAUUSD'} · ${settings.timeframe || 'M15'}`, 30, 48);
+    ctx.restore();
 
     // Determine how many candles to reveal based on currentTime and revealMode
     let visibleCount = candles.length;
@@ -65,7 +90,7 @@ export const ChartCanvas: React.FC = () => {
     }
     const visibleCandles = candles.slice(0, visibleCount);
 
-    // 3. Render Overlays (FVG, Order Block, Liquidity Lines, Long/Short)
+    // 4. Render Overlays (FVG, Order Block, Liquidity Lines, Long/Short)
     overlays.forEach((overlay: Overlay) => {
       if (overlay.startCandleIndex >= visibleCount) return;
 
@@ -135,7 +160,7 @@ export const ChartCanvas: React.FC = () => {
         // Risk:Reward Ratio Overlay (Target green, Risk red)
         const entryY = priceToCanvasY(overlay.priceStart, minPrice, maxPrice, height);
         const targetY = priceToCanvasY(overlay.priceEnd, minPrice, maxPrice, height);
-        const slPrice = overlay.priceStart - (overlay.priceEnd - overlay.priceStart) / 3; // default 1:3 RR
+        const slPrice = overlay.priceStart - (overlay.priceEnd - overlay.priceStart) / 3.5;
         const slY = priceToCanvasY(slPrice, minPrice, maxPrice, height);
 
         // Profit Zone (Green)
@@ -159,11 +184,11 @@ export const ChartCanvas: React.FC = () => {
 
         ctx.font = 'bold 10px monospace';
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('ENTRY', startX + 6, entryY - 4);
+        ctx.fillText(`ENTRY: $${overlay.priceStart.toFixed(2)}`, startX + 6, entryY - 4);
         ctx.fillStyle = '#00F5A0';
-        ctx.fillText('TARGET (TP) - 1:3.0 R:R', startX + 6, Math.min(entryY, targetY) + 14);
+        ctx.fillText(`TP: $${overlay.priceEnd.toFixed(2)} (1:3.5 RR)`, startX + 6, Math.min(entryY, targetY) + 14);
         ctx.fillStyle = '#FF3366';
-        ctx.fillText('STOP LOSS (SL)', startX + 6, Math.max(entryY, slY) - 4);
+        ctx.fillText(`SL: $${slPrice.toFixed(2)}`, startX + 6, Math.max(entryY, slY) - 4);
       } else {
         // Standard Order Block
         ctx.fillStyle = overlay.color || '#6366F1';
@@ -185,7 +210,7 @@ export const ChartCanvas: React.FC = () => {
       ctx.restore();
     });
 
-    // 4. Render Candlesticks
+    // 5. Render Candlesticks
     visibleCandles.forEach((candle: Candle) => {
       const isBullish = candle.close >= candle.open;
       const color = isBullish ? settings.bullishColor : settings.bearishColor;
@@ -219,7 +244,34 @@ export const ChartCanvas: React.FC = () => {
       ctx.shadowBlur = 0; // reset
     });
 
-    // 5. Render Spotlight Mode (if enabled)
+    // 6. Current Price Tag (on Right Axis)
+    if (visibleCandles.length > 0) {
+      const lastCandle = visibleCandles[visibleCandles.length - 1];
+      const curY = priceToCanvasY(lastCandle.close, minPrice, maxPrice, height);
+      const isBull = lastCandle.close >= lastCandle.open;
+      const curColor = isBull ? settings.bullishColor : settings.bearishColor;
+
+      // Price marker background
+      ctx.fillStyle = curColor;
+      ctx.fillRect(chartWidth + 2, curY - 9, priceAxisWidth - 4, 18);
+
+      ctx.font = 'bold 10px monospace';
+      ctx.fillStyle = '#0B0E14';
+      ctx.fillText(lastCandle.close.toFixed(2), chartWidth + 6, curY + 4);
+
+      // Dotted horizontal guide line to current candle
+      ctx.save();
+      ctx.strokeStyle = curColor;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(0, curY);
+      ctx.lineTo(chartWidth, curY);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 7. Render Spotlight Mode (if enabled)
     if (settings.spotlightEnabled && visibleCandles.length > 0) {
       const lastCandle = visibleCandles[visibleCandles.length - 1];
       const spotX =

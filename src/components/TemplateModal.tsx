@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { TEMPLATES, ChartTemplate } from '../data/templates';
-import { LayoutTemplate, X, Sparkles, Monitor, Smartphone, ArrowRight, Video, Flame } from 'lucide-react';
+import { LayoutTemplate, X, Smartphone, Monitor, Video, Flame } from 'lucide-react';
 
 interface TemplateModalProps {
   isOpen: boolean;
@@ -43,18 +43,18 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
         {/* Header */}
         <div className="p-5 border-b border-[#1E293B] flex items-center justify-between bg-[#131A26]/80">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-tr from-primary to-indigo-500 text-white shadow-lg shadow-primary/25">
-              <LayoutTemplate className="w-5 h-5" />
+            <div className="p-2.5 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 text-black shadow-lg shadow-amber-500/25">
+              <LayoutTemplate className="w-5 h-5 font-black" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-white tracking-tight">Thư Viện Template Chuẩn Pro</h2>
+                <h2 className="text-lg font-bold text-white tracking-tight">Thư Viện Template Vàng XAUUSD (Forex)</h2>
                 <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold flex items-center gap-1">
-                  <Flame className="w-3 h-3 text-amber-400 fill-current" /> ChartAnimator Pro
+                  <Flame className="w-3 h-3 text-amber-400 fill-current" /> XAU/USD Special
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Các mẫu thiết lập giao dịch có sẵn (SMC, ICT, Wyckoff) — Chọn mẫu là có thể render xuất video ngay
+                Các kịch bản Vàng chuẩn thực chiến (London Open, New York CPI, Asia Sweep, Vùng 2700) — Chọn mẫu là xuất video ngay
               </p>
             </div>
           </div>
@@ -68,17 +68,17 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
 
         {/* Filter Categories */}
         <div className="px-6 py-3 border-b border-[#1E293B] flex items-center gap-2 bg-[#0C1017]">
-          {['All', 'SMC', 'ICT', 'Wyckoff', 'Elliott Wave'].map((cat) => (
+          {['All', 'ICT', 'SMC'].map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+              className={`px-3.5 py-1 rounded-lg text-xs font-medium transition ${
                 selectedCategory === cat
-                  ? 'bg-primary text-white shadow'
+                  ? 'bg-amber-500 text-black font-bold shadow'
                   : 'text-slate-400 hover:text-white hover:bg-[#161F2E]'
               }`}
             >
-              {cat === 'All' ? 'Tất cả Template' : cat}
+              {cat === 'All' ? 'Tất cả Kịch Bản Vàng' : `Chiến Thuật ${cat}`}
             </button>
           ))}
         </div>
@@ -88,12 +88,12 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
           {filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className="bg-[#131A26] border border-[#1E293B] hover:border-primary/50 transition-all rounded-xl p-4 flex flex-col justify-between gap-3 shadow-lg group hover:shadow-primary/10"
+              className="bg-[#131A26] border border-[#1E293B] hover:border-amber-500/50 transition-all rounded-xl p-4 flex flex-col justify-between gap-3 shadow-lg group hover:shadow-amber-500/10"
             >
               {/* Card Header */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  <span className="text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
                     {template.strategy}
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -122,7 +122,7 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
                   </div>
                 </div>
 
-                <h3 className="font-bold text-white text-sm group-hover:text-primary transition line-clamp-1">
+                <h3 className="font-bold text-white text-sm group-hover:text-amber-400 transition line-clamp-1">
                   {template.title}
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{template.description}</p>
@@ -144,7 +144,7 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
                   </button>
                   <button
                     onClick={() => handleApplyAndExport(template)}
-                    className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-primary/20 transition"
+                    className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black text-xs font-bold flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition"
                   >
                     <Video className="w-3.5 h-3.5" /> Xuất Video
                   </button>

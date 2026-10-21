@@ -30,33 +30,47 @@ interface ChartState {
   resetChart: () => void;
 }
 
-// Initial demo candles
+// Initial demo candles for XAUUSD (Gold)
 const INITIAL_CANDLES: Candle[] = [
-  { id: 'c-1', index: 0, open: 100, high: 108, low: 98, close: 106 },
-  { id: 'c-2', index: 1, open: 106, high: 112, low: 104, close: 110 },
-  { id: 'c-3', index: 2, open: 110, high: 115, low: 102, close: 103 },
-  { id: 'c-4', index: 3, open: 103, high: 105, low: 95, close: 96 },
-  { id: 'c-5', index: 4, open: 96, high: 114, low: 95, close: 113 },
-  { id: 'c-6', index: 5, open: 113, high: 122, low: 112, close: 120 },
+  { id: 'c-1', index: 0, open: 2645.0, high: 2652.5, low: 2643.0, close: 2650.0 },
+  { id: 'c-2', index: 1, open: 2650.0, high: 2658.0, low: 2648.5, close: 2656.5 },
+  { id: 'c-3', index: 2, open: 2656.5, high: 2659.0, low: 2646.0, close: 2647.5 },
+  { id: 'c-4', index: 3, open: 2647.5, high: 2668.0, low: 2646.0, close: 2665.0 }, // Expansion
+  { id: 'c-5', index: 4, open: 2665.0, high: 2674.0, low: 2663.0, close: 2672.5 },
+  { id: 'c-6', index: 5, open: 2672.5, high: 2673.5, low: 2656.0, close: 2658.0 }, // FVG Retest
+  { id: 'c-7', index: 6, open: 2658.0, high: 2682.0, low: 2657.0, close: 2680.0 }, // Target rally
 ];
 
 export const useChartStore = create<ChartState>((set, get) => ({
   candles: INITIAL_CANDLES,
   overlays: [
     {
-      id: 'fvg-1',
+      id: 'fvg-gold',
       type: 'FVG',
-      startCandleIndex: 2,
-      endCandleIndex: 4,
-      priceStart: 105,
-      priceEnd: 112,
+      startCandleIndex: 3,
+      endCandleIndex: 6,
+      priceStart: 2649.0,
+      priceEnd: 2663.0,
       color: '#00F5A0',
-      opacity: 0.2,
-      label: 'Bullish FVG',
+      opacity: 0.22,
+      label: 'XAUUSD Bullish FVG [2649.00 - 2663.00]',
+    },
+    {
+      id: 'asia-low',
+      type: 'LIQUIDITY_LINE',
+      startCandleIndex: 0,
+      endCandleIndex: 3,
+      priceStart: 2643.0,
+      priceEnd: 2643.0,
+      color: '#F59E0B',
+      opacity: 0.85,
+      label: 'Asia Low Liquidity - 2643.00',
     },
   ],
   settings: {
-    aspectRatio: '16:9',
+    symbol: 'XAUUSD',
+    timeframe: 'M15',
+    aspectRatio: '9:16',
     revealSpeed: 0.5,
     bullishColor: '#00F5A0',
     bearishColor: '#FF3366',
@@ -92,10 +106,10 @@ export const useChartStore = create<ChartState>((set, get) => ({
       candles: state.candles.slice(0, -1),
     })),
 
-  generateRandomWalk: (count, drift = 0.002, volatility = 0.03) =>
+  generateRandomWalk: (count, drift = 0.001, volatility = 0.008) =>
     set((state) => {
       const result: Candle[] = [];
-      let lastPrice = state.candles.length > 0 ? state.candles[state.candles.length - 1].close : 100;
+      let lastPrice = state.candles.length > 0 ? state.candles[state.candles.length - 1].close : 2650;
       let startIndex = state.candles.length;
 
       for (let i = 0; i < count; i++) {

@@ -30,19 +30,21 @@ export const Header: React.FC = () => {
   return (
     <>
       <header className="h-14 bg-[#0B0E14] border-b border-[#1E293B] px-6 flex items-center justify-between">
-        {/* Brand */}
+        {/* Brand & XAUUSD Asset Tag */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-cyan-400 flex items-center justify-center font-black text-white text-base shadow-lg shadow-primary/25">
-            CA
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-black text-black text-sm shadow-lg shadow-amber-500/25">
+            AU
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-              ChartAnimator{' '}
-              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-primary/20 text-primary">
-                Studio
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
+                XAUUSD <span className="text-amber-400 font-extrabold">GOLD</span>
+              </h1>
+              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                M15 FOREX
               </span>
-            </h1>
-            <p className="text-[10px] text-slate-400">Clean-Room Animated Trading Video Maker</p>
+            </div>
+            <p className="text-[10px] text-slate-400">Forex Gold Animated Breakdown Studio</p>
           </div>
         </div>
 

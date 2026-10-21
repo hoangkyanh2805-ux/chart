@@ -27,6 +27,8 @@ export interface Overlay {
 }
 
 export interface ChartSettings {
+  symbol: string;
+  timeframe: string;
   aspectRatio: AspectRatio;
   revealSpeed: number; // milliseconds per candle
   bullishColor: string;
