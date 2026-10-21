@@ -3,12 +3,15 @@
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { AspectRatio } from '../types/chart';
-import { Download, Monitor, Smartphone, Square, Eye, Video } from 'lucide-react';
+import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame } from 'lucide-react';
 import { ExportModal } from './ExportModal';
+import { TemplateModal } from './TemplateModal';
+import { ChartTemplate } from '../data/templates';
 
 export const Header: React.FC = () => {
   const { settings, updateSettings } = useChartStore();
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState<boolean>(false);
 
   const handleExportPNG = () => {
     const canvas = document.querySelector('canvas');
@@ -17,6 +20,11 @@ export const Header: React.FC = () => {
     link.download = `chart-frame-${Date.now()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
+  };
+
+  const handleSelectAndExport = (template: ChartTemplate) => {
+    // Open Export modal immediately after selecting template
+    setIsExportModalOpen(true);
   };
 
   return (
@@ -38,38 +46,53 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Aspect Ratio Switcher (YouTube 16:9 vs TikTok/Shorts 9:16) */}
-        <div className="flex items-center bg-[#131A26] p-1 rounded-lg border border-[#1E293B]">
+        {/* Center: Template Library button & Aspect Ratio Switcher */}
+        <div className="flex items-center gap-3">
+          {/* Templates Trigger Button */}
           <button
-            onClick={() => updateSettings({ aspectRatio: '16:9' })}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs transition ${
-              settings.aspectRatio === '16:9'
-                ? 'bg-primary text-white font-medium shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
+            onClick={() => setIsTemplateModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#161F2E] hover:bg-[#1E293B] border border-primary/40 hover:border-primary text-slate-200 hover:text-white rounded-lg text-xs font-medium transition shadow-sm"
           >
-            <Monitor className="w-3.5 h-3.5" /> 16:9 (YouTube)
+            <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
+            <span>Templates</span>
+            <span className="text-[9px] uppercase font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+              PRO
+            </span>
           </button>
-          <button
-            onClick={() => updateSettings({ aspectRatio: '9:16' })}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs transition ${
-              settings.aspectRatio === '9:16'
-                ? 'bg-primary text-white font-medium shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Smartphone className="w-3.5 h-3.5" /> 9:16 (Shorts/TikTok)
-          </button>
-          <button
-            onClick={() => updateSettings({ aspectRatio: '1:1' })}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs transition ${
-              settings.aspectRatio === '1:1'
-                ? 'bg-primary text-white font-medium shadow'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Square className="w-3.5 h-3.5" /> 1:1 (Post)
-          </button>
+
+          {/* Aspect Ratio Switcher (YouTube 16:9 vs TikTok/Shorts 9:16) */}
+          <div className="flex items-center bg-[#131A26] p-1 rounded-lg border border-[#1E293B]">
+            <button
+              onClick={() => updateSettings({ aspectRatio: '16:9' })}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs transition ${
+                settings.aspectRatio === '16:9'
+                  ? 'bg-primary text-white font-medium shadow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Monitor className="w-3.5 h-3.5" /> 16:9
+            </button>
+            <button
+              onClick={() => updateSettings({ aspectRatio: '9:16' })}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs transition ${
+                settings.aspectRatio === '9:16'
+                  ? 'bg-primary text-white font-medium shadow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" /> 9:16
+            </button>
+            <button
+              onClick={() => updateSettings({ aspectRatio: '1:1' })}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs transition ${
+                settings.aspectRatio === '1:1'
+                  ? 'bg-primary text-white font-medium shadow'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Square className="w-3.5 h-3.5" /> 1:1
+            </button>
+          </div>
         </div>
 
         {/* Actions: Spotlight, Export PNG, Export Video */}
@@ -101,6 +124,13 @@ export const Header: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Template Library Modal */}
+      <TemplateModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onSelectAndExport={handleSelectAndExport}
+      />
 
       {/* Video Export Modal */}
       <ExportModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} />

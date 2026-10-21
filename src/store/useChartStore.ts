@@ -26,6 +26,7 @@ interface ChartState {
   setIsPlaying: (playing: boolean) => void;
   setRevealMode: (mode: RevealAnimationType) => void;
   updateSettings: (updates: Partial<ChartSettings>) => void;
+  loadTemplate: (template: any) => void;
   resetChart: () => void;
 }
 
@@ -129,6 +130,21 @@ export const useChartStore = create<ChartState>((set, get) => ({
   updateSettings: (updates) =>
     set((state) => ({
       settings: { ...state.settings, ...updates },
+    })),
+
+  loadTemplate: (template) =>
+    set((state) => ({
+      candles: template.candles,
+      overlays: template.overlays,
+      duration: template.duration,
+      currentTime: template.duration,
+      isPlaying: false,
+      revealMode: template.revealMode || 'sequential',
+      settings: {
+        ...state.settings,
+        aspectRatio: template.aspectRatio || state.settings.aspectRatio,
+        spotlightEnabled: template.spotlightEnabled ?? state.settings.spotlightEnabled,
+      },
     })),
 
   resetChart: () =>
