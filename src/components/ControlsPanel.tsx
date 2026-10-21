@@ -15,8 +15,8 @@ export const ControlsPanel: React.FC = () => {
     addOverlay,
   } = useChartStore();
 
-  // Local state for single candle builder (Calibrated for XAUUSD Gold)
-  const lastClose = candles.length > 0 ? candles[candles.length - 1].close : 2650.0;
+  // Local state for single candle builder (Calibrated for XAUUSD Gold ~4,129.00)
+  const lastClose = candles.length > 0 ? candles[candles.length - 1].close : 4129.0;
   const [open, setOpen] = useState(lastClose);
   const [high, setHigh] = useState(Math.round((lastClose + 5.5) * 10) / 10);
   const [low, setLow] = useState(Math.round((lastClose - 3.0) * 10) / 10);
@@ -40,8 +40,8 @@ export const ControlsPanel: React.FC = () => {
   const handleAddFVG = () => {
     if (candles.length < 3) return;
     const lastIdx = candles.length - 1;
-    const p1 = candles[lastIdx - 2]?.high || 2650;
-    const p2 = candles[lastIdx]?.low || 2662;
+    const p1 = candles[lastIdx - 2]?.high || 4125;
+    const p2 = candles[lastIdx]?.low || 4138;
     addOverlay({
       type: 'FVG',
       startCandleIndex: Math.max(0, lastIdx - 2),
@@ -83,8 +83,8 @@ export const ControlsPanel: React.FC = () => {
           </div>
           <input
             type="range"
-            min="2600"
-            max="2750"
+            min="4080"
+            max="4220"
             step="0.5"
             value={open}
             onChange={(e) => setOpen(Number(e.target.value))}
@@ -100,8 +100,8 @@ export const ControlsPanel: React.FC = () => {
           </div>
           <input
             type="range"
-            min="2600"
-            max="2750"
+            min="4080"
+            max="4220"
             step="0.5"
             value={high}
             onChange={(e) => setHigh(Number(e.target.value))}
@@ -117,8 +117,8 @@ export const ControlsPanel: React.FC = () => {
           </div>
           <input
             type="range"
-            min="2600"
-            max="2750"
+            min="4080"
+            max="4220"
             step="0.5"
             value={low}
             onChange={(e) => setLow(Number(e.target.value))}
@@ -134,8 +134,8 @@ export const ControlsPanel: React.FC = () => {
           </div>
           <input
             type="range"
-            min="2600"
-            max="2750"
+            min="4080"
+            max="4220"
             step="0.5"
             value={close}
             onChange={(e) => setClose(Number(e.target.value))}

@@ -40,11 +40,14 @@ export const Header: React.FC = () => {
               <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
                 XAUUSD <span className="text-amber-400 font-extrabold">GOLD</span>
               </h1>
-              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
-                M15 FOREX
+              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                OANDA · M15
+              </span>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30 flex items-center gap-1">
+                $4,129.09 <span className="text-[10px] text-emerald-500 font-normal">+0.09%</span>
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">Forex Gold Animated Breakdown Studio</p>
+            <p className="text-[10px] text-slate-400">Forex Gold Spot / U.S. Dollar</p>
           </div>
         </div>
 

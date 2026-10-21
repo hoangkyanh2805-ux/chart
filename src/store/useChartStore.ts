@@ -30,15 +30,15 @@ interface ChartState {
   resetChart: () => void;
 }
 
-// Initial demo candles for XAUUSD (Gold)
+// Initial demo candles for XAUUSD (Gold - Live Price Range ~4,129.00)
 const INITIAL_CANDLES: Candle[] = [
-  { id: 'c-1', index: 0, open: 2645.0, high: 2652.5, low: 2643.0, close: 2650.0 },
-  { id: 'c-2', index: 1, open: 2650.0, high: 2658.0, low: 2648.5, close: 2656.5 },
-  { id: 'c-3', index: 2, open: 2656.5, high: 2659.0, low: 2646.0, close: 2647.5 },
-  { id: 'c-4', index: 3, open: 2647.5, high: 2668.0, low: 2646.0, close: 2665.0 }, // Expansion
-  { id: 'c-5', index: 4, open: 2665.0, high: 2674.0, low: 2663.0, close: 2672.5 },
-  { id: 'c-6', index: 5, open: 2672.5, high: 2673.5, low: 2656.0, close: 2658.0 }, // FVG Retest
-  { id: 'c-7', index: 6, open: 2658.0, high: 2682.0, low: 2657.0, close: 2680.0 }, // Target rally
+  { id: 'c-1', index: 0, open: 4125.0, high: 4132.5, low: 4123.0, close: 4130.0 },
+  { id: 'c-2', index: 1, open: 4130.0, high: 4138.0, low: 4128.5, close: 4136.5 },
+  { id: 'c-3', index: 2, open: 4136.5, high: 4139.0, low: 4126.0, close: 4127.5 },
+  { id: 'c-4', index: 3, open: 4127.5, high: 4148.0, low: 4126.0, close: 4145.0 }, // Expansion
+  { id: 'c-5', index: 4, open: 4145.0, high: 4154.0, low: 4143.0, close: 4152.5 },
+  { id: 'c-6', index: 5, open: 4152.5, high: 4153.5, low: 4136.0, close: 4138.0 }, // FVG Retest
+  { id: 'c-7', index: 6, open: 4138.0, high: 4162.0, low: 4137.0, close: 4160.0 }, // Target rally
 ];
 
 export const useChartStore = create<ChartState>((set, get) => ({
@@ -49,22 +49,22 @@ export const useChartStore = create<ChartState>((set, get) => ({
       type: 'FVG',
       startCandleIndex: 3,
       endCandleIndex: 6,
-      priceStart: 2649.0,
-      priceEnd: 2663.0,
+      priceStart: 4129.0,
+      priceEnd: 4143.0,
       color: '#00F5A0',
       opacity: 0.22,
-      label: 'XAUUSD Bullish FVG [2649.00 - 2663.00]',
+      label: 'XAUUSD Bullish FVG [4129.00 - 4143.00]',
     },
     {
       id: 'asia-low',
       type: 'LIQUIDITY_LINE',
       startCandleIndex: 0,
       endCandleIndex: 3,
-      priceStart: 2643.0,
-      priceEnd: 2643.0,
+      priceStart: 4123.0,
+      priceEnd: 4123.0,
       color: '#F59E0B',
       opacity: 0.85,
-      label: 'Asia Low Liquidity - 2643.00',
+      label: 'Asia Low Liquidity - 4,123.00',
     },
   ],
   settings: {
@@ -106,10 +106,10 @@ export const useChartStore = create<ChartState>((set, get) => ({
       candles: state.candles.slice(0, -1),
     })),
 
-  generateRandomWalk: (count, drift = 0.001, volatility = 0.008) =>
+  generateRandomWalk: (count, drift = 0.001, volatility = 0.004) =>
     set((state) => {
       const result: Candle[] = [];
-      let lastPrice = state.candles.length > 0 ? state.candles[state.candles.length - 1].close : 2650;
+      let lastPrice = state.candles.length > 0 ? state.candles[state.candles.length - 1].close : 4129.0;
       let startIndex = state.candles.length;
 
       for (let i = 0; i < count; i++) {

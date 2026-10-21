@@ -23,18 +23,18 @@ export const TEMPLATES: ChartTemplate[] = [
     aspectRatio: '9:16',
     duration: 5.5,
     revealMode: 'sequential',
-    description: 'Chiến thuật Vàng kinh điển: Phiên Á đi ngang (2642 - 2650), London quét thủng đáy Á xuống 2634 (chạm H1 Order Block) rồi New York bùng nổ lên 2678.',
+    description: 'Chiến thuật Vàng thực chiến 2026: Phiên Á đi ngang (4122 - 4130), London quét bấc thủng đáy Á xuống 4114 (chạm H1 OB) rồi New York bùng nổ lên 4148.50.',
     spotlightEnabled: true,
     candles: [
-      { id: 'c-1', index: 0, open: 2646.0, high: 2650.0, low: 2644.0, close: 2648.5 }, // Asia High
-      { id: 'c-2', index: 1, open: 2648.5, high: 2649.0, low: 2642.0, close: 2643.0 }, // Asia Low
-      { id: 'c-3', index: 2, open: 2643.0, high: 2645.0, low: 2634.0, close: 2636.5 }, // London Sweep wick into H1 OB
-      { id: 'c-4', index: 3, open: 2636.5, high: 2656.0, low: 2635.0, close: 2655.0 }, // NY Open Displacement
-      { id: 'c-5', index: 4, open: 2655.0, high: 2668.0, low: 2653.0, close: 2666.0 }, // BOS of Asia High 2650
-      { id: 'c-6', index: 5, open: 2666.0, high: 2667.0, low: 2658.0, close: 2659.0 },
-      { id: 'c-7', index: 6, open: 2659.0, high: 2660.0, low: 2649.5, close: 2652.0 }, // Retest into Bullish FVG [2645 - 2653]
-      { id: 'c-8', index: 7, open: 2652.0, high: 2672.0, low: 2651.0, close: 2670.0 }, // Expansion rally
-      { id: 'c-9', index: 8, open: 2670.0, high: 2682.0, low: 2669.0, close: 2678.5 }, // Target TP
+      { id: 'c-1', index: 0, open: 4126.0, high: 4130.0, low: 4124.0, close: 4128.5 }, // Asia High 4130
+      { id: 'c-2', index: 1, open: 4128.5, high: 4129.0, low: 4122.0, close: 4123.0 }, // Asia Low 4122
+      { id: 'c-3', index: 2, open: 4123.0, high: 4125.0, low: 4114.0, close: 4116.5 }, // London Sweep wick into H1 OB
+      { id: 'c-4', index: 3, open: 4116.5, high: 4136.0, low: 4115.0, close: 4135.0 }, // NY Open Displacement
+      { id: 'c-5', index: 4, open: 4135.0, high: 4148.0, low: 4133.0, close: 4146.0 }, // BOS of Asia High 4130
+      { id: 'c-6', index: 5, open: 4146.0, high: 4147.0, low: 4138.0, close: 4139.0 },
+      { id: 'c-7', index: 6, open: 4139.0, high: 4140.0, low: 4129.5, close: 4132.0 }, // Retest into Bullish FVG [4125 - 4133]
+      { id: 'c-8', index: 7, open: 4132.0, high: 4152.0, low: 4131.0, close: 4150.0 }, // Expansion rally
+      { id: 'c-9', index: 8, open: 4150.0, high: 4162.0, low: 4149.0, close: 4158.5 }, // Target TP
     ],
     overlays: [
       {
@@ -42,52 +42,52 @@ export const TEMPLATES: ChartTemplate[] = [
         type: 'LIQUIDITY_LINE',
         startCandleIndex: 0,
         endCandleIndex: 5,
-        priceStart: 2650.0,
-        priceEnd: 2650.0,
+        priceStart: 4130.0,
+        priceEnd: 4130.0,
         color: '#F59E0B',
         opacity: 0.85,
-        label: 'Asia High Liquidity (2650.00)',
+        label: 'Asia High Liquidity (4,130.00)',
       },
       {
         id: 'asia-low-sweep',
         type: 'LIQUIDITY_LINE',
         startCandleIndex: 1,
         endCandleIndex: 3,
-        priceStart: 2642.0,
-        priceEnd: 2642.0,
+        priceStart: 4122.0,
+        priceEnd: 4122.0,
         color: '#FF3366',
         opacity: 0.85,
-        label: 'Asia Low Sweep ($$$) - 2642.00',
+        label: 'Asia Low Sweep ($$$) - 4,122.00',
       },
       {
         id: 'h1-ob',
         type: 'ORDER_BLOCK',
         startCandleIndex: 2,
         endCandleIndex: 4,
-        priceStart: 2634.0,
-        priceEnd: 2638.0,
+        priceStart: 4114.0,
+        priceEnd: 4118.0,
         color: '#6366F1',
         opacity: 0.25,
-        label: 'H1 Bullish Order Block [2634 - 2638]',
+        label: 'H1 Bullish Order Block [4114 - 4118]',
       },
       {
         id: 'bull-fvg',
         type: 'FVG',
         startCandleIndex: 3,
         endCandleIndex: 7,
-        priceStart: 2645.0,
-        priceEnd: 2653.0,
+        priceStart: 4125.0,
+        priceEnd: 4133.0,
         color: '#00F5A0',
         opacity: 0.22,
-        label: 'NY Bullish FVG [2645.00 - 2653.00]',
+        label: 'NY Bullish FVG [4125.00 - 4133.00]',
       },
       {
         id: 'rr-long',
         type: 'LONG_SHORT',
         startCandleIndex: 6,
         endCandleIndex: 8,
-        priceStart: 2652.0, // Entry
-        priceEnd: 2678.5, // TP (+265 pips)
+        priceStart: 4132.0, // Entry
+        priceEnd: 4158.5, // TP (+265 pips)
         color: '#00F5A0',
         opacity: 0.2,
         label: 'Long XAUUSD +265 Pips (1:4.5 RR)',
@@ -102,16 +102,16 @@ export const TEMPLATES: ChartTemplate[] = [
     aspectRatio: '9:16',
     duration: 5.0,
     revealMode: 'brownian',
-    description: 'Tin CPI Mỹ ra lúc 8:30 AM: Cú quét bấc giật 120 pips lên 2694 rồi đổ sập phá vỡ cấu trúc về 2645 (Bearish Displacement).',
+    description: 'Tin CPI Mỹ: Cú giật bấc Judas Swing 130 pips lên 4155 rồi sập gãy cấu trúc (MSS) về 4105 tạo Bearish FVG lớn.',
     spotlightEnabled: true,
     candles: [
-      { id: 'c-1', index: 0, open: 2678.0, high: 2684.0, low: 2676.0, close: 2682.0 }, // Pre-news
-      { id: 'c-2', index: 1, open: 2682.0, high: 2685.0, low: 2680.0, close: 2683.5 }, // Equal Highs resistance
-      { id: 'c-3', index: 2, open: 2683.5, high: 2695.0, low: 2678.0, close: 2680.0 }, // CPI News Wick (Judas Swing)
-      { id: 'c-4', index: 3, open: 2680.0, high: 2681.0, low: 2652.0, close: 2654.0 }, // Massive red dump candle
-      { id: 'c-5', index: 4, open: 2654.0, high: 2660.0, low: 2644.0, close: 2646.0 }, // Sell-off
-      { id: 'c-6', index: 5, open: 2646.0, high: 2670.0, low: 2645.0, close: 2668.0 }, // Pullback into Bearish FVG [2660 - 2678]
-      { id: 'c-7', index: 6, open: 2668.0, high: 2669.0, low: 2638.0, close: 2640.0 }, // Full dump continuation
+      { id: 'c-1', index: 0, open: 4138.0, high: 4144.0, low: 4136.0, close: 4142.0 }, // Pre-news
+      { id: 'c-2', index: 1, open: 4142.0, high: 4145.0, low: 4140.0, close: 4143.5 }, // Equal Highs
+      { id: 'c-3', index: 2, open: 4143.5, high: 4155.0, low: 4138.0, close: 4140.0 }, // CPI Spike Wick
+      { id: 'c-4', index: 3, open: 4140.0, high: 4141.0, low: 4112.0, close: 4114.0 }, // Massive red dump candle
+      { id: 'c-5', index: 4, open: 4114.0, high: 4120.0, low: 4104.0, close: 4106.0 }, // Sell-off
+      { id: 'c-6', index: 5, open: 4106.0, high: 4130.0, low: 4105.0, close: 4128.0 }, // Pullback into Bearish FVG [4120 - 4138]
+      { id: 'c-7', index: 6, open: 4128.0, high: 4129.0, low: 4098.0, close: 4100.0 }, // Full dump continuation
     ],
     overlays: [
       {
@@ -119,54 +119,54 @@ export const TEMPLATES: ChartTemplate[] = [
         type: 'LIQUIDITY_LINE',
         startCandleIndex: 1,
         endCandleIndex: 3,
-        priceStart: 2685.0,
-        priceEnd: 2685.0,
+        priceStart: 4145.0,
+        priceEnd: 4145.0,
         color: '#FF3366',
         opacity: 0.9,
-        label: 'CPI Liquidity Sweep Wick (2695.00)',
+        label: 'CPI Liquidity Sweep Wick (4,155.00)',
       },
       {
         id: 'bear-fvg',
         type: 'FVG',
         startCandleIndex: 3,
         endCandleIndex: 6,
-        priceStart: 2660.0,
-        priceEnd: 2678.0,
+        priceStart: 4120.0,
+        priceEnd: 4138.0,
         color: '#FF3366',
         opacity: 0.25,
-        label: 'Bearish FVG [2660.00 - 2678.00]',
+        label: 'Bearish FVG [4120.00 - 4138.00]',
       },
       {
         id: 'mss-gold',
         type: 'LIQUIDITY_LINE',
         startCandleIndex: 0,
         endCandleIndex: 4,
-        priceStart: 2676.0,
-        priceEnd: 2676.0,
+        priceStart: 4136.0,
+        priceEnd: 4136.0,
         color: '#38BDF8',
         opacity: 0.8,
-        label: 'MSS (Market Structure Shift) - 2676.00',
+        label: 'MSS (Market Structure Shift) - 4,136.00',
       },
     ],
   },
   {
-    id: 'xauusd-2700-round-level',
-    title: 'XAUUSD: $2700 Psychological Round Level Liquidity Grab',
+    id: 'xauusd-4150-round-level',
+    title: 'XAUUSD: $4,150 Psychological Round Level Liquidity Grab',
     strategy: 'ICT',
     tier: 'Creator',
     aspectRatio: '16:9',
     duration: 6.0,
     revealMode: 'sequential',
-    description: 'Vùng số tròn tâm lý 2700.00: Đám đông đặt buy-stop breakout bị bẫy thanh khoản (Institutional Trap), giá đảo chiều 350 pips.',
+    description: 'Vùng số tròn tâm lý $4,150.00: Đám đông đặt buy-stop breakout bị bẫy thanh khoản (Institutional Trap), giá đảo chiều 350 pips về 4115.',
     spotlightEnabled: true,
     candles: [
-      { id: 'c-1', index: 0, open: 2685.0, high: 2692.0, low: 2684.0, close: 2691.0 },
-      { id: 'c-2', index: 1, open: 2691.0, high: 2698.0, low: 2689.0, close: 2697.5 }, // Approaching 2700
-      { id: 'c-3', index: 2, open: 2697.5, high: 2705.5, low: 2696.0, close: 2698.0 }, // Trap wick tapping 2705.50
-      { id: 'c-4', index: 3, open: 2698.0, high: 2699.0, low: 2680.0, close: 2682.0 }, // Sharp decline
-      { id: 'c-5', index: 4, open: 2682.0, high: 2684.0, low: 2671.0, close: 2672.5 }, // Breakdown
-      { id: 'c-6', index: 5, open: 2672.5, high: 2688.0, low: 2671.0, close: 2686.0 }, // Retest 2688 mitigation
-      { id: 'c-7', index: 6, open: 2686.0, high: 2687.0, low: 2660.0, close: 2662.0 }, // Target $2662
+      { id: 'c-1', index: 0, open: 4135.0, high: 4142.0, low: 4134.0, close: 4141.0 },
+      { id: 'c-2', index: 1, open: 4141.0, high: 4148.0, low: 4139.0, close: 4147.5 }, // Approaching 4150
+      { id: 'c-3', index: 2, open: 4147.5, high: 4155.5, low: 4146.0, close: 4148.0 }, // Trap wick tapping 4155.50
+      { id: 'c-4', index: 3, open: 4148.0, high: 4149.0, low: 4130.0, close: 4132.0 }, // Sharp decline
+      { id: 'c-5', index: 4, open: 4132.0, high: 4134.0, low: 4121.0, close: 4122.5 }, // Breakdown
+      { id: 'c-6', index: 5, open: 4122.5, high: 4138.0, low: 4121.0, close: 4136.0 }, // Retest 4138 mitigation
+      { id: 'c-7', index: 6, open: 4136.0, high: 4137.0, low: 4112.0, close: 4114.0 }, // Target $4114
     ],
     overlays: [
       {
@@ -174,22 +174,22 @@ export const TEMPLATES: ChartTemplate[] = [
         type: 'LIQUIDITY_LINE',
         startCandleIndex: 0,
         endCandleIndex: 4,
-        priceStart: 2700.0,
-        priceEnd: 2700.0,
+        priceStart: 4150.0,
+        priceEnd: 4150.0,
         color: '#EAB308',
         opacity: 0.95,
-        label: 'Key Level: $2,700.00 Major Psychological Barrier',
+        label: 'Key Level: $4,150.00 Major Psychological Barrier',
       },
       {
         id: 'ob-bear',
         type: 'ORDER_BLOCK',
         startCandleIndex: 2,
         endCandleIndex: 6,
-        priceStart: 2696.0,
-        priceEnd: 2704.0,
+        priceStart: 4146.0,
+        priceEnd: 4154.0,
         color: '#FF3366',
         opacity: 0.28,
-        label: 'Institutional Supply Block (2696 - 2704)',
+        label: 'Institutional Supply Block (4146 - 4154)',
       },
     ],
   },
@@ -201,14 +201,14 @@ export const TEMPLATES: ChartTemplate[] = [
     aspectRatio: '9:16',
     duration: 4.5,
     revealMode: 'sequential',
-    description: 'Thiết lập Scalp Vàng M15 chuẩn: Rủi ro 20 pips, lợi nhuận 80 pips (R:R 1:4.0). Canh mua tại 50% Consequent Encroachment.',
+    description: 'Thiết lập Scalp Vàng M15 tại vùng giá 4,129: Rủi ro 20 pips, lợi nhuận 80 pips (R:R 1:4.0). Canh mua tại 50% Consequent Encroachment.',
     spotlightEnabled: true,
     candles: [
-      { id: 'c-1', index: 0, open: 2648.0, high: 2652.0, low: 2646.0, close: 2651.0 },
-      { id: 'c-2', index: 1, open: 2651.0, high: 2666.0, low: 2650.0, close: 2665.0 }, // Strong M15 expansion candle
-      { id: 'c-3', index: 2, open: 2665.0, high: 2674.0, low: 2663.0, close: 2672.0 },
-      { id: 'c-4', index: 3, open: 2672.0, high: 2673.0, low: 2657.5, close: 2659.0 }, // Pullback into FVG (50% CE is 2657.5)
-      { id: 'c-5', index: 4, open: 2659.0, high: 2682.0, low: 2658.0, close: 2680.0 }, // Profit target hit
+      { id: 'c-1', index: 0, open: 4122.0, high: 4126.0, low: 4120.0, close: 4125.0 },
+      { id: 'c-2', index: 1, open: 4125.0, high: 4140.0, low: 4124.0, close: 4139.0 }, // Strong M15 expansion candle
+      { id: 'c-3', index: 2, open: 4139.0, high: 4148.0, low: 4137.0, close: 4146.0 },
+      { id: 'c-4', index: 3, open: 4146.0, high: 4147.0, low: 4131.5, close: 4133.0 }, // Retest 50% CE (4131.5)
+      { id: 'c-5', index: 4, open: 4133.0, high: 4156.0, low: 4132.0, close: 4154.0 }, // Profit target hit
     ],
     overlays: [
       {
@@ -216,19 +216,19 @@ export const TEMPLATES: ChartTemplate[] = [
         type: 'FVG',
         startCandleIndex: 1,
         endCandleIndex: 4,
-        priceStart: 2652.0,
-        priceEnd: 2663.0,
+        priceStart: 4126.0,
+        priceEnd: 4137.0,
         color: '#00F5A0',
         opacity: 0.25,
-        label: 'XAUUSD M15 FVG [2652.00 - 2663.00]',
+        label: 'XAUUSD M15 FVG [4126.00 - 4137.00]',
       },
       {
         id: 'scalp-rr',
         type: 'LONG_SHORT',
         startCandleIndex: 3,
         endCandleIndex: 4,
-        priceStart: 2659.0, // Entry
-        priceEnd: 2680.0, // TP (+210 pips)
+        priceStart: 4133.0, // Entry
+        priceEnd: 4154.0, // TP (+210 pips)
         color: '#00F5A0',
         opacity: 0.22,
         label: 'Scalp Entry at 50% CE (1:4.2 RR)',
