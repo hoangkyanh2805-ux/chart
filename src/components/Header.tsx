@@ -3,15 +3,17 @@
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { AspectRatio } from '../types/chart';
-import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame } from 'lucide-react';
+import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio } from 'lucide-react';
 import { ExportModal } from './ExportModal';
 import { TemplateModal } from './TemplateModal';
+import { AzzamOpsModal } from './AzzamOpsModal';
 import { ChartTemplate } from '../data/templates';
 
 export const Header: React.FC = () => {
   const { settings, updateSettings } = useChartStore();
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState<boolean>(false);
+  const [isAzzamOpsOpen, setIsAzzamOpsOpen] = useState<boolean>(false);
 
   const handleExportPNG = () => {
     const canvas = document.querySelector('canvas');
@@ -51,8 +53,20 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Center: Template Library button & Aspect Ratio Switcher */}
-        <div className="flex items-center gap-3">
+        {/* Center: Azzam Ops, Template Library button & Aspect Ratio Switcher */}
+        <div className="flex items-center gap-2.5">
+          {/* Azzam Ops Direct Intelligence Button */}
+          <button
+            onClick={() => setIsAzzamOpsOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121A28] hover:bg-[#1E293B] border border-sky-500/50 hover:border-sky-400 text-sky-300 hover:text-white rounded-lg text-xs font-bold transition shadow-sm group"
+          >
+            <Radio className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
+            <span>Azzam Ops Hub</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-extrabold border border-sky-500/30">
+              PAIN POINTS
+            </span>
+          </button>
+
           {/* Templates Trigger Button */}
           <button
             onClick={() => setIsTemplateModalOpen(true)}
@@ -129,6 +143,13 @@ export const Header: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Azzam Ops Intelligence Modal */}
+      <AzzamOpsModal
+        isOpen={isAzzamOpsOpen}
+        onClose={() => setIsAzzamOpsOpen(false)}
+        onSelectAndExport={() => setIsExportModalOpen(true)}
+      />
 
       {/* Template Library Modal */}
       <TemplateModal

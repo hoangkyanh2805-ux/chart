@@ -80,6 +80,28 @@ export const ChartCanvas: React.FC = () => {
     ctx.font = 'bold 24px sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.fillText(`${settings.symbol || 'XAUUSD'} · ${settings.timeframe || 'M15'}`, 30, 48);
+
+    // 3b. Azzam Ops Viral Video Hook Banner (for TikTok / Shorts)
+    if (settings.bannerHook) {
+      const bannerText = settings.bannerHook;
+      ctx.font = '900 12px sans-serif';
+      const textWidth = ctx.measureText(bannerText).width;
+      const bannerX = (chartWidth - textWidth) / 2 - 12;
+      const bannerY = 18;
+
+      // Banner background
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+      ctx.strokeStyle = '#EAB308';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(bannerX, bannerY, textWidth + 24, 28, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Banner text
+      ctx.fillStyle = '#FDE047';
+      ctx.fillText(bannerText, bannerX + 12, bannerY + 18);
+    }
     ctx.restore();
 
     // Determine how many candles to reveal based on currentTime and revealMode
