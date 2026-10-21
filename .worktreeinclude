@@ -1,0 +1,4 @@
+# Các file cấu hình cần copy khi tạo Git Worktree nhánh song song
+.env.local
+.mcp.json
+CLAUDE.local.md

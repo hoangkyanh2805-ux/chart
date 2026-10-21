@@ -1,0 +1,29 @@
+# Node.js & Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs & Next.js
+.next/
+out/
+build/
+dist/
+
+# Environment & Secrets (TUYỆT ĐỐI KHÔNG COMMIT)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Harness Local Settings & Memory
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/agent-memory/
+
+# Temp Files & Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+livrables/test_reports/temp/

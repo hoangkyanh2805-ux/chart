@@ -1,0 +1,14 @@
+{
+  "project": "ChartAnimator Clean-Room Rebuild",
+  "harnessTier": 3,
+  "rules": [
+    ".claude/rules/clean_room.md",
+    ".claude/rules/mutation_test.md",
+    ".claude/rules/canvas_rules.md"
+  ],
+  "agentRoles": {
+    "specAuditor": "rea",
+    "builder": "clean-room",
+    "tester": "mutation-checker"
+  }
+}
