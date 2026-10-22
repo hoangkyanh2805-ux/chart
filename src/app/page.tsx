@@ -6,6 +6,7 @@ import { Header } from '../components/Header';
 import { ToolRail } from '../components/ToolRail';
 import { TemplateSidebar } from '../components/TemplateSidebar';
 import { ControlsPanel } from '../components/ControlsPanel';
+import { TextTypographyPanel } from '../components/TextTypographyPanel';
 import { StageCanvas } from '../components/StageCanvas';
 import { ChartCanvas } from '../components/ChartCanvas';
 import { NleTimeline } from '../components/NleTimeline';
@@ -27,10 +28,12 @@ export default function Home() {
         {/* Leftmost Vertical Tool Rail (5 Tools) */}
         <ToolRail />
 
-        {/* Secondary Drawer: Template Library (2-column grid) OR OHLC Controls Panel */}
+        {/* Secondary Drawer: Template Library (2-column grid) OR Text Studio OR OHLC Controls Panel */}
         <aside className="h-full flex-shrink-0">
           {activeTool === 'templates' ? (
             <TemplateSidebar />
+          ) : activeTool === 'text' ? (
+            <TextTypographyPanel />
           ) : (
             <ControlsPanel />
           )}

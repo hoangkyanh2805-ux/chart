@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { useChartStore } from '../store/useChartStore';
-import { ShieldCheck, Smartphone } from 'lucide-react';
+import { ShieldCheck, Smartphone, Edit3, Check, Type } from 'lucide-react';
 
 // Clean text auto-wrapping utility
 function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -41,6 +41,8 @@ export const StageCanvas: React.FC = () => {
     showSafeZones,
     setShowSafeZones,
   } = useChartStore();
+
+  const [isEditingInline, setIsEditingInline] = React.useState<boolean>(false);
 
   const isWhite = stageTheme === 'white';
 
@@ -480,6 +482,7 @@ export const StageCanvas: React.FC = () => {
     <div className="relative w-full h-full flex flex-col items-center justify-center p-3 select-none overflow-hidden">
       {/* Central Canvas Container with 9:16 (360x640) Aspect Ratio */}
       <div
+        onDoubleClick={() => setIsEditingInline(true)}
         className={`relative transition-all duration-300 shadow-2xl rounded-2xl overflow-hidden border flex items-center justify-center ${
           isWhite
             ? 'bg-white border-slate-200 shadow-slate-300/40'
@@ -492,7 +495,85 @@ export const StageCanvas: React.FC = () => {
             : 'w-full max-w-[860px] h-[480px]'
         }`}
       >
-        <canvas ref={canvasRef} className="w-full h-full block" />
+        <canvas ref={canvasRef} className="w-full h-full block cursor-pointer" />
+
+        {/* Floating Quick Inline Edit Trigger Button on Canvas */}
+        <button
+          type="button"
+          onClick={() => setIsEditingInline(!isEditingInline)}
+          title="Nhấp đúp chuột vào canvas hoặc bấm đây để sửa chữ trực tiếp"
+          className={`absolute top-3 right-3 z-30 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition shadow-lg backdrop-blur-md border ${
+            isEditingInline
+              ? 'bg-amber-500 text-black border-amber-400'
+              : 'bg-black/50 hover:bg-black/80 text-slate-300 hover:text-white border-white/10'
+          }`}
+        >
+          {isEditingInline ? (
+            <>
+              <Check className="w-3 h-3 text-black" />
+              <span>Xong</span>
+            </>
+          ) : (
+            <>
+              <Edit3 className="w-3 h-3 text-amber-400" />
+              <span>Sửa Chữ Trực Tiếp</span>
+            </>
+          )}
+        </button>
+
+        {/* Direct In-Place Text Editor Overlay */}
+        {isEditingInline && (
+          <div className="absolute top-10 inset-x-4 z-20 bg-black/90 backdrop-blur-md border border-amber-500/60 rounded-xl p-3.5 shadow-2xl flex flex-col gap-2.5 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between text-[10px] font-mono text-amber-400 font-bold border-b border-white/10 pb-1">
+              <span className="flex items-center gap-1.5">
+                <Type className="w-3.5 h-3.5" />
+                <span>TRÌNH SỬA CHỮ TRỰC TIẾP TRÊN CANVAS</span>
+              </span>
+              <span className="text-slate-400 text-[9px]">Esc để thoát</span>
+            </div>
+
+            <div>
+              <span className="text-[9px] font-mono text-slate-400 block mb-0.5 font-bold">
+                TIÊU ĐỀ HOOK 0-3S (IN HOA):
+              </span>
+              <textarea
+                value={headlineText}
+                autoFocus
+                onChange={(e) => setHeadlineText(e.target.value.toUpperCase())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setIsEditingInline(false);
+                }}
+                rows={2}
+                className="w-full bg-[#141B29] border border-amber-500/50 rounded-lg p-2 text-xs font-black text-amber-300 uppercase focus:outline-none focus:border-amber-400 resize-none font-sans"
+              />
+            </div>
+
+            <div>
+              <span className="text-[9px] font-mono text-slate-400 block mb-0.5 font-bold">
+                PHỤ ĐỀ GIẢI THÍCH (SUBLINE):
+              </span>
+              <input
+                type="text"
+                value={sublineText}
+                onChange={(e) => setSublineText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === 'Escape') setIsEditingInline(false);
+                }}
+                className="w-full bg-[#141B29] border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400 font-sans"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 mt-0.5">
+              <button
+                type="button"
+                onClick={() => setIsEditingInline(false)}
+                className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-extrabold text-[10px] rounded-lg shadow-md transition"
+              >
+                ✓ Hoàn Tất & Lưu Lên Video
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quick Text Editor Bar below canvas */}
