@@ -50,10 +50,10 @@ interface HermesChatModalProps {
 }
 
 const QUICK_PROMPTS = [
-  '⚡ Lên setup nến FVG M15 hồi 50% CE tối nay',
-  '🎯 /goal: Lên video XAUUSD Risk-First chuẩn SPEC.md. Done: tests pass & canvas ready',
-  '💡 Pain point nào đang nhiều comment nhất?',
-  '🚀 Setup Quét thanh khoản BSL $4,154',
+  '⚡ [OPT 3 SMC + Bẫy PDF]: Lên video vạch trần bẫy đọc 44 PDF nhưng không biết 50% FVG C.E.',
+  '🛡️ [OPT 11 + Mất $62k]: Lên video công thức Risk Budget $30 trước khi nhìn chart',
+  '📈 [OPT 4 + Không biết đọc nến]: Lên video 3 bước đọc Swing High và BOS cấu trúc thị trường',
+  '🎯 [OPT 9 + Bẫy Breakout]: Lên setup nến quét râu BSL $4,148 dụ retail mua',
 ];
 
 function extractSetupPayload(text: string) {

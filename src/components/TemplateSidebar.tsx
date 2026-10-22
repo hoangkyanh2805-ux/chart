@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
-import { Search, Plus, Sparkles, Play, Clock, Flame, FileText } from 'lucide-react';
+import { Search, Plus, Sparkles, Play, Clock, Flame, FileText, BookOpen } from 'lucide-react';
 import { BriefImporterModal } from './BriefImporterModal';
+import { CoursePainpointModal } from './CoursePainpointModal';
+import { COURSE_PAINPOINT_PRESETS } from '../data/coursePainpointMatrix';
 
 interface TemplateItem {
   id: string;
@@ -13,6 +15,7 @@ interface TemplateItem {
   duration: number; // in seconds
   headline?: string;
   subline?: string;
+  courseTag?: string;
   candleSetup?: {
     open: number;
     high: number;
@@ -22,6 +25,17 @@ interface TemplateItem {
 }
 
 const REAL_TEMPLATES: TemplateItem[] = [
+  // Presets from Course + Pain Point Matrix
+  ...COURSE_PAINPOINT_PRESETS.map((p) => ({
+    id: p.id,
+    title: `⚡ ${p.courseId}: ${p.hookHeadline}`,
+    category: 'Course',
+    access: 'CREATOR' as const,
+    duration: p.duration,
+    headline: p.hookHeadline,
+    subline: p.hookSubline,
+    courseTag: p.painPointId,
+  })),
   {
     id: 'brief-risk-first-20261019',
     title: '🔥 Define Loss First (Brief A01)',
@@ -161,6 +175,9 @@ const REAL_TEMPLATES: TemplateItem[] = [
 
 export const TemplateSidebar: React.FC = () => {
   const {
+    setCandles,
+    setOverlays,
+    setBadges,
     setHeadlineText,
     setSublineText,
     setCurrentTime,
@@ -175,8 +192,9 @@ export const TemplateSidebar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [isBriefModalOpen, setIsBriefModalOpen] = useState<boolean>(false);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState<boolean>(false);
 
-  const categories = ['All', 'Top', 'ICT', 'Crypto', 'Forex'];
+  const categories = ['All', 'Course', 'Top', 'ICT', 'Crypto', 'Forex'];
 
   const filtered = REAL_TEMPLATES.filter((t) => {
     const matchCat = selectedCategory === 'All' || t.category === selectedCategory;
@@ -185,6 +203,20 @@ export const TemplateSidebar: React.FC = () => {
   });
 
   const handleApplyTemplate = (t: TemplateItem) => {
+    // Check if this is a Course + Pain Point Preset
+    const preset = COURSE_PAINPOINT_PRESETS.find((p) => p.id === t.id);
+    if (preset) {
+      setCandles(preset.candles);
+      setOverlays(preset.overlays);
+      setHeadlineText(preset.hookHeadline);
+      setSublineText(preset.hookSubline);
+      setBadges(preset.badges);
+      useChartStore.setState({ duration: preset.duration || 10 });
+      setCurrentTime(0);
+      setIsPlaying(true);
+      return;
+    }
+
     if (t.headline) setHeadlineText(t.headline);
     if (t.subline) setSublineText(t.subline);
 
@@ -272,14 +304,24 @@ export const TemplateSidebar: React.FC = () => {
             </button>
           </div>
 
-          <button
-            onClick={() => setIsBriefModalOpen(true)}
-            title="Dán Brief tạo Video tự động cho Editor"
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold transition shadow-sm"
-          >
-            <FileText className="w-3 h-3 text-emerald-400" />
-            <span>+ BRIEF</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setIsCourseModalOpen(true)}
+              title="Tạo video từ Khóa học Live & Nỗi đau khán giả"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-bold transition shadow-sm"
+            >
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>KHÓA HỌC</span>
+            </button>
+            <button
+              onClick={() => setIsBriefModalOpen(true)}
+              title="Dán Brief tạo Video tự động cho Editor"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition shadow-sm"
+            >
+              <FileText className="w-3 h-3 text-emerald-400" />
+              <span>+ BRIEF</span>
+            </button>
+          </div>
         </div>
 
         {/* Search Input */}
@@ -379,6 +421,12 @@ export const TemplateSidebar: React.FC = () => {
       <BriefImporterModal
         isOpen={isBriefModalOpen}
         onClose={() => setIsBriefModalOpen(false)}
+      />
+
+      {/* Course & Pain Point Video Generator Modal */}
+      <CoursePainpointModal
+        isOpen={isCourseModalOpen}
+        onClose={() => setIsCourseModalOpen(false)}
       />
     </div>
   );
