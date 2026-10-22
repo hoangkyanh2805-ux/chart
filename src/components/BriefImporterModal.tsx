@@ -19,8 +19,8 @@ import {
   BrainCircuit,
   Loader2,
   ShieldCheck,
+  Bookmark,
 } from 'lucide-react';
-
 import { ApiKeyModal } from './ApiKeyModal';
 
 interface BriefImporterModalProps {
@@ -53,10 +53,58 @@ interface SeniorTraderAIResult {
   provider?: string;
 }
 
-// Client-side quick parser
+const SAMPLE_BRIEFS = [
+  {
+    id: 'sweep',
+    label: '⚡ Quét BSL ($4,154)',
+    strategyName: 'Liquidity Sweep',
+    text: `# Kịch Bản: Quét Thanh Khoản Buy Side Liquidity (BSL)
+TITLE CUỐI: You Stop Watching The Sweep: Institutional Purge
+Hook Short (10 từ): "You stop watching the sweep. You start watching after it."
+Setup: Smart Money quét đỉnh BSL $4,154 rồi xả hàng Short cực mạnh về $4,130. Tỷ lệ RR 1:3.2.`,
+  },
+  {
+    id: 'fvg',
+    label: '🎯 FVG 50% CE ($4,125)',
+    strategyName: 'Fair Value Gap',
+    text: `# Kịch Bản: Fair Value Gap Retest XAUUSD
+TITLE CUỐI: The 50% FVG Entry Secret: Institutional Magnet
+Hook Short (10 từ): "Fair Value Gaps are institutional magnets. 50% entry."
+Setup: Nến đẩy mạnh tạo M15 FVG từ $4,120 đến $4,129. Chờ nến hồi về 50% Consequent Encroachment để Buy lên $4,144.`,
+  },
+  {
+    id: 'break',
+    label: '💥 Break & Retest ($4,132)',
+    strategyName: 'Break & Retest',
+    text: `# Kịch Bản: Breakout & Retest Kháng Cự Cũ
+TITLE CUỐI: Clean Break and Retest Only: High Winrate
+Hook Short (10 từ): "Clean break and retest only. Patience pays maximum reward."
+Setup: Nến Marubozu phá vỡ kháng cự $4,132, nến sau retest giữ vững rồi tiếp tục tăng mạnh lên $4,148.`,
+  },
+  {
+    id: 'supply',
+    label: '📉 Khối Cung ($4,145)',
+    strategyName: 'Bearish Supply',
+    text: `# Kịch Bản: H1 Supply Zone Phân Phối
+TITLE CUỐI: Supply Zone Rejection: When Retail Buys Top
+Hook Short (10 từ): "When retail buys the top, institutions distribute heavily."
+Setup: Giá chạm khối Supply Zone $4,145 xuất hiện nến từ chối râu trên cực dài, Smart Money xả hàng về $4,125.`,
+  },
+  {
+    id: 'risk',
+    label: '🛡️ Risk-First ($30 SL)',
+    strategyName: 'Risk-First Support',
+    text: `# Script -- 2026-10-19 (risk-first-xauusd-beginner-roadmap-risk-first)
+TITLE CUỐI: Define the Loss First: 3 Steps Before Any XAUUSD Entry
+Hook Short (10 từ): "The stop loss came first. The entry came second."
+Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,128.00, 1:3.5 RR. Label: ILLUSTRATION`,
+  },
+];
+
+// Client-side quick parser supporting both Vietnamese & English
 function parseBriefText(text: string): ParsedBrief {
-  let headline = 'THE STOP LOSS CAME FIRST';
-  let subline = 'The entry came second. That order is the whole video.';
+  let headline = 'CLEAN TRADING SETUP';
+  let subline = 'Disciplined execution beats market noise.';
   let setupType: SetupType = 'risk-first';
   let symbol = 'XAUUSD';
   let basePrice = 4128.0;
@@ -64,28 +112,40 @@ function parseBriefText(text: string): ParsedBrief {
   let slPips = 20;
   let rrRatio = 3.5;
 
-  if (/sweep|liquidity|bsl|ssl|purge|stop watching|fakeout|trap/i.test(text)) {
+  const isSweep = /sweep|liquidity|bsl|ssl|purge|stop watching|fakeout|trap|quét|thanh khoản|bẫy|quét đỉnh|quét đáy/i.test(text);
+  const isFVG = /fvg|imbalance|fair value gap|consequent encroachment|50%|mất cân bằng|khoảng trống/i.test(text);
+  const isBreakRetest = /break (?:and|&) retest|retest|bos|break of structure|phá vỡ|test lại|cản/i.test(text);
+  const isSupply = /bearish|short|dump|sell|supply|distribution|phân phối|bán tháo|cung|giảm mạnh/i.test(text);
+  const isRisk = /risk-first|define the loss|stop loss first|loss budget|quản lý vốn|cắt lỗ|ngân sách rủi ro/i.test(text);
+
+  if (isSweep) {
     setupType = 'liquidity-sweep';
     headline = 'YOU STOP WATCHING THE SWEEP';
     subline = 'You start watching what happens after it';
-  } else if (/fvg|imbalance|fair value gap|consequent encroachment|50%/i.test(text)) {
+    basePrice = 4140.0;
+  } else if (isFVG) {
     setupType = 'fvg';
-    headline = 'THE 50% C.E. SECRET ENTRY';
+    headline = 'THE 50% FVG ENTRY SECRET';
     subline = 'Fair Value Gaps are institutional price magnets';
-  } else if (/break (?:and|&) retest|retest|bos|break of structure/i.test(text)) {
+    basePrice = 4125.0;
+  } else if (isBreakRetest) {
     setupType = 'break-retest';
     headline = 'CLEAN BREAK & RETEST ONLY';
     subline = 'Patience pays 1:3.5 Risk-to-Reward';
-  } else if (/bearish|short|dump|sell|supply|distribution/i.test(text)) {
+    basePrice = 4132.0;
+  } else if (isSupply) {
     setupType = 'bearish-supply';
     headline = 'SUPPLY ZONE REJECTION';
     subline = 'When retail buys the top, institutions distribute';
-  } else if (/risk-first|define the loss|stop loss first|loss budget/i.test(text)) {
+    basePrice = 4145.0;
+  } else if (isRisk) {
     setupType = 'risk-first';
     headline = 'THE STOP LOSS CAME FIRST';
     subline = 'The entry came second. That order is the whole video.';
+    basePrice = 4128.0;
   }
 
+  // 1. Custom Hook Short extraction
   const hookShortMatch = text.match(/Hook(?:\s*Short)?(?:\s*\([^)]*\))?:\s*["“]?([^"”\r\n]+)["”]?/i);
   if (hookShortMatch && hookShortMatch[1]) {
     const raw = hookShortMatch[1].trim();
@@ -93,7 +153,8 @@ function parseBriefText(text: string): ParsedBrief {
     if (parts[0]) headline = parts[0];
     if (parts[1]) subline = parts[1] + (parts.length > 2 ? '. ' + parts.slice(2).join('. ') : '.');
   } else {
-    const titleMatch = text.match(/(?:TITLE|Title)(?:[^\r\n]*?)[:\-]\s*([^\r\n]+)/i);
+    // 2. Title extraction
+    const titleMatch = text.match(/(?:1\.\s*)?(?:TITLE|Title)(?:[^\r\n]*?)[:\-]\s*([^\r\n]+)/i);
     if (titleMatch && titleMatch[1]) {
       const rawTitle = titleMatch[1].trim();
       if (rawTitle.includes(':')) {
@@ -106,16 +167,19 @@ function parseBriefText(text: string): ParsedBrief {
     }
   }
 
+  // Auto-cut headline: strictly cap at 6 words
   const headWords = headline.split(/\s+/).filter(Boolean);
-  if (headWords.length > 7) {
+  if (headWords.length > 6) {
     headline = headWords.slice(0, 6).join(' ');
   }
 
+  // Auto-cut subline: strictly cap at 10 words
   const subWords = subline.split(/\s+/).filter(Boolean);
-  if (subWords.length > 12) {
+  if (subWords.length > 10) {
     subline = subWords.slice(0, 10).join(' ') + '...';
   }
 
+  // Extract numbers
   const budgetMatch = text.match(/\$(\d+)\s*(?:budget|risk|loss)/i) || text.match(/(?:budget|risk|loss)[^\d]*\$?(\d+)/i);
   if (budgetMatch) riskBudget = parseInt(budgetMatch[1], 10);
 
@@ -125,7 +189,7 @@ function parseBriefText(text: string): ParsedBrief {
   const rrMatch = text.match(/1\s*:\s*(\d+(?:\.\d+)?)/i);
   if (rrMatch) rrRatio = parseFloat(rrMatch[1]);
 
-  const priceMatch = text.match(/\$?([4-9]\d{3}(?:\.\d{1,2})?)/);
+  const priceMatch = text.match(/\$?([2-9]\d{3}(?:\.\d{1,2})?)/);
   if (priceMatch) basePrice = parseFloat(priceMatch[1]);
 
   return {
@@ -266,7 +330,6 @@ function generateSetupData(type: SetupType, baseP: number) {
       },
     ];
   } else {
-    // Risk-First Support Bounce
     candles = [
       { id: 'c-1', index: 0, open: baseP - 8.0, high: baseP + 4.0, low: baseP - 9.0, close: baseP + 2.0 },
       { id: 'c-2', index: 1, open: baseP + 2.0, high: baseP + 3.0, low: baseP - 5.0, close: baseP - 3.5 },
@@ -307,11 +370,7 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
   const { setHeadlineText, setSublineText, setCurrentTime, setIsPlaying, clearAllCandles, addCandle, addOverlay } =
     useChartStore();
 
-  const [briefText, setBriefText] = useState<string>(`# Script -- 2026-10-19 (risk-first-xauusd-beginner-roadmap-risk-first)
-1. TITLE CUỐI: Define the Loss First: 3 Steps Before Any XAUUSD Entry
-Hook Short (10 từ): "The stop loss came first. The entry came second."
-Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,128.00, 1:3.5 RR. Label: ILLUSTRATION`);
-
+  const [briefText, setBriefText] = useState<string>(SAMPLE_BRIEFS[4].text);
   const [parsedHeadline, setParsedHeadline] = useState<string>('THE STOP LOSS CAME FIRST');
   const [parsedSubline, setParsedSubline] = useState<string>('The entry came second.');
   const [selectedSetup, setSelectedSetup] = useState<SetupType>('risk-first');
@@ -331,34 +390,30 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
     }
   }, [isApiKeyModalOpen]);
 
-  // Save API key when changed
-  const handleSaveApiKey = (key: string) => {
-    setCustomApiKey(key);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('gemini_api_key', key);
-    }
+  // Synchronize client parse immediately when text changes
+  const applyTextParse = (text: string) => {
+    const res = parseBriefText(text);
+    setParsedHeadline(res.headline);
+    setParsedSubline(res.subline);
+    setSelectedSetup(res.setupType);
+    setBasePrice(res.basePrice);
   };
 
-  // Quick initial parse
-  useEffect(() => {
-    if (!aiResult) {
-      const res = parseBriefText(briefText);
-      setParsedHeadline(res.headline);
-      setParsedSubline(res.subline);
-      setSelectedSetup(res.setupType);
-      setBasePrice(res.basePrice);
-    }
-  }, [briefText, aiResult]);
-
   // Call Gemini AI / Senior Trader Brain API
-  const handleAnalyzeWithGemini = async () => {
+  const handleAnalyzeWithGemini = async (textToAnalyze?: string) => {
+    const text = (textToAnalyze !== undefined ? textToAnalyze : briefText).trim();
+    if (!text) return;
+
+    // Apply quick client parse immediately
+    applyTextParse(text);
+
     setIsLoadingAI(true);
     try {
       const res = await fetch('/api/ai/parse-brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          briefText,
+          briefText: text,
           customApiKey: customApiKey.trim() || undefined,
         }),
       });
@@ -369,9 +424,9 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
 
       const data: SeniorTraderAIResult = await res.json();
       setAiResult(data);
-      setParsedHeadline(data.headline);
-      setParsedSubline(data.subline);
-      setBasePrice(data.basePrice);
+      if (data.headline) setParsedHeadline(data.headline);
+      if (data.subline) setParsedSubline(data.subline);
+      if (data.basePrice) setBasePrice(data.basePrice);
 
       // Map strategy to local setup
       if (/sweep|liquidity/i.test(data.strategy)) {
@@ -386,12 +441,8 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
         setSelectedSetup('risk-first');
       }
     } catch (err: any) {
-      console.error('Failed to analyze with Gemini:', err);
-      // Fallback to local heuristic
-      const local = parseBriefText(briefText);
-      setParsedHeadline(local.headline);
-      setParsedSubline(local.subline);
-      setSelectedSetup(local.setupType);
+      console.warn('Gemini AI call notice:', err.message);
+      // Fallback already handled by applyTextParse
     } finally {
       setIsLoadingAI(false);
     }
@@ -406,6 +457,11 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
     { id: 'break-retest', label: '💥 Break & Retest', icon: Activity, color: 'text-indigo-400 border-indigo-500/40' },
     { id: 'bearish-supply', label: '📉 Bearish Supply Zone', icon: TrendingDown, color: 'text-rose-400 border-rose-500/40' },
   ];
+
+  const handleSelectSample = (sample: typeof SAMPLE_BRIEFS[0]) => {
+    setBriefText(sample.text);
+    handleAnalyzeWithGemini(sample.text);
+  };
 
   const handleApply = () => {
     // 1. Set text
@@ -444,13 +500,13 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
             </div>
             <div>
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <span>Google Gemini AI • Phân Tích Brief & Sinh Setup Nến</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">
-                  SENIOR TRADER
+                <span>Google Gemini AI • Phân Tích Brief & Tự Sinh Setup</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                  AUTO DYNAMIC
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Tự động trích xuất Hook không tràn màn hình và sinh 6 nến cấu trúc riêng biệt
+                Dán bất kỳ kịch bản nào: Tự động đổi Hook và sinh nến riêng biệt tương ứng
               </p>
             </div>
           </div>
@@ -462,10 +518,32 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
           </button>
         </div>
 
+        {/* 1-Click Sample Brief Presets */}
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+            <span className="flex items-center gap-1 text-slate-300">
+              <Bookmark className="w-3.5 h-3.5 text-amber-400" />
+              <span>Bấm thử nhanh 5 kịch bản mẫu (Xem setup đổi ngay):</span>
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {SAMPLE_BRIEFS.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => handleSelectSample(s)}
+                className="px-2.5 py-1 rounded-lg bg-[#141B29] hover:bg-indigo-600/30 border border-[#1E293B] hover:border-indigo-500/50 text-[11px] font-semibold text-slate-300 hover:text-white transition shadow-sm"
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Textarea */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
-            <span>Dán nội dung Brief kịch bản (dài đến 1,400 từ từ Drive):</span>
+            <span>Dán nội dung Brief kịch bản vào đây:</span>
             <button
               type="button"
               onClick={() => setIsApiKeyModalOpen(true)}
@@ -479,11 +557,20 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
           <textarea
             rows={4}
             value={briefText}
-            onChange={(e) => {
-              setBriefText(e.target.value);
-              setAiResult(null); // Reset when editing raw text
+            onPaste={(e) => {
+              const pasted = e.clipboardData.getData('text');
+              if (pasted && pasted.trim().length > 10) {
+                setBriefText(pasted);
+                handleAnalyzeWithGemini(pasted);
+              }
             }}
-            placeholder="Dán toàn bộ file brief vào đây..."
+            onChange={(e) => {
+              const val = e.target.value;
+              setBriefText(val);
+              applyTextParse(val);
+              setAiResult(null);
+            }}
+            placeholder="Dán toàn bộ file brief từ Google Drive hoặc văn bản kịch bản vào đây..."
             className="w-full bg-[#141B29] border border-[#1E293B] rounded-xl p-3 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-mono transition resize-none"
           />
         </div>
@@ -491,19 +578,19 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
         {/* Gemini AI Action Trigger Button */}
         <button
           type="button"
-          onClick={handleAnalyzeWithGemini}
+          onClick={() => handleAnalyzeWithGemini()}
           disabled={isLoadingAI || !briefText.trim()}
           className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoadingAI ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin text-white" />
-              <span>Đang Phân Tích Với Google Gemini AI...</span>
+              <span>Đang Phân Tích Kịch Bản Mới Bằng Google Gemini AI...</span>
             </>
           ) : (
             <>
               <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
-              <span>Phân Tích Bằng AI (Tự Động Sinh Setup Nến Khác Biệt)</span>
+              <span>Phân Tích Bằng AI (Tự Động Sinh Setup Nến Mới Khác Biệt)</span>
             </>
           )}
         </button>
@@ -514,7 +601,7 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-indigo-400 flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Chiến thuật: {aiResult.strategy}</span>
+                <span>Chiến thuật phát hiện: {aiResult.strategy}</span>
               </span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 {aiResult.provider || 'AI Engine'}
