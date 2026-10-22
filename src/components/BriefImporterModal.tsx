@@ -20,6 +20,10 @@ import {
   Loader2,
   ShieldCheck,
   Bookmark,
+  Bot,
+  RefreshCw,
+  Clock,
+  Radio,
 } from 'lucide-react';
 import { ApiKeyModal } from './ApiKeyModal';
 
@@ -51,6 +55,16 @@ interface SeniorTraderAIResult {
   candles: Candle[];
   overlays: Overlay[];
   provider?: string;
+}
+
+interface HermesScript {
+  id: string;
+  filename: string;
+  title: string;
+  hook: string;
+  date: string;
+  painpoint?: string;
+  content: string;
 }
 
 const SAMPLE_BRIEFS = [
@@ -153,16 +167,24 @@ function parseBriefText(text: string): ParsedBrief {
     if (parts[0]) headline = parts[0];
     if (parts[1]) subline = parts[1] + (parts.length > 2 ? '. ' + parts.slice(2).join('. ') : '.');
   } else {
-    // 2. Title extraction
-    const titleMatch = text.match(/(?:1\.\s*)?(?:TITLE|Title)(?:[^\r\n]*?)[:\-]\s*([^\r\n]+)/i);
-    if (titleMatch && titleMatch[1]) {
-      const rawTitle = titleMatch[1].trim();
-      if (rawTitle.includes(':')) {
-        const [h, s] = rawTitle.split(':');
-        headline = h.trim();
-        subline = s.trim();
-      } else {
-        headline = rawTitle;
+    // 2. Cutoff match
+    const cutoffMatch = text.match(/Short hook cutoff:\s*["“]?([^"”\r\n]+)["”]?/i);
+    if (cutoffMatch && cutoffMatch[1]) {
+      const parts = cutoffMatch[1].trim().split(/[.?!]/).map((s) => s.trim()).filter(Boolean);
+      if (parts[0]) headline = parts[0];
+      if (parts[1]) subline = parts[1] + '.';
+    } else {
+      // 3. Title extraction
+      const titleMatch = text.match(/(?:1\.\s*)?(?:TITLE|Title)(?:[^\r\n]*?)[:\-]\s*([^\r\n]+)/i);
+      if (titleMatch && titleMatch[1]) {
+        const rawTitle = titleMatch[1].trim();
+        if (rawTitle.includes(':')) {
+          const [h, s] = rawTitle.split(':');
+          headline = h.trim();
+          subline = s.trim();
+        } else {
+          headline = rawTitle;
+        }
       }
     }
   }
@@ -370,6 +392,11 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
   const { setHeadlineText, setSublineText, setCurrentTime, setIsPlaying, clearAllCandles, addCandle, addOverlay } =
     useChartStore();
 
+  const [activeTab, setActiveTab] = useState<'hermes' | 'manual'>('hermes');
+  const [hermesScripts, setHermesScripts] = useState<HermesScript[]>([]);
+  const [selectedHermesId, setSelectedHermesId] = useState<string>('');
+  const [isLoadingHermes, setIsLoadingHermes] = useState<boolean>(false);
+
   const [briefText, setBriefText] = useState<string>(SAMPLE_BRIEFS[4].text);
   const [parsedHeadline, setParsedHeadline] = useState<string>('THE STOP LOSS CAME FIRST');
   const [parsedSubline, setParsedSubline] = useState<string>('The entry came second.');
@@ -381,6 +408,35 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [isLoadingAI, setIsLoadingAI] = useState<boolean>(false);
   const [aiResult, setAiResult] = useState<SeniorTraderAIResult | null>(null);
+
+  // Load Hermes scripts on modal open
+  useEffect(() => {
+    if (isOpen) {
+      fetchHermesScripts();
+    }
+  }, [isOpen]);
+
+  const fetchHermesScripts = async () => {
+    setIsLoadingHermes(true);
+    try {
+      const res = await fetch('/api/hermes/scripts');
+      const data = await res.json();
+      if (data.scripts && data.scripts.length > 0) {
+        setHermesScripts(data.scripts);
+        // Default to first Hermes script if none selected
+        if (!selectedHermesId) {
+          const first = data.scripts[0];
+          setSelectedHermesId(first.id);
+          setBriefText(first.content);
+          handleAnalyzeWithGemini(first.content);
+        }
+      }
+    } catch (err) {
+      console.warn('Lỗi tải danh sách kịch bản Hermes:', err);
+    } finally {
+      setIsLoadingHermes(false);
+    }
+  };
 
   // Load saved API key on mount
   useEffect(() => {
@@ -441,8 +497,7 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
         setSelectedSetup('risk-first');
       }
     } catch (err: any) {
-      console.warn('Gemini AI call notice:', err.message);
-      // Fallback already handled by applyTextParse
+      console.warn('Gemini AI notice:', err.message);
     } finally {
       setIsLoadingAI(false);
     }
@@ -457,6 +512,12 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
     { id: 'break-retest', label: '💥 Break & Retest', icon: Activity, color: 'text-indigo-400 border-indigo-500/40' },
     { id: 'bearish-supply', label: '📉 Bearish Supply Zone', icon: TrendingDown, color: 'text-rose-400 border-rose-500/40' },
   ];
+
+  const handleSelectHermesScript = (s: HermesScript) => {
+    setSelectedHermesId(s.id);
+    setBriefText(s.content);
+    handleAnalyzeWithGemini(s.content);
+  };
 
   const handleSelectSample = (sample: typeof SAMPLE_BRIEFS[0]) => {
     setBriefText(sample.text);
@@ -491,22 +552,22 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-xl bg-[#0F1420] border border-[#1E293B] rounded-2xl p-6 shadow-2xl flex flex-col gap-4 text-slate-200 select-none max-h-[92vh] overflow-y-auto">
+      <div className="w-full max-w-2xl bg-[#0F1420] border border-[#1E293B] rounded-2xl p-6 shadow-2xl flex flex-col gap-4 text-slate-200 select-none max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">
-              <BrainCircuit className="w-5 h-5 text-indigo-400 animate-pulse" />
+            <div className="p-2 bg-gradient-to-br from-indigo-500/20 via-sky-500/20 to-purple-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">
+              <Bot className="w-5 h-5 text-indigo-400 animate-pulse" />
             </div>
             <div>
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <span>Google Gemini AI • Phân Tích Brief & Tự Sinh Setup</span>
+                <span>Hermes Agent & Gemini AI • Đồng Bộ Kịch Bản & Sinh Video</span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
-                  AUTO DYNAMIC
+                  AUTONOMOUS PIPELINE
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Dán bất kỳ kịch bản nào: Tự động đổi Hook và sinh nến riêng biệt tương ứng
+                Đồng bộ trực tiếp kịch bản thực chiến từ Hermes CLI và tự động tạo nến chuẩn Smart Money
               </p>
             </div>
           </div>
@@ -518,62 +579,150 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
           </button>
         </div>
 
-        {/* 1-Click Sample Brief Presets */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
-            <span className="flex items-center gap-1 text-slate-300">
-              <Bookmark className="w-3.5 h-3.5 text-amber-400" />
-              <span>Bấm thử nhanh 5 kịch bản mẫu (Xem setup đổi ngay):</span>
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {SAMPLE_BRIEFS.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => handleSelectSample(s)}
-                className="px-2.5 py-1 rounded-lg bg-[#141B29] hover:bg-indigo-600/30 border border-[#1E293B] hover:border-indigo-500/50 text-[11px] font-semibold text-slate-300 hover:text-white transition shadow-sm"
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Textarea */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
-            <span>Dán nội dung Brief kịch bản vào đây:</span>
+        {/* Tab Switcher: Hermes Live Sync vs Manual Paste */}
+        <div className="flex items-center justify-between bg-[#141B29] p-1 rounded-xl border border-[#1E293B]">
+          <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => setIsApiKeyModalOpen(true)}
-              className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 font-mono px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 transition hover:bg-indigo-500/20"
+              onClick={() => setActiveTab('hermes')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                activeTab === 'hermes'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
             >
-              <Key className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{customApiKey ? 'Đổi Gemini Key (🟢 Đã Lưu)' : 'Cài Đặt Gemini Key'}</span>
+              <Bot className="w-3.5 h-3.5 text-sky-400" />
+              <span>⚡ Kịch Bản Từ Hermes Agent ({hermesScripts.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('manual')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                activeTab === 'manual'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-indigo-400" />
+              <span>📝 Dán Văn Bản Brief Tùy Ý</span>
             </button>
           </div>
 
-          <textarea
-            rows={4}
-            value={briefText}
-            onPaste={(e) => {
-              const pasted = e.clipboardData.getData('text');
-              if (pasted && pasted.trim().length > 10) {
-                setBriefText(pasted);
-                handleAnalyzeWithGemini(pasted);
-              }
-            }}
-            onChange={(e) => {
-              const val = e.target.value;
-              setBriefText(val);
-              applyTextParse(val);
-              setAiResult(null);
-            }}
-            placeholder="Dán toàn bộ file brief từ Google Drive hoặc văn bản kịch bản vào đây..."
-            className="w-full bg-[#141B29] border border-[#1E293B] rounded-xl p-3 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-mono transition resize-none"
-          />
+          <button
+            type="button"
+            onClick={() => setIsApiKeyModalOpen(true)}
+            className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-mono px-2.5 py-1 rounded-lg hover:bg-indigo-500/10 transition"
+          >
+            <Key className="w-3 h-3 text-indigo-400" />
+            <span>{customApiKey ? 'Gemini: 🟢 Đã Lưu Key' : 'Gemini: Cài Đặt Key'}</span>
+          </button>
         </div>
+
+        {/* TAB 1: Hermes Live Sync */}
+        {activeTab === 'hermes' && (
+          <div className="flex flex-col gap-2 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
+              <span className="flex items-center gap-1.5">
+                <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                <span>Kịch bản nóng hổi vừa sinh từ Hermes CLI (`video_scripts/`):</span>
+              </span>
+              <button
+                type="button"
+                onClick={fetchHermesScripts}
+                disabled={isLoadingHermes}
+                className="text-[11px] text-slate-400 hover:text-sky-400 flex items-center gap-1 transition"
+              >
+                <RefreshCw className={`w-3 h-3 ${isLoadingHermes ? 'animate-spin' : ''}`} />
+                <span>Quét Lại Thư Mục</span>
+              </button>
+            </div>
+
+            {/* Hermes Scripts List */}
+            <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto pr-1">
+              {hermesScripts.map((s) => (
+                <div
+                  key={s.id}
+                  onClick={() => handleSelectHermesScript(s)}
+                  className={`p-2.5 rounded-xl border cursor-pointer transition flex flex-col gap-1 text-left ${
+                    selectedHermesId === s.id
+                      ? 'bg-indigo-600/25 border-indigo-500 text-white shadow-md'
+                      : 'bg-[#141B29] border-[#1E293B] hover:bg-[#1A2335] text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs truncate max-w-[420px] text-white">
+                      {s.title || s.filename}
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1 flex-shrink-0">
+                      <Clock className="w-3 h-3 text-slate-500" />
+                      <span>{s.date ? new Date(s.date).toLocaleDateString('vi-VN') : 'Mới'}</span>
+                    </span>
+                  </div>
+
+                  {s.hook && (
+                    <div className="text-[11px] text-amber-300/90 italic truncate">
+                      Hook: "{s.hook}"
+                    </div>
+                  )}
+
+                  {s.painpoint && (
+                    <div className="text-[10px] text-slate-400 truncate">
+                      💡 Pain point: {s.painpoint}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {selectedHermesId && (
+              <div className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                <span className="truncate">Đang đồng bộ file: {selectedHermesId}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 2: Manual Paste */}
+        {activeTab === 'manual' && (
+          <div className="flex flex-col gap-2.5 animate-in fade-in duration-150">
+            {/* 1-Click Sample Presets */}
+            <div className="flex flex-wrap gap-1.5">
+              {SAMPLE_BRIEFS.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => handleSelectSample(s)}
+                  className="px-2.5 py-1 rounded-lg bg-[#141B29] hover:bg-indigo-600/30 border border-[#1E293B] hover:border-indigo-500/50 text-[11px] font-semibold text-slate-300 hover:text-white transition shadow-sm"
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Textarea */}
+            <textarea
+              rows={4}
+              value={briefText}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData('text');
+                if (pasted && pasted.trim().length > 10) {
+                  setBriefText(pasted);
+                  handleAnalyzeWithGemini(pasted);
+                }
+              }}
+              onChange={(e) => {
+                const val = e.target.value;
+                setBriefText(val);
+                applyTextParse(val);
+                setAiResult(null);
+              }}
+              placeholder="Dán toàn bộ file brief từ Google Drive hoặc văn bản kịch bản vào đây..."
+              className="w-full bg-[#141B29] border border-[#1E293B] rounded-xl p-3 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-mono transition resize-none"
+            />
+          </div>
+        )}
 
         {/* Gemini AI Action Trigger Button */}
         <button
@@ -585,7 +734,7 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
           {isLoadingAI ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin text-white" />
-              <span>Đang Phân Tích Kịch Bản Mới Bằng Google Gemini AI...</span>
+              <span>Đang Phân Tích Với Google Gemini AI...</span>
             </>
           ) : (
             <>
