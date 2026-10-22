@@ -175,33 +175,120 @@ export const StageCanvas: React.FC = () => {
       const candleSpacing = chartWidth / (totalCandles + 1);
       const cWidth = Math.min(22, candleSpacing * 0.65);
 
-      // Previous High Support Line ($4,128.00)
-      const supportPrice = 4128.0;
-      const supportY = toY(supportPrice);
+      // Render Dynamic Overlays from Store (FVG, Liquidity Line, Long/Short, Order Block)
+      overlays.forEach((overlay) => {
+        if (overlay.startCandleIndex >= revealedCount) return;
 
-      ctx.save();
-      ctx.strokeStyle = '#0284C7';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([5, 4]);
-      ctx.beginPath();
-      ctx.moveTo(chartLeft, supportY);
-      ctx.lineTo(chartRight, supportY);
-      ctx.stroke();
-      ctx.setLineDash([]);
+        const effectiveEndIndex = Math.min(overlay.endCandleIndex, revealedCount - 1);
+        const startX = chartLeft + (overlay.startCandleIndex + 1) * candleSpacing - cWidth / 2;
+        const endX = chartLeft + (effectiveEndIndex + 1) * candleSpacing + cWidth / 2;
 
-      // Non-overlapping Support Pill Label on the Left Margin
-      const supPillW = 100;
-      const supPillH = 15;
-      ctx.fillStyle = isWhite ? '#0284C7' : '#0369A1';
-      ctx.beginPath();
-      ctx.roundRect(chartLeft, supportY - 16, supPillW, supPillH, 3);
-      ctx.fill();
+        const yTop = toY(Math.max(overlay.priceStart, overlay.priceEnd));
+        const yBottom = toY(Math.min(overlay.priceStart, overlay.priceEnd));
+        const boxHeight = Math.max(4, yBottom - yTop);
+        const boxWidth = Math.max(cWidth * 2, endX - startX + cWidth);
 
-      ctx.font = 'bold 8.5px monospace';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textAlign = 'left';
-      ctx.fillText('Support $4,128.00', chartLeft + 5, supportY - 5);
-      ctx.restore();
+        ctx.save();
+        if (overlay.type === 'LIQUIDITY_LINE') {
+          // Crisp dashed structural level line (Support / BSL / Retest)
+          const yLine = toY(overlay.priceStart);
+          ctx.strokeStyle = overlay.color || '#38BDF8';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.moveTo(chartLeft, yLine);
+          ctx.lineTo(chartRight, yLine);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Non-overlapping label pill on the left margin
+          if (overlay.label) {
+            ctx.font = 'bold 8.5px monospace';
+            const metrics = ctx.measureText(overlay.label);
+            const pillW = Math.min(130, metrics.width + 10);
+            ctx.fillStyle = overlay.color || '#0284C7';
+            ctx.beginPath();
+            ctx.roundRect(chartLeft, yLine - 16, pillW, 15, 3);
+            ctx.fill();
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'left';
+            ctx.fillText(overlay.label, chartLeft + 5, yLine - 5);
+          }
+        } else if (overlay.type === 'FVG') {
+          // Fair Value Gap with 50% Consequent Encroachment (C.E.) Line
+          ctx.fillStyle = isWhite ? 'rgba(16, 185, 129, 0.18)' : 'rgba(0, 245, 160, 0.2)';
+          ctx.fillRect(startX, yTop, boxWidth, boxHeight);
+
+          ctx.strokeStyle = '#10B981';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(startX, yTop, boxWidth, boxHeight);
+
+          // 50% C.E. Dotted Line
+          const midY = yTop + boxHeight / 2;
+          ctx.setLineDash([4, 3]);
+          ctx.strokeStyle = '#10B981';
+          ctx.beginPath();
+          ctx.moveTo(startX, midY);
+          ctx.lineTo(startX + boxWidth, midY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          if (overlay.label) {
+            ctx.font = 'bold 8px monospace';
+            ctx.fillStyle = isWhite ? '#065F46' : '#6EE7B7';
+            ctx.fillText(overlay.label, startX + 4, yTop + 11);
+          }
+        } else if (overlay.type === 'ORDER_BLOCK') {
+          // Order Block / Supply-Demand Zone
+          ctx.fillStyle = isWhite ? 'rgba(239, 68, 68, 0.2)' : 'rgba(244, 63, 94, 0.22)';
+          ctx.fillRect(startX, yTop, boxWidth, boxHeight);
+
+          ctx.strokeStyle = '#EF4444';
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(startX, yTop, boxWidth, boxHeight);
+
+          if (overlay.label) {
+            ctx.font = 'bold 8px monospace';
+            ctx.fillStyle = isWhite ? '#991B1B' : '#FCA5A5';
+            ctx.fillText(overlay.label, startX + 4, yTop + 11);
+          }
+        } else if (overlay.type === 'LONG_SHORT') {
+          // Risk:Reward Target & SL Boxes
+          const isLong = overlay.priceEnd >= overlay.priceStart;
+          const entryY = toY(overlay.priceStart);
+          const tpY = toY(overlay.priceEnd);
+          const slDistance = Math.abs(overlay.priceEnd - overlay.priceStart) / 3.5;
+          const slPrice = isLong ? overlay.priceStart - slDistance : overlay.priceStart + slDistance;
+          const slY = toY(slPrice);
+
+          const rwBoxWidth = Math.min(105, chartRight - startX);
+
+          // Profit Zone (Green)
+          ctx.fillStyle = isWhite ? 'rgba(16, 185, 129, 0.22)' : 'rgba(0, 245, 160, 0.22)';
+          ctx.fillRect(startX, Math.min(entryY, tpY), rwBoxWidth, Math.abs(tpY - entryY));
+
+          // Risk Zone (Red)
+          ctx.fillStyle = isWhite ? 'rgba(239, 68, 68, 0.22)' : 'rgba(255, 51, 102, 0.22)';
+          ctx.fillRect(startX, Math.min(entryY, slY), rwBoxWidth, Math.abs(slY - entryY));
+
+          // Entry Line
+          ctx.strokeStyle = isWhite ? '#18181B' : '#FFFFFF';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(startX, entryY);
+          ctx.lineTo(startX + rwBoxWidth, entryY);
+          ctx.stroke();
+
+          ctx.font = 'bold 8.5px monospace';
+          ctx.fillStyle = isWhite ? '#065F46' : '#6EE7B7';
+          ctx.fillText(`TP: $${overlay.priceEnd.toFixed(1)} (1:3.5)`, startX + 4, Math.min(entryY, tpY) + 11);
+
+          ctx.fillStyle = isWhite ? '#991B1B' : '#FCA5A5';
+          ctx.fillText(`SL: $${slPrice.toFixed(1)}`, startX + 4, Math.max(entryY, slY) - 4);
+        }
+        ctx.restore();
+      });
 
       // Render Candles
       activeCandles.forEach((c, i) => {
@@ -237,43 +324,6 @@ export const StageCanvas: React.FC = () => {
         ctx.fillRect(x, bodyTop, cWidth, bodyHeight);
         ctx.restore();
       });
-
-      // Render Risk-First 1:3.5 RR Overlay when entry candle (#5) is reached
-      if (revealedCount >= 5) {
-        const entryIdx = 4;
-        const entryX = chartLeft + (entryIdx + 1) * candleSpacing + cWidth / 2 + 4;
-        const boxWidth = Math.min(105, chartRight - entryX);
-
-        const entryY = toY(4128.0);
-        const tpY = toY(4135.0);
-        const slY = toY(4126.0);
-
-        ctx.save();
-        // Target Profit Zone (Green)
-        ctx.fillStyle = isWhite ? 'rgba(16, 185, 129, 0.22)' : 'rgba(0, 245, 160, 0.22)';
-        ctx.fillRect(entryX, tpY, boxWidth, entryY - tpY);
-
-        // Risk Zone (Red)
-        ctx.fillStyle = isWhite ? 'rgba(239, 68, 68, 0.22)' : 'rgba(255, 51, 102, 0.22)';
-        ctx.fillRect(entryX, entryY, boxWidth, slY - entryY);
-
-        // Entry Horizontal Line
-        ctx.strokeStyle = isWhite ? '#18181B' : '#FFFFFF';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(entryX, entryY);
-        ctx.lineTo(entryX + boxWidth, entryY);
-        ctx.stroke();
-
-        // Text inside boxes
-        ctx.font = 'bold 8.5px monospace';
-        ctx.fillStyle = isWhite ? '#065F46' : '#6EE7B7';
-        ctx.fillText('TP: $4,135 (1:3.5)', entryX + 4, tpY + 12);
-
-        ctx.fillStyle = isWhite ? '#991B1B' : '#FCA5A5';
-        ctx.fillText('SL: $4,126 ($30)', entryX + 4, slY - 4);
-        ctx.restore();
-      }
 
       // Bottom 3-Step Stepper Badges (COMPACT, NO SMASHING, NO OVERLAP)
       ctx.save();
