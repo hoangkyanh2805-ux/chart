@@ -1,580 +1,619 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useChartStore } from '../store/useChartStore';
-import { Plus, Trash2, Wand2, Sliders, Layers, Type, Sparkles, Palette, Activity, TrendingUp, TrendingDown, ArrowDownUp } from 'lucide-react';
+import { Plus, Trash2, Wand2, Sliders, Type, Sparkles, Layers, Activity } from 'lucide-react';
+
+interface VerticalSliderProps {
+  label: string;
+  value: number;
+  min?: number;
+  max?: number;
+  onChange: (val: number) => void;
+}
+
+const VerticalSlider: React.FC<VerticalSliderProps> = ({
+  label,
+  value,
+  min = 0,
+  max = 100,
+  onChange,
+}) => {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+
+  const calculateFromClientY = useCallback(
+    (clientY: number) => {
+      const track = trackRef.current;
+      if (!track) return;
+      const rect = track.getBoundingClientRect();
+      const relativeY = clientY - rect.top;
+      const clampedY = Math.max(0, Math.min(rect.height, relativeY));
+      const percentage = 1 - clampedY / rect.height;
+      const computedValue = Math.round(min + percentage * (max - min));
+      onChange(computedValue);
+    },
+    [min, max, onChange]
+  );
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    calculateFromClientY(e.clientY);
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      calculateFromClientY(moveEvent.clientY);
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 0) return;
+    calculateFromClientY(e.touches[0].clientY);
+
+    const onTouchMove = (moveEvent: TouchEvent) => {
+      if (moveEvent.touches.length > 0) {
+        calculateFromClientY(moveEvent.touches[0].clientY);
+      }
+    };
+
+    const onTouchEnd = () => {
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+
+    window.addEventListener('touchmove', onTouchMove);
+    window.addEventListener('touchend', onTouchEnd);
+  };
+
+  const percent = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+
+  return (
+    <div className="flex flex-col items-center gap-1.5 select-none">
+      <span className="text-[11px] font-medium text-slate-400">{label}</span>
+
+      {/* Vertical Slider Track */}
+      <div
+        ref={trackRef}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        className="relative w-4 h-28 bg-[#182030] rounded-full cursor-pointer flex justify-center py-1 hover:bg-[#1C263A] transition border border-[#1E293B]"
+      >
+        {/* Track Fill */}
+        <div
+          className="absolute bottom-0 w-1.5 bg-indigo-500/60 rounded-full"
+          style={{ height: `${percent}%` }}
+        />
+
+        {/* Glowing Thumb Handle */}
+        <div
+          className="absolute w-3.5 h-3.5 bg-white rounded-full shadow-[0_0_8px_rgba(139,92,246,0.8)] border border-indigo-500 transition-transform -translate-y-1/2"
+          style={{ bottom: `calc(${percent}% - 7px)` }}
+        />
+      </div>
+
+      {/* Numerical Value */}
+      <span className="text-xs font-mono font-bold text-slate-300">{value}</span>
+    </div>
+  );
+};
 
 export const ControlsPanel: React.FC = () => {
   const {
     candles,
     overlays,
     settings,
+    builderMode,
+    revealAnimation,
     addCandle,
     removeLastCandle,
     clearAllCandles,
-    generateRandomWalk,
     addGroupCandles,
     addZigZagLegs,
     updateSettings,
+    setRevealAnimation,
     addOverlay,
-    updateOverlayLabel,
   } = useChartStore();
 
-  const [activeTab, setActiveTab] = useState<'candles' | 'text'>('candles');
-  const [builderMode, setBuilderMode] = useState<'single' | 'group' | 'zigzag'>('single');
+  const [activeTab, setActiveTab] = useState<'ohlc' | 'text'>('ohlc');
 
-  // Single Candle State
-  const lastClose = candles.length > 0 ? candles[candles.length - 1].close : 4129.0;
-  const [open, setOpen] = useState(lastClose);
-  const [high, setHigh] = useState(Math.round((lastClose + 5.5) * 10) / 10);
-  const [low, setLow] = useState(Math.round((lastClose - 3.0) * 10) / 10);
-  const [close, setClose] = useState(Math.round((lastClose + 4.0) * 10) / 10);
+  // 4 Vertical OHLC Slider Values (0-100 normalized matching screenshot)
+  const [openVal, setOpenVal] = useState<number>(35);
+  const [highVal, setHighVal] = useState<number>(80);
+  const [lowVal, setLowVal] = useState<number>(20);
+  const [closeVal, setCloseVal] = useState<number>(65);
 
-  // Group Candle State (Pro)
+  // Group Candle (Pro) State
   const [groupCount, setGroupCount] = useState<number>(5);
   const [groupDirection, setGroupDirection] = useState<'bullish' | 'bearish' | 'range'>('bullish');
   const [groupMomentum, setGroupMomentum] = useState<'high' | 'moderate' | 'grind'>('high');
 
-  // ZigZag Candle State (Creator)
+  // ZigZag Candle (Creator) State
   const [leg1Price, setLeg1Price] = useState<number>(4148.0);
   const [leg2Price, setLeg2Price] = useState<number>(4132.0);
   const [leg3Price, setLeg3Price] = useState<number>(4162.0);
 
-  const handleAddSingle = () => {
+  // Auto-adjust constraints for OHLC
+  const handleOpenChange = (val: number) => {
+    setOpenVal(val);
+    if (val > highVal) setHighVal(val);
+    if (val < lowVal) setLowVal(val);
+  };
+
+  const handleCloseChange = (val: number) => {
+    setCloseVal(val);
+    if (val > highVal) setHighVal(val);
+    if (val < lowVal) setLowVal(val);
+  };
+
+  const handleHighChange = (val: number) => {
+    const minHigh = Math.max(openVal, closeVal);
+    setHighVal(Math.max(minHigh, val));
+  };
+
+  const handleLowChange = (val: number) => {
+    const maxLow = Math.min(openVal, closeVal);
+    setLowVal(Math.min(maxLow, val));
+  };
+
+  // Convert 0-100 OHLC to actual XAUUSD Market Gold price ($4,129.00 range)
+  const handleAddCandleToCanvas = () => {
+    const lastPrice = candles.length > 0 ? candles[candles.length - 1].close : 4129.0;
+    const priceScale = 0.15; // $0.15 per percentage point for realistic Gold volatility
+
+    const deltaClose = (closeVal - openVal) * priceScale;
+    const finalClose = Math.round((lastPrice + deltaClose) * 100) / 100;
+    const bodyTop = Math.max(lastPrice, finalClose);
+    const bodyBottom = Math.min(lastPrice, finalClose);
+
+    const deltaHigh = Math.max(0.4, (highVal - Math.max(openVal, closeVal)) * priceScale);
+    const deltaLow = Math.max(0.4, (Math.min(openVal, closeVal) - lowVal) * priceScale);
+
+    const finalHigh = Math.round((bodyTop + deltaHigh) * 100) / 100;
+    const finalLow = Math.round((bodyBottom - deltaLow) * 100) / 100;
+
     addCandle({
-      open: Number(open),
-      high: Number(high),
-      low: Number(low),
-      close: Number(close),
-    });
-    const nextO = Number(close);
-    setOpen(nextO);
-    setHigh(Math.round((nextO + 4.5) * 10) / 10);
-    setLow(Math.round((nextO - 3.5) * 10) / 10);
-    setClose(Math.round((nextO + 2.5) * 10) / 10);
-  };
-
-  const handleAddGroup = () => {
-    addGroupCandles({
-      count: groupCount,
-      direction: groupDirection,
-      momentum: groupMomentum,
+      open: lastPrice,
+      high: finalHigh,
+      low: finalLow,
+      close: finalClose,
     });
   };
 
-  const handleAddZigZag = () => {
-    addZigZagLegs([
-      { targetPrice: leg1Price, candleCount: 4, label: 'Leg 1 (HH)' },
-      { targetPrice: leg2Price, candleCount: 3, label: 'Leg 2 (HL)' },
-      { targetPrice: leg3Price, candleCount: 5, label: 'Leg 3 (Expansion)' },
-    ]);
-  };
-
-  const handleAddFVG = () => {
-    if (candles.length < 3) return;
-    const lastIdx = candles.length - 1;
-    const p1 = candles[lastIdx - 2]?.high || 4125;
-    const p2 = candles[lastIdx]?.low || 4138;
-    addOverlay({
-      type: 'FVG',
-      startCandleIndex: Math.max(0, lastIdx - 2),
-      endCandleIndex: lastIdx,
-      priceStart: Math.min(p1, p2),
-      priceEnd: Math.max(p1, p2),
-      color: '#00F5A0',
-      opacity: 0.25,
-      label: `M15 FAIR VALUE GAP [${Math.min(p1, p2).toFixed(1)} - ${Math.max(p1, p2).toFixed(1)}]`,
-    });
-  };
-
-  const quickHooks = [
-    'HOW TO TRADE XAUUSD LIKE BANKS (ICT SETUP)',
-    'THIS 1 TRADE WIPED OUT MY ENTIRE ACCOUNT',
-    'WHY 90% OF GOLD TRADERS GET TRAPPED HERE',
-    'DELETE THESE 5 INDICATORS RIGHT NOW!',
-    'DO NOT BUY GOLD UNTIL YOU SEE THIS SETUP',
-  ];
+  const isBullish = closeVal >= openVal;
+  const candleColor = isBullish ? settings.bullishColor : settings.bearishColor;
 
   return (
-    <div className="w-80 bg-[#0F141C] border-l border-[#1E293B] flex flex-col h-full text-slate-200">
-      {/* Tab Switcher: Candles vs Text/Typography */}
-      <div className="flex border-b border-[#1E293B] bg-[#0B0E14] p-1.5 gap-1">
+    <div className="w-[310px] bg-[#0B0F19] border-r border-[#1E293B] flex flex-col h-full text-slate-200 select-none overflow-y-auto">
+      {/* Tab Switcher: OHLC Controls vs English Typography */}
+      <div className="flex border-b border-[#1E293B] bg-[#0E1422] p-1.5 gap-1">
         <button
-          onClick={() => setActiveTab('candles')}
+          onClick={() => setActiveTab('ohlc')}
           className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
-            activeTab === 'candles'
-              ? 'bg-[#1E293B] text-white shadow'
-              : 'text-slate-400 hover:text-white hover:bg-[#161F2E]'
+            activeTab === 'ohlc'
+              ? 'bg-[#182030] text-indigo-400 border border-indigo-500/30 font-bold'
+              : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Sliders className="w-3.5 h-3.5 text-primary" /> Builders
+          <Sliders className="w-3.5 h-3.5" />
+          <span>OHLC Controls</span>
         </button>
         <button
           onClick={() => setActiveTab('text')}
           className={`flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
             activeTab === 'text'
-              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow'
-              : 'text-slate-400 hover:text-white hover:bg-[#161F2E]'
+              ? 'bg-[#182030] text-amber-400 border border-amber-500/30 font-bold'
+              : 'text-slate-400 hover:text-white'
           }`}
         >
-          <Type className="w-3.5 h-3.5 text-amber-400" /> Text & Fonts (EN)
+          <Type className="w-3.5 h-3.5" />
+          <span>Text & Fonts (EN)</span>
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-        {activeTab === 'candles' ? (
+      <div className="p-4 flex-1 flex flex-col gap-4">
+        {activeTab === 'ohlc' ? (
           <>
-            {/* 3-Mode Builder Switcher (Matching ChartAnimator.io) */}
-            <div className="flex flex-col gap-1.5">
-              <div className="grid grid-cols-3 gap-1 bg-[#121824] p-1 rounded-xl border border-[#1E293B]">
-                <button
-                  onClick={() => setBuilderMode('single')}
-                  className={`py-1.5 rounded-lg text-[11px] font-bold transition flex flex-col items-center justify-center ${
-                    builderMode === 'single'
-                      ? 'bg-primary text-white shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <span>Single</span>
-                  <span className="text-[9px] opacity-70">Free</span>
-                </button>
-                <button
-                  onClick={() => setBuilderMode('group')}
-                  className={`py-1.5 rounded-lg text-[11px] font-bold transition flex flex-col items-center justify-center ${
-                    builderMode === 'group'
-                      ? 'bg-amber-500 text-black shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <span>Group</span>
-                  <span className="text-[9px] uppercase font-mono font-black text-amber-400">PRO</span>
-                </button>
-                <button
-                  onClick={() => setBuilderMode('zigzag')}
-                  className={`py-1.5 rounded-lg text-[11px] font-bold transition flex flex-col items-center justify-center ${
-                    builderMode === 'zigzag'
-                      ? 'bg-gradient-to-tr from-indigo-500 to-cyan-400 text-white shadow'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <span>ZigZag</span>
-                  <span className="text-[9px] uppercase font-mono font-black text-cyan-300">CREATOR</span>
-                </button>
-              </div>
-            </div>
-
-            {/* MODE 1: SINGLE CANDLE BUILDER */}
             {builderMode === 'single' && (
-              <div className="flex flex-col gap-3 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
-                <div className="flex justify-between items-center text-xs text-slate-400">
-                  <span className="font-semibold text-white">Single Candle OHLC</span>
-                  <span className={close >= open ? 'text-bullish font-bold' : 'text-bearish font-bold'}>
-                    {close >= open ? 'BULLISH' : 'BEARISH'}
-                  </span>
+              <>
+                {/* OHLC CONTROLS Card */}
+                <div className="bg-[#101726] border border-[#1E293B] rounded-2xl p-4 shadow-lg">
+                  <div className="mb-3">
+                    <h2 className="text-xs font-bold tracking-wider text-slate-300 uppercase">
+                      OHLC CONTROLS
+                    </h2>
+                    <p className="text-[10px] text-slate-500 mt-0.5">↕ Drag any slider to reshape</p>
+                  </div>
+
+                  {/* Sliders Container + Live Candle Preview */}
+                  <div className="bg-[#0B0F19] rounded-xl p-3 border border-[#1E293B] flex items-center justify-between">
+                    {/* 4 Vertical Sliders */}
+                    <div className="flex items-center gap-2.5">
+                      <VerticalSlider
+                        label="Open"
+                        value={openVal}
+                        onChange={handleOpenChange}
+                      />
+                      <VerticalSlider
+                        label="High"
+                        value={highVal}
+                        onChange={handleHighChange}
+                      />
+                      <VerticalSlider
+                        label="Low"
+                        value={lowVal}
+                        onChange={handleLowChange}
+                      />
+                      <VerticalSlider
+                        label="Close"
+                        value={closeVal}
+                        onChange={handleCloseChange}
+                      />
+                    </div>
+
+                    {/* Live Candle Preview */}
+                    <div className="flex flex-col items-center justify-center pl-3 border-l border-[#1E293B]/70">
+                      <span className="text-[10px] text-slate-500 font-mono mb-1">Preview</span>
+                      <div className="relative w-9 h-28 bg-[#131B2A] rounded-lg border border-[#1E293B] flex items-center justify-center overflow-hidden">
+                        {/* Upper and Lower Wick */}
+                        <div
+                          className="absolute w-[2px] transition-all"
+                          style={{
+                            backgroundColor: candleColor,
+                            top: `${100 - highVal}%`,
+                            bottom: `${lowVal}%`,
+                          }}
+                        />
+
+                        {/* Candle Body */}
+                        <div
+                          className="absolute w-5 rounded-sm transition-all shadow-[0_0_6px_currentColor]"
+                          style={{
+                            backgroundColor: candleColor,
+                            color: candleColor,
+                            top: `${100 - Math.max(openVal, closeVal)}%`,
+                            height: `${Math.max(4, Math.abs(closeVal - openVal))}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Primary Add Candle Button */}
+                  <button
+                    onClick={handleAddCandleToCanvas}
+                    className="w-full mt-3 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition active:scale-[0.98]"
+                  >
+                    <Plus className="w-4 h-4 stroke-[2.5]" />
+                    <span>+ Add Candle to Canvas</span>
+                  </button>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">Open</span>
-                      <span className="font-mono text-white">${open.toFixed(1)}</span>
+                {/* GAP, WIDTH, WICK SIZE Sliders */}
+                <div className="bg-[#101726] border border-[#1E293B] rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+                  {/* GAP */}
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-300">GAP</span>
+                    <div className="flex items-center gap-2 flex-1 ml-4">
+                      <input
+                        type="range"
+                        min="4"
+                        max="36"
+                        value={settings.candleGap}
+                        onChange={(e) => updateSettings({ candleGap: Number(e.target.value) })}
+                        className="flex-1 accent-indigo-500 h-1.5 bg-[#182030] rounded cursor-pointer"
+                      />
+                      <span className="w-7 text-right font-mono text-[11px] text-slate-400">
+                        {settings.candleGap}px
+                      </span>
                     </div>
-                    <input
-                      type="range"
-                      min="4080"
-                      max="4220"
-                      step="0.5"
-                      value={open}
-                      onChange={(e) => setOpen(Number(e.target.value))}
-                      className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
-                    />
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">High</span>
-                      <span className="font-mono text-white">${high.toFixed(1)}</span>
+                  {/* WIDTH */}
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-300">WIDTH</span>
+                    <div className="flex items-center gap-2 flex-1 ml-4">
+                      <input
+                        type="range"
+                        min="10"
+                        max="46"
+                        value={settings.candleWidth}
+                        onChange={(e) => updateSettings({ candleWidth: Number(e.target.value) })}
+                        className="flex-1 accent-indigo-500 h-1.5 bg-[#182030] rounded cursor-pointer"
+                      />
+                      <span className="w-7 text-right font-mono text-[11px] text-slate-400">
+                        {settings.candleWidth}px
+                      </span>
                     </div>
-                    <input
-                      type="range"
-                      min="4080"
-                      max="4220"
-                      step="0.5"
-                      value={high}
-                      onChange={(e) => setHigh(Number(e.target.value))}
-                      className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
-                    />
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">Low</span>
-                      <span className="font-mono text-white">${low.toFixed(1)}</span>
+                  {/* WICK SIZE */}
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-300">WICK SIZE</span>
+                    <div className="flex items-center gap-2 flex-1 ml-4">
+                      <input
+                        type="range"
+                        min="1"
+                        max="5"
+                        step="0.5"
+                        value={settings.wickWidth}
+                        onChange={(e) => updateSettings({ wickWidth: Number(e.target.value) })}
+                        className="flex-1 accent-indigo-500 h-1.5 bg-[#182030] rounded cursor-pointer"
+                      />
+                      <span className="w-7 text-right font-mono text-[11px] text-slate-400">
+                        {settings.wickWidth}px
+                      </span>
                     </div>
-                    <input
-                      type="range"
-                      min="4080"
-                      max="4220"
-                      step="0.5"
-                      value={low}
-                      onChange={(e) => setLow(Number(e.target.value))}
-                      className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">Close</span>
-                      <span className="font-mono text-white">${close.toFixed(1)}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="4080"
-                      max="4220"
-                      step="0.5"
-                      value={close}
-                      onChange={(e) => setClose(Number(e.target.value))}
-                      className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
-                    />
                   </div>
                 </div>
 
-                <button
-                  onClick={handleAddSingle}
-                  className="mt-1 w-full py-2 bg-primary hover:bg-primary/90 text-white rounded font-medium text-xs flex items-center justify-center gap-2 transition"
-                >
-                  <Plus className="w-4 h-4" /> Add 1 Candle to Canvas
-                </button>
-              </div>
+                {/* Reveal Animation Switch & Delete Actions */}
+                <div className="bg-[#101726] border border-[#1E293B] rounded-2xl p-4 flex flex-col gap-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>✨ Reveal Animation</span>
+                    </div>
+                    {/* Toggle Switch */}
+                    <button
+                      onClick={() => setRevealAnimation(!revealAnimation)}
+                      className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
+                        revealAnimation ? 'bg-indigo-600' : 'bg-[#182030] border border-[#1E293B]'
+                      }`}
+                    >
+                      <div
+                        className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
+                          revealAnimation ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="pt-2 border-t border-[#1E293B] flex gap-2">
+                    <button
+                      onClick={removeLastCandle}
+                      disabled={candles.length === 0}
+                      className="flex-1 py-2 px-3 rounded-xl bg-[#141B28] hover:bg-[#1E293B] text-slate-400 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 transition disabled:opacity-40"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete Last</span>
+                    </button>
+                    <button
+                      onClick={clearAllCandles}
+                      disabled={candles.length === 0}
+                      className="py-2 px-3 rounded-xl bg-rose-950/20 hover:bg-rose-950/40 text-rose-400 text-xs font-medium border border-rose-900/30 transition disabled:opacity-40"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
 
-            {/* MODE 2: GROUP CANDLE BUILDER (PRO) */}
+            {/* GROUP CANDLE BUILDER (PRO) */}
             {builderMode === 'group' && (
-              <div className="flex flex-col gap-3 bg-[#131A26] p-3 rounded-lg border border-amber-500/30">
-                <div className="flex items-center justify-between border-b border-[#1E293B] pb-2">
-                  <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5" /> Group Candle Builder
+              <div className="bg-[#101726] border border-indigo-500/40 rounded-2xl p-4 flex flex-col gap-3 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                    Group Candle Builder
                   </span>
-                  <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">
-                    PRO BATCH
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    PRO
                   </span>
                 </div>
 
-                {/* Direction */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] text-slate-400">Trend Direction:</label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    <button
-                      onClick={() => setGroupDirection('bullish')}
-                      className={`py-1 rounded text-xs font-semibold flex items-center justify-center gap-1 transition ${
-                        groupDirection === 'bullish'
-                          ? 'bg-bullish text-black font-bold'
-                          : 'bg-[#1C2638] text-slate-300'
-                      }`}
-                    >
-                      <TrendingUp className="w-3 h-3" /> Bullish
-                    </button>
-                    <button
-                      onClick={() => setGroupDirection('bearish')}
-                      className={`py-1 rounded text-xs font-semibold flex items-center justify-center gap-1 transition ${
-                        groupDirection === 'bearish'
-                          ? 'bg-bearish text-white font-bold'
-                          : 'bg-[#1C2638] text-slate-300'
-                      }`}
-                    >
-                      <TrendingDown className="w-3 h-3" /> Bearish
-                    </button>
-                    <button
-                      onClick={() => setGroupDirection('range')}
-                      className={`py-1 rounded text-xs font-semibold flex items-center justify-center gap-1 transition ${
-                        groupDirection === 'range'
-                          ? 'bg-sky-400 text-black font-bold'
-                          : 'bg-[#1C2638] text-slate-300'
-                      }`}
-                    >
-                      Range
-                    </button>
-                  </div>
-                </div>
-
-                {/* Candle Count */}
-                <div className="flex flex-col gap-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-400">Number of Candles:</span>
-                    <span className="font-mono text-white font-bold">{groupCount} Candles</span>
+                  <div className="flex justify-between text-xs text-slate-300">
+                    <span>Candle Count</span>
+                    <span className="font-mono text-indigo-400 font-bold">{groupCount} candles</span>
                   </div>
                   <input
                     type="range"
                     min="3"
-                    max="10"
+                    max="15"
                     value={groupCount}
                     onChange={(e) => setGroupCount(Number(e.target.value))}
-                    className="w-full accent-amber-400 h-1.5 bg-[#1E293B] rounded cursor-pointer"
+                    className="accent-indigo-500 h-1.5 bg-[#182030] rounded cursor-pointer"
                   />
                 </div>
 
-                {/* Momentum */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] text-slate-400">Impulse Momentum:</label>
-                  <select
-                    value={groupMomentum}
-                    onChange={(e) => setGroupMomentum(e.target.value as any)}
-                    className="bg-[#0B0E14] border border-[#1E293B] rounded p-1.5 text-xs text-white"
-                  >
-                    <option value="high">High Momentum (News & Expansion)</option>
-                    <option value="moderate">Moderate Trend (Standard Wave)</option>
-                    <option value="grind">Slow Grind (Consolidation)</option>
-                  </select>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-slate-300">Market Direction</span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {(['bullish', 'bearish', 'range'] as const).map((d) => (
+                      <button
+                        key={d}
+                        onClick={() => setGroupDirection(d)}
+                        className={`py-1.5 rounded-lg text-xs font-bold capitalize transition ${
+                          groupDirection === d
+                            ? d === 'bullish'
+                              ? 'bg-emerald-600 text-white'
+                              : d === 'bearish'
+                              ? 'bg-rose-600 text-white'
+                              : 'bg-indigo-600 text-white'
+                            : 'bg-[#182030] text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-slate-300">Momentum</span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {(['high', 'moderate', 'grind'] as const).map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => setGroupMomentum(m)}
+                        className={`py-1.5 rounded-lg text-[11px] font-semibold capitalize transition ${
+                          groupMomentum === m
+                            ? 'bg-indigo-600 text-white font-bold'
+                            : 'bg-[#182030] text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <button
-                  onClick={handleAddGroup}
-                  className="mt-1 w-full py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 text-black font-bold text-xs rounded shadow-md transition flex items-center justify-center gap-1.5"
+                  onClick={() =>
+                    addGroupCandles({
+                      count: groupCount,
+                      direction: groupDirection,
+                      momentum: groupMomentum,
+                    })
+                  }
+                  className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/30 transition mt-2"
                 >
-                  <Plus className="w-4 h-4" /> Add +{groupCount} Candle Group
+                  <Plus className="w-4 h-4" />
+                  <span>+ Add {groupCount} Group Candles</span>
                 </button>
               </div>
             )}
 
-            {/* MODE 3: ZIGZAG BUILDER (CREATOR) */}
+            {/* ZIGZAG CANDLE BUILDER (CREATOR) */}
             {builderMode === 'zigzag' && (
-              <div className="flex flex-col gap-3 bg-[#131A26] p-3 rounded-lg border border-cyan-500/30">
-                <div className="flex items-center justify-between border-b border-[#1E293B] pb-2">
-                  <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-                    <ArrowDownUp className="w-3.5 h-3.5" /> ZigZag Wave Builder
+              <div className="bg-[#101726] border border-amber-500/40 rounded-2xl p-4 flex flex-col gap-3 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                    ZigZag Wave Builder
                   </span>
-                  <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">
-                    CREATOR 4K
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    CREATOR
                   </span>
                 </div>
 
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Tự động sinh chuỗi nến tự nhiên bám sát theo 3 nhịp sóng Đỉnh/Đáy (Swing High & Low):
-                </p>
-
-                {/* Leg 1 Target */}
-                <div className="flex flex-col gap-1">
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-slate-400">Leg 1: Swing High (HH)</span>
-                    <span className="font-mono text-cyan-300 font-bold">${leg1Price.toFixed(1)}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Leg 1 Target (HH):</span>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={leg1Price}
+                      onChange={(e) => setLeg1Price(Number(e.target.value))}
+                      className="w-24 bg-[#182030] border border-[#1E293B] rounded px-2 py-1 text-right font-mono text-amber-300 font-bold"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="4130"
-                    max="4190"
-                    step="0.5"
-                    value={leg1Price}
-                    onChange={(e) => setLeg1Price(Number(e.target.value))}
-                    className="w-full accent-cyan-400 h-1 bg-[#1E293B] rounded cursor-pointer"
-                  />
-                </div>
-
-                {/* Leg 2 Target */}
-                <div className="flex flex-col gap-1">
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-slate-400">Leg 2: Pullback Low (HL)</span>
-                    <span className="font-mono text-amber-300 font-bold">${leg2Price.toFixed(1)}</span>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Leg 2 Target (HL):</span>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={leg2Price}
+                      onChange={(e) => setLeg2Price(Number(e.target.value))}
+                      className="w-24 bg-[#182030] border border-[#1E293B] rounded px-2 py-1 text-right font-mono text-amber-300 font-bold"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="4110"
-                    max="4150"
-                    step="0.5"
-                    value={leg2Price}
-                    onChange={(e) => setLeg2Price(Number(e.target.value))}
-                    className="w-full accent-amber-400 h-1 bg-[#1E293B] rounded cursor-pointer"
-                  />
-                </div>
-
-                {/* Leg 3 Target */}
-                <div className="flex flex-col gap-1">
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-slate-400">Leg 3: Expansion Surge</span>
-                    <span className="font-mono text-bullish font-bold">${leg3Price.toFixed(1)}</span>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Leg 3 Target (BOS):</span>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={leg3Price}
+                      onChange={(e) => setLeg3Price(Number(e.target.value))}
+                      className="w-24 bg-[#182030] border border-[#1E293B] rounded px-2 py-1 text-right font-mono text-amber-300 font-bold"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="4140"
-                    max="4220"
-                    step="0.5"
-                    value={leg3Price}
-                    onChange={(e) => setLeg3Price(Number(e.target.value))}
-                    className="w-full accent-bullish h-1 bg-[#1E293B] rounded cursor-pointer"
-                  />
                 </div>
 
                 <button
-                  onClick={handleAddZigZag}
-                  className="mt-1 w-full py-2.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 text-white font-bold text-xs rounded shadow-md transition flex items-center justify-center gap-1.5"
+                  onClick={() =>
+                    addZigZagLegs([
+                      { targetPrice: leg1Price, candleCount: 4, label: 'Leg 1 (HH)' },
+                      { targetPrice: leg2Price, candleCount: 3, label: 'Leg 2 (HL)' },
+                      { targetPrice: leg3Price, candleCount: 5, label: 'Leg 3 (Expansion)' },
+                    ])
+                  }
+                  className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-600/30 transition mt-2"
                 >
-                  <Activity className="w-4 h-4" /> Generate 3-Leg ZigZag Wave
+                  <Activity className="w-4 h-4" />
+                  <span>+ Generate Multi-Leg ZigZag</span>
                 </button>
               </div>
             )}
-
-            {/* Quick Actions & Canvas Clear */}
-            <div className="flex gap-2">
-              <button
-                onClick={removeLastCandle}
-                disabled={candles.length === 0}
-                className="flex-1 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 rounded font-medium text-xs flex items-center justify-center gap-1.5 transition disabled:opacity-40"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> Remove Last
-              </button>
-              <button
-                onClick={clearAllCandles}
-                className="px-3 py-1.5 bg-[#1E293B] hover:bg-[#2B384E] text-slate-400 hover:text-white rounded text-xs transition"
-              >
-                Clear All
-              </button>
-            </div>
-
-            {/* Overlays Add */}
-            <div className="flex flex-col gap-2.5 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                <Layers className="w-3.5 h-3.5 text-cyan-400" /> Quick Smart Money Tools
-              </div>
-              <button
-                onClick={handleAddFVG}
-                className="w-full py-1.5 bg-[#1C2638] hover:bg-[#25334D] text-cyan-300 text-xs rounded border border-cyan-500/20 transition font-mono"
-              >
-                + Add Fair Value Gap (FVG)
-              </button>
-            </div>
           </>
         ) : (
-          /* TAB 2: TEXT & TYPOGRAPHY EDITOR (ENGLISH) */
-          <div className="flex flex-col gap-4">
-            {/* Section 1: Hook Banner */}
-            <div className="flex flex-col gap-2.5 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" /> Viral Hook Banner (English)
-                </span>
-                <button
-                  onClick={() => updateSettings({ bannerHook: '' })}
-                  className="text-[10px] text-slate-500 hover:text-red-400"
-                >
-                  Clear
-                </button>
-              </div>
-
+          /* TEXT & FONTS (EN) CUSTOMIZER */
+          <div className="space-y-4">
+            <div className="bg-[#101726] border border-[#1E293B] rounded-2xl p-4 space-y-3">
+              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
+                English Hook Banner
+              </span>
               <textarea
-                rows={2}
+                rows={3}
                 value={settings.bannerHook || ''}
                 onChange={(e) => updateSettings({ bannerHook: e.target.value })}
-                placeholder="Type your English hook title..."
-                className="w-full bg-[#0B0E14] border border-[#1E293B] rounded-lg p-2 text-xs text-white focus:outline-none focus:border-amber-400 uppercase font-bold"
+                placeholder="ENTER HOOK TEXT..."
+                className="w-full bg-[#182030] border border-[#1E293B] rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition resize-none font-semibold"
               />
 
-              {/* Quick Preset Hooks */}
-              <div className="flex flex-col gap-1.5 mt-1">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                  Quick English Hooks:
-                </span>
-                <div className="flex flex-col gap-1">
-                  {quickHooks.map((h, i) => (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[11px] text-slate-400">Banner Font</span>
+                <div className="grid grid-cols-3 gap-1">
+                  {['Montserrat', 'Bebas Neue', 'Inter'].map((f) => (
                     <button
-                      key={i}
-                      onClick={() => updateSettings({ bannerHook: h })}
-                      className="text-left text-[11px] p-1.5 rounded bg-[#1C2638]/60 hover:bg-[#25334D] text-slate-300 hover:text-amber-300 line-clamp-1 transition"
+                      key={f}
+                      onClick={() => updateSettings({ fontFamily: f })}
+                      className={`py-1 px-2 rounded text-[11px] font-bold transition ${
+                        settings.fontFamily === f
+                          ? 'bg-amber-500 text-black shadow-sm'
+                          : 'bg-[#182030] text-slate-400 hover:text-white'
+                      }`}
                     >
-                      • {h}
+                      {f}
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Section 2: Font Family & Size */}
-            <div className="flex flex-col gap-3 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
-              <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                <Type className="w-3.5 h-3.5 text-primary" /> Typography & Font Choice
-              </span>
-
-              {/* Font Family */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[11px] text-slate-400">Font Family:</label>
-                <select
-                  value={settings.fontFamily || 'Montserrat'}
-                  onChange={(e) => updateSettings({ fontFamily: e.target.value })}
-                  className="bg-[#0B0E14] border border-[#1E293B] rounded-lg p-1.5 text-xs text-white focus:outline-none focus:border-primary"
-                >
-                  <option value="Montserrat">Montserrat (Modern Bold - Recommended)</option>
-                  <option value="Inter">Inter (Clean Geometric)</option>
-                  <option value="Bebas Neue">Bebas Neue (Viral Shorts Condensed)</option>
-                  <option value="monospace">Courier / Monospace (Terminal Style)</option>
-                </select>
-              </div>
-
-              {/* Font Size */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Banner Font Size</span>
-                  <span className="font-mono text-white">{settings.bannerFontSize || 13}px</span>
-                </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">Font Size</span>
                 <input
                   type="range"
                   min="10"
-                  max="18"
-                  value={settings.bannerFontSize || 13}
+                  max="20"
+                  value={settings.bannerFontSize}
                   onChange={(e) => updateSettings({ bannerFontSize: Number(e.target.value) })}
-                  className="w-full accent-primary h-1 bg-[#1E293B] rounded cursor-pointer"
+                  className="w-28 accent-amber-500 h-1.5 bg-[#182030] rounded cursor-pointer"
                 />
-              </div>
-
-              {/* Banner Color Palette */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] text-slate-400">Banner Accent Color:</span>
-                <div className="flex items-center gap-2">
-                  {[
-                    { name: 'Yellow', color: '#FDE047' },
-                    { name: 'Cyan', color: '#38BDF8' },
-                    { name: 'Green', color: '#00F5A0' },
-                    { name: 'Red', color: '#FF3366' },
-                    { name: 'White', color: '#FFFFFF' },
-                  ].map((c) => (
-                    <button
-                      key={c.name}
-                      onClick={() => updateSettings({ bannerTextColor: c.color })}
-                      className={`w-6 h-6 rounded-full border-2 transition ${
-                        settings.bannerTextColor === c.color ? 'border-white scale-110' : 'border-transparent'
-                      }`}
-                      style={{ backgroundColor: c.color }}
-                      title={c.name}
-                    />
-                  ))}
-                </div>
+                <span className="font-mono text-amber-400 text-[11px]">
+                  {settings.bannerFontSize}px
+                </span>
               </div>
             </div>
 
-            {/* Section 3: Direct Editing of Overlay Labels */}
-            <div className="flex flex-col gap-2.5 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
-              <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5 text-cyan-400" /> Active Chart Labels ({overlays.length})
-              </span>
-              <p className="text-[10px] text-slate-400">Edit the text that appears on your chart markers directly:</p>
-
-              <div className="flex flex-col gap-2 mt-1">
-                {overlays.map((ov, index) => (
-                  <div key={ov.id} className="flex flex-col gap-1 bg-[#0B0E14] p-2 rounded border border-[#1E293B]">
-                    <div className="flex justify-between items-center text-[10px] text-slate-400 font-mono">
-                      <span className="uppercase font-bold" style={{ color: ov.color || '#38BDF8' }}>
-                        {ov.type}
-                      </span>
-                      <span>#{index + 1}</span>
-                    </div>
-                    <input
-                      type="text"
-                      value={ov.label || ''}
-                      onChange={(e) => updateOverlayLabel(ov.id, e.target.value)}
-                      placeholder="e.g. M15 FAIR VALUE GAP"
-                      className="w-full bg-[#161F2E] border border-[#232F42] rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-400 font-mono"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Fair Value Gap Quick Injector */}
+            <button
+              onClick={() => {
+                if (candles.length < 3) return;
+                const lastIdx = candles.length - 1;
+                const p1 = candles[lastIdx - 2]?.high || 4125;
+                const p2 = candles[lastIdx]?.low || 4138;
+                addOverlay({
+                  type: 'FVG',
+                  startCandleIndex: Math.max(0, lastIdx - 2),
+                  endCandleIndex: lastIdx,
+                  priceStart: Math.min(p1, p2),
+                  priceEnd: Math.max(p1, p2),
+                  color: '#00F5A0',
+                  opacity: 0.25,
+                  label: `M15 FAIR VALUE GAP [${Math.min(p1, p2).toFixed(1)} - ${Math.max(p1, p2).toFixed(1)}]`,
+                });
+              }}
+              className="w-full py-2 rounded-xl bg-emerald-950/40 hover:bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>+ Add Bullish FVG Overlay</span>
+            </button>
           </div>
         )}
       </div>

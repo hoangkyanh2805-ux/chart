@@ -9,6 +9,11 @@ interface ChartState {
   overlays: Overlay[];
   settings: ChartSettings;
   
+  // Studio & Workspace Mode
+  builderMode: 'single' | 'group' | 'zigzag';
+  activeWorkspaceTab: 'canvas' | 'timeline';
+  revealAnimation: boolean;
+  
   // Timeline State
   currentTime: number; // in seconds
   duration: number; // in seconds
@@ -16,6 +21,10 @@ interface ChartState {
   revealMode: RevealAnimationType;
 
   // Actions
+  setBuilderMode: (mode: 'single' | 'group' | 'zigzag') => void;
+  setActiveWorkspaceTab: (tab: 'canvas' | 'timeline') => void;
+  setRevealAnimation: (enabled: boolean) => void;
+  
   addCandle: (candle: Omit<Candle, 'id' | 'index'>) => void;
   updateCandle: (index: number, updates: Partial<Candle>) => void;
   removeLastCandle: () => void;
@@ -91,10 +100,21 @@ export const useChartStore = create<ChartState>((set, get) => ({
     showGrid: true,
     spotlightEnabled: false,
   },
+  builderMode: 'single',
+  activeWorkspaceTab: 'canvas',
+  revealAnimation: true,
   currentTime: 3,
   duration: 6,
   isPlaying: false,
   revealMode: 'sequential',
+
+  setBuilderMode: (mode) => set({ builderMode: mode }),
+  setActiveWorkspaceTab: (tab) => set({ activeWorkspaceTab: tab }),
+  setRevealAnimation: (enabled) =>
+    set({
+      revealAnimation: enabled,
+      revealMode: enabled ? 'sequential' : 'instant',
+    }),
 
   addCandle: (c) =>
     set((state) => {

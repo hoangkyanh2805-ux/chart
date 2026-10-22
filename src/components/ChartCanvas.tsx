@@ -4,12 +4,22 @@ import React, { useRef, useEffect } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { priceToCanvasY, indexToCanvasX } from '../math/coordinates';
 import { Candle, Overlay } from '../types/chart';
+import { InteractiveTimeline } from './InteractiveTimeline';
 
 export const ChartCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const { candles, overlays, settings, currentTime, duration, revealMode } = useChartStore();
+  const {
+    candles,
+    overlays,
+    settings,
+    currentTime,
+    duration,
+    revealMode,
+    activeWorkspaceTab,
+    setActiveWorkspaceTab,
+  } = useChartStore();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,12 +38,81 @@ export const ChartCanvas: React.FC = () => {
     const height = rect.height;
     const priceAxisWidth = 65;
     const chartWidth = width - priceAxisWidth;
+    const activeFont = settings.fontFamily || 'Montserrat';
 
     // 1. Clear background
-    ctx.fillStyle = '#0B0E14';
+    ctx.fillStyle = '#0B0F19';
     ctx.fillRect(0, 0, width, height);
 
-    if (candles.length === 0) return;
+    // Helper: Draw signature ▲ LIMIT and ▼ LIMIT boundary dashed lines
+    const drawLimitLines = () => {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+
+      // Top Limit Line
+      const topLimitY = 32;
+      ctx.beginPath();
+      ctx.moveTo(12, topLimitY);
+      ctx.lineTo(chartWidth, topLimitY);
+      ctx.stroke();
+
+      ctx.font = 'bold 9px monospace';
+      ctx.fillStyle = '#818CF8';
+      ctx.textAlign = 'right';
+      ctx.fillText('▲ LIMIT', chartWidth - 8, topLimitY - 6);
+
+      // Bottom Limit Line
+      const bottomLimitY = height - 32;
+      ctx.beginPath();
+      ctx.moveTo(12, bottomLimitY);
+      ctx.lineTo(chartWidth, bottomLimitY);
+      ctx.stroke();
+
+      ctx.fillText('▼ LIMIT', chartWidth - 8, bottomLimitY + 14);
+      ctx.textAlign = 'left';
+      ctx.restore();
+    };
+
+    if (candles.length === 0) {
+      drawLimitLines();
+
+      // Empty State: Dashed circle + prompt matching ChartAnimator
+      ctx.save();
+      const centerX = chartWidth / 2;
+      const centerY = height / 2;
+
+      ctx.strokeStyle = '#222F43';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.arc(centerX, centerY - 18, 22, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Plus sign
+      ctx.strokeStyle = '#64748B';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(centerX - 7, centerY - 18);
+      ctx.lineTo(centerX + 7, centerY - 18);
+      ctx.moveTo(centerX, centerY - 25);
+      ctx.lineTo(centerX, centerY - 11);
+      ctx.stroke();
+
+      // Prompt text
+      ctx.font = `500 11px "${activeFont}", sans-serif`;
+      ctx.fillStyle = '#64748B';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        'Adjust the OHLC sliders and click Add Candle, then edit Gap, Width or Wick Size',
+        centerX,
+        centerY + 24
+      );
+      ctx.restore();
+      return;
+    }
 
     // Calculate dynamic price range with 4% padding
     const allPrices = candles.flatMap((c) => [c.high, c.low]);
@@ -75,9 +154,11 @@ export const ChartCanvas: React.FC = () => {
       }
     }
 
+    // Draw Limit Lines on active chart
+    drawLimitLines();
+
     // 3. Watermark: XAUUSD · Timeframe
     ctx.save();
-    const activeFont = settings.fontFamily || 'Montserrat';
     ctx.font = `bold 22px "${activeFont}", sans-serif`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.fillText(`${settings.symbol || 'XAUUSD'} · ${settings.timeframe || 'M15'}`, 24, 42);
@@ -325,18 +406,61 @@ export const ChartCanvas: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full flex items-center justify-center p-4 bg-[#080A0F] rounded-xl overflow-hidden border border-[#1E293B]"
+      className="relative w-full h-full flex flex-col bg-[#080C14] rounded-2xl overflow-hidden border border-[#1E293B] shadow-2xl"
     >
-      <div
-        className={`relative transition-all duration-300 shadow-2xl rounded-lg overflow-hidden border border-[#1E293B] ${
-          settings.aspectRatio === '9:16'
-            ? 'w-[360px] h-[640px]'
-            : settings.aspectRatio === '1:1'
-            ? 'w-[540px] h-[540px]'
-            : 'w-full max-w-[960px] h-[540px]'
-        }`}
-      >
-        <canvas ref={canvasRef} className="w-full h-full block" />
+      {/* Workspace Header Bar: Canvas | Timeline & Counter & LIVE Badge */}
+      <div className="h-12 px-5 bg-[#0C101B] border-b border-[#1E293B] flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-1.5 bg-[#121826] p-1 rounded-xl border border-[#1E293B]">
+          <button
+            onClick={() => setActiveWorkspaceTab('canvas')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              activeWorkspaceTab === 'canvas'
+                ? 'bg-[#6366F1] text-white shadow-md shadow-indigo-600/30 font-bold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Canvas
+          </button>
+          <button
+            onClick={() => setActiveWorkspaceTab('timeline')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              activeWorkspaceTab === 'timeline'
+                ? 'bg-[#6366F1] text-white shadow-md shadow-indigo-600/30 font-bold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Timeline
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-mono text-slate-400">
+            {candles.length} candle{candles.length !== 1 ? 's' : ''}
+          </span>
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1E1B4B] border border-indigo-500/40 text-indigo-300 text-xs font-bold font-mono shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+            LIVE
+          </span>
+        </div>
+      </div>
+
+      {/* Main Workspace Body */}
+      <div className="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center p-4">
+        {activeWorkspaceTab === 'canvas' ? (
+          <div
+            className={`relative transition-all duration-300 shadow-2xl rounded-xl overflow-hidden border border-[#1E293B] ${
+              settings.aspectRatio === '9:16'
+                ? 'w-[360px] h-[640px]'
+                : settings.aspectRatio === '1:1'
+                ? 'w-[540px] h-[540px]'
+                : 'w-full max-w-[960px] h-[540px]'
+            }`}
+          >
+            <canvas ref={canvasRef} className="w-full h-full block" />
+          </div>
+        ) : (
+          <InteractiveTimeline />
+        )}
       </div>
     </div>
   );
