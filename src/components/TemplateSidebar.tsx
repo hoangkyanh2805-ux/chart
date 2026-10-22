@@ -150,8 +150,15 @@ const REAL_TEMPLATES: TemplateItem[] = [
 ];
 
 export const TemplateSidebar: React.FC = () => {
-  const { setHeadlineText, setSublineText, setCurrentTime, addCandle, clearAllCandles, addOverlay } =
-    useChartStore();
+  const {
+    setHeadlineText,
+    setSublineText,
+    setCurrentTime,
+    setIsPlaying,
+    addCandle,
+    clearAllCandles,
+    addOverlay,
+  } = useChartStore();
 
   const [activeTab, setActiveTab] = useState<'library' | 'my_projects'>('library');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -168,6 +175,9 @@ export const TemplateSidebar: React.FC = () => {
   const handleApplyTemplate = (t: TemplateItem) => {
     if (t.headline) setHeadlineText(t.headline);
     if (t.subline) setSublineText(t.subline);
+
+    // Apply template duration
+    useChartStore.setState({ duration: t.duration || 10 });
 
     // Apply clean illustrative liquidity sweep candles
     clearAllCandles();
@@ -186,7 +196,9 @@ export const TemplateSidebar: React.FC = () => {
       label: 'BSL Sweep Level ($4,145.00)',
     });
 
+    // Reset and start playing immediately!
     setCurrentTime(0);
+    setIsPlaying(true);
   };
 
   return (

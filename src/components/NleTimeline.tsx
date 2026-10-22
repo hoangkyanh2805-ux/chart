@@ -24,7 +24,7 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({ onOpenExport }) => {
   const animationFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
 
-  // Animation Loop
+  // High-performance 60 FPS Animation Loop
   useEffect(() => {
     if (!isPlaying) {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
@@ -37,9 +37,12 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({ onOpenExport }) => {
       const deltaSec = (timestamp - lastTimeRef.current) / 1000;
       lastTimeRef.current = timestamp;
 
-      const nextTime = currentTime + deltaSec;
-      if (nextTime >= duration) {
-        setCurrentTime(duration);
+      const currentStoreTime = useChartStore.getState().currentTime;
+      const storeDuration = useChartStore.getState().duration;
+      const nextTime = currentStoreTime + deltaSec;
+
+      if (nextTime >= storeDuration) {
+        setCurrentTime(storeDuration);
         setIsPlaying(false);
       } else {
         setCurrentTime(nextTime);
@@ -52,7 +55,7 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({ onOpenExport }) => {
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [isPlaying, currentTime, duration, setCurrentTime, setIsPlaying]);
+  }, [isPlaying, setCurrentTime, setIsPlaying]);
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
