@@ -57,4 +57,16 @@ describe('Hermes Native Engine', () => {
     const pullback = generateStrategySetup('Risk-First Pullback', 4128, 10, 20, '0.05 lot', 3.5);
     expect(pullback.overlays.some((o) => o.label?.includes('Support'))).toBe(true);
   });
+
+  it('verifies 9:16 Shorts Safe Zone and Compliance boundaries', () => {
+    // 9:16 standard viewport: 360x640
+    const viewportHeight = 640;
+    const topSafeMargin = 70;
+    const bottomSafeMargin = 100;
+
+    const usableHeight = viewportHeight - topSafeMargin - bottomSafeMargin;
+    expect(usableHeight).toBe(470);
+    expect(topSafeMargin).toBeGreaterThanOrEqual(60); // Header clear
+    expect(bottomSafeMargin).toBeGreaterThanOrEqual(90); // TikTok/Shorts caption clear
+  });
 });

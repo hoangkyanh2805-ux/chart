@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { useChartStore } from '../store/useChartStore';
+import { ShieldCheck, Smartphone } from 'lucide-react';
 
 // Clean text auto-wrapping utility
 function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -37,6 +38,8 @@ export const StageCanvas: React.FC = () => {
     candles,
     overlays,
     badges,
+    showSafeZones,
+    setShowSafeZones,
   } = useChartStore();
 
   const isWhite = stageTheme === 'white';
@@ -436,7 +439,42 @@ export const StageCanvas: React.FC = () => {
       }
     }
 
-  }, [stageTheme, headlineText, sublineText, currentTime, duration, settings, candles, overlays, badges]);
+    // 7. Optional 9:16 Safe Zones Overlay (YouTube Shorts / TikTok UI clearance)
+    if (showSafeZones && settings.aspectRatio === '9:16') {
+      ctx.save();
+      ctx.strokeStyle = isWhite ? 'rgba(239, 68, 68, 0.6)' : 'rgba(244, 63, 94, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+
+      // Top margin (70px header clearance)
+      ctx.beginPath();
+      ctx.moveTo(0, 70);
+      ctx.lineTo(width, 70);
+      ctx.stroke();
+
+      // Bottom margin (100px captions/sound clearance)
+      const bottomSafeY = height - 100;
+      ctx.beginPath();
+      ctx.moveTo(0, bottomSafeY);
+      ctx.lineTo(width, bottomSafeY);
+      ctx.stroke();
+
+      // Right margin (50px like/comment buttons clearance)
+      const rightSafeX = width - 50;
+      ctx.beginPath();
+      ctx.moveTo(rightSafeX, 70);
+      ctx.lineTo(rightSafeX, bottomSafeY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.font = 'bold 8px monospace';
+      ctx.fillStyle = isWhite ? '#DC2626' : '#FB7185';
+      ctx.fillText('9:16 SAFE: TOP (70px)', 12, 65);
+      ctx.fillText('9:16 SAFE: BOTTOM (100px)', 12, bottomSafeY + 12);
+      ctx.restore();
+    }
+
+  }, [stageTheme, headlineText, sublineText, currentTime, duration, settings, candles, overlays, badges, showSafeZones]);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center p-3 select-none overflow-hidden">
@@ -475,6 +513,22 @@ export const StageCanvas: React.FC = () => {
           placeholder="Enter subline..."
           className="flex-1 bg-transparent text-xs text-slate-300 focus:outline-none focus:text-indigo-300"
         />
+
+        {settings.aspectRatio === '9:16' && (
+          <button
+            type="button"
+            onClick={() => setShowSafeZones(!showSafeZones)}
+            title="Bật/Tắt đường căn lề Safe Zones cho TikTok / YouTube Shorts"
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono transition border select-none ${
+              showSafeZones
+                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                : 'bg-black/30 text-slate-400 border-white/10 hover:text-white'
+            }`}
+          >
+            <ShieldCheck className="w-3 h-3 text-rose-400" />
+            <span>Safe Zones</span>
+          </button>
+        )}
       </div>
     </div>
   );
