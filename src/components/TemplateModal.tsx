@@ -16,7 +16,18 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
   onClose,
   onSelectAndExport,
 }) => {
-  const { loadTemplate } = useChartStore();
+  const {
+    loadTemplate,
+    updateSettings,
+    setHeadlineText,
+    setSublineText,
+    setBadges,
+    clearAllCandles,
+    addCandle,
+    addOverlay,
+    setCurrentTime,
+    setIsPlaying,
+  } = useChartStore();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   if (!isOpen) return null;
@@ -24,16 +35,46 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
   const filteredTemplates =
     selectedCategory === 'All'
       ? TEMPLATES
-      : TEMPLATES.filter((t) => t.strategy.toLowerCase().includes(selectedCategory.toLowerCase()));
+      : TEMPLATES.filter((t) => {
+          if (selectedCategory === '9:16 Shorts') return t.aspectRatio === '9:16';
+          if (selectedCategory === '16:9 Landscape') return t.aspectRatio === '16:9';
+          if (selectedCategory === '1:1 Square') return t.aspectRatio === '1:1';
+          return (
+            t.strategy.toLowerCase() === selectedCategory.toLowerCase() ||
+            t.title.toLowerCase().includes(selectedCategory.toLowerCase())
+          );
+        });
 
   const handleApply = (template: ChartTemplate) => {
     loadTemplate(template);
+
+    // Sync candles and overlays to canvas stage
+    clearAllCandles();
+    template.candles.forEach((c) => addCandle(c));
+    template.overlays.forEach((o) => addOverlay(o));
+
+    // Update typography and 3-step badges
+    setHeadlineText(template.title.toUpperCase());
+    setSublineText(template.description);
+    setBadges([
+      `1. ${template.strategy.toUpperCase()}`,
+      `2. ${template.aspectRatio}`,
+      `3. ${template.tier.toUpperCase()}`,
+    ]);
+
+    updateSettings({
+      aspectRatio: template.aspectRatio,
+      spotlightEnabled: template.spotlightEnabled ?? false,
+    });
+
+    useChartStore.setState({ duration: template.duration || 10 });
+    setCurrentTime(0);
+    setIsPlaying(true);
     onClose();
   };
 
   const handleApplyAndExport = (template: ChartTemplate) => {
-    loadTemplate(template);
-    onClose();
+    handleApply(template);
     onSelectAndExport(template);
   };
 
@@ -67,18 +108,18 @@ export const TemplateModal: React.FC<TemplateModalProps> = ({
         </div>
 
         {/* Filter Categories */}
-        <div className="px-6 py-3 border-b border-[#1E293B] flex items-center gap-2 bg-[#0C1017]">
-          {['All', 'ICT', 'SMC'].map((cat) => (
+        <div className="px-6 py-3 border-b border-[#1E293B] flex items-center gap-1.5 overflow-x-auto bg-[#0C1017]">
+          {['All', '9:16 Shorts', '16:9 Landscape', '1:1 Square', 'ICT', 'SMC', 'Price Action', 'Wyckoff'].map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1 rounded-lg text-xs font-medium transition ${
+              className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
                 selectedCategory === cat
-                  ? 'bg-amber-500 text-black font-bold shadow'
+                  ? 'bg-amber-500 text-black shadow'
                   : 'text-slate-400 hover:text-white hover:bg-[#161F2E]'
               }`}
             >
-              {cat === 'All' ? 'Tất cả Kịch Bản Vàng' : `Chiến Thuật ${cat}`}
+              {cat === 'All' ? 'Tất cả Templates' : cat}
             </button>
           ))}
         </div>
