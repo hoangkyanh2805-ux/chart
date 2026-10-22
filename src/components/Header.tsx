@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { AspectRatio } from '../types/chart';
-import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio } from 'lucide-react';
+import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio, Key } from 'lucide-react';
 import { ExportModal } from './ExportModal';
 import { TemplateModal } from './TemplateModal';
 import { AzzamOpsModal } from './AzzamOpsModal';
+import { ApiKeyModal } from './ApiKeyModal';
 import { ChartTemplate } from '../data/templates';
 
 export const Header: React.FC = () => {
@@ -14,6 +15,7 @@ export const Header: React.FC = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState<boolean>(false);
   const [isAzzamOpsOpen, setIsAzzamOpsOpen] = useState<boolean>(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
 
   const handleExportPNG = () => {
     const canvas = document.querySelector('canvas');
@@ -114,8 +116,17 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Actions: Spotlight, Export PNG, Export Video */}
+        {/* Actions: Gemini Key, Spotlight, Export PNG, Export Video */}
         <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setIsApiKeyModalOpen(true)}
+            title="Quản lý Google Gemini API Key"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121A28] hover:bg-[#1E293B] border border-indigo-500/40 hover:border-indigo-400 text-indigo-300 hover:text-white rounded-lg text-xs font-semibold transition"
+          >
+            <Key className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Gemini Key</span>
+          </button>
+
           <button
             onClick={() => updateSettings({ spotlightEnabled: !settings.spotlightEnabled })}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition ${
@@ -160,6 +171,9 @@ export const Header: React.FC = () => {
 
       {/* Video Export Modal */}
       <ExportModal isOpen={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} />
+
+      {/* Gemini API Key Management Modal */}
+      <ApiKeyModal isOpen={isApiKeyModalOpen} onClose={() => setIsApiKeyModalOpen(false)} />
     </>
   );
 };

@@ -21,6 +21,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+import { ApiKeyModal } from './ApiKeyModal';
+
 interface BriefImporterModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -317,7 +319,7 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
 
   // Gemini AI Integration States
   const [customApiKey, setCustomApiKey] = useState<string>('');
-  const [showApiKeySetting, setShowApiKeySetting] = useState<boolean>(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [isLoadingAI, setIsLoadingAI] = useState<boolean>(false);
   const [aiResult, setAiResult] = useState<SeniorTraderAIResult | null>(null);
 
@@ -327,7 +329,7 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
       const savedKey = localStorage.getItem('gemini_api_key');
       if (savedKey) setCustomApiKey(savedKey);
     }
-  }, []);
+  }, [isApiKeyModalOpen]);
 
   // Save API key when changed
   const handleSaveApiKey = (key: string) => {
@@ -465,39 +467,14 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
           <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
             <span>Dán nội dung Brief kịch bản (dài đến 1,400 từ từ Drive):</span>
             <button
-              onClick={() => setShowApiKeySetting(!showApiKeySetting)}
-              className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-mono transition"
+              type="button"
+              onClick={() => setIsApiKeyModalOpen(true)}
+              className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 font-mono px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 transition hover:bg-indigo-500/20"
             >
-              <Key className="w-3 h-3" />
-              <span>{customApiKey ? 'Đã cài Gemini API Key' : 'Cài đặt Gemini API Key'}</span>
+              <Key className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{customApiKey ? 'Đổi Gemini Key (🟢 Đã Lưu)' : 'Cài Đặt Gemini Key'}</span>
             </button>
           </div>
-
-          {/* Optional Gemini API Key Input */}
-          {showApiKeySetting && (
-            <div className="bg-[#141B29] border border-indigo-500/30 rounded-xl p-2.5 flex flex-col gap-1.5 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
-                <span>Google Gemini API Key (Không bắt buộc - mặc định dùng Senior Trader Engine):</span>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  placeholder="AIzaSy..."
-                  value={customApiKey}
-                  onChange={(e) => handleSaveApiKey(e.target.value)}
-                  className="flex-1 bg-[#0B0F19] border border-[#1E293B] rounded-lg px-2.5 py-1 text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
-                />
-                {customApiKey && (
-                  <button
-                    onClick={() => handleSaveApiKey('')}
-                    className="text-[10px] text-rose-400 hover:underline px-2"
-                  >
-                    Xóa
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
 
           <textarea
             rows={4}
@@ -626,6 +603,13 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
           <span>Áp Dụng Vào Canvas & Sinh Video Ngay (1-Click)</span>
         </button>
       </div>
+
+      {/* Api Key Modal */}
+      <ApiKeyModal
+        isOpen={isApiKeyModalOpen}
+        onClose={() => setIsApiKeyModalOpen(false)}
+        onKeySaved={(newKey) => setCustomApiKey(newKey)}
+      />
     </div>
   );
 };
