@@ -24,8 +24,13 @@ import {
   RefreshCw,
   Clock,
   Radio,
+  Zap,
+  ListOrdered,
+  Target,
+  DollarSign,
 } from 'lucide-react';
 import { ApiKeyModal } from './ApiKeyModal';
+import { executeHermesDirective, HermesDirectorDirective } from '../utils/hermesEngine';
 
 interface BriefImporterModalProps {
   isOpen: boolean;
@@ -396,6 +401,8 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
   const [hermesScripts, setHermesScripts] = useState<HermesScript[]>([]);
   const [selectedHermesId, setSelectedHermesId] = useState<string>('');
   const [isLoadingHermes, setIsLoadingHermes] = useState<boolean>(false);
+  const [hermesDirective, setHermesDirective] = useState<HermesDirectorDirective | null>(null);
+  const [showOutlinePreview, setShowOutlinePreview] = useState<boolean>(false);
 
   const [briefText, setBriefText] = useState<string>(SAMPLE_BRIEFS[4].text);
   const [parsedHeadline, setParsedHeadline] = useState<string>('THE STOP LOSS CAME FIRST');
@@ -403,7 +410,7 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
   const [selectedSetup, setSelectedSetup] = useState<SetupType>('risk-first');
   const [basePrice, setBasePrice] = useState<number>(4128.0);
 
-  // Gemini AI Integration States
+  // Gemini AI Integration States (Auxiliary fallback)
   const [customApiKey, setCustomApiKey] = useState<string>('');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [isLoadingAI, setIsLoadingAI] = useState<boolean>(false);
@@ -423,12 +430,9 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
       const data = await res.json();
       if (data.scripts && data.scripts.length > 0) {
         setHermesScripts(data.scripts);
-        // Default to first Hermes script if none selected
+        // Automatically execute the first Hermes script
         if (!selectedHermesId) {
-          const first = data.scripts[0];
-          setSelectedHermesId(first.id);
-          setBriefText(first.content);
-          handleAnalyzeWithGemini(first.content);
+          handleSelectHermesScript(data.scripts[0]);
         }
       }
     } catch (err) {
@@ -455,12 +459,49 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
     setBasePrice(res.basePrice);
   };
 
-  // Call Gemini AI / Senior Trader Brain API
+  // ⚡ HERMES NATIVE EXECUTION (DIRECTOR SOT)
+  const handleSelectHermesScript = (s: HermesScript) => {
+    setSelectedHermesId(s.id);
+    setBriefText(s.content);
+
+    // Run Hermes Native Engine synchronously: 0% hallucination!
+    const directive = executeHermesDirective(s.content, s.filename);
+    setHermesDirective(directive);
+    setParsedHeadline(directive.hookHeadline);
+    setParsedSubline(directive.hookSubline);
+    setBasePrice(directive.basePrice);
+
+    if (/sweep|liquidity/i.test(directive.strategy)) {
+      setSelectedSetup('liquidity-sweep');
+    } else if (/fvg|imbalance/i.test(directive.strategy)) {
+      setSelectedSetup('fvg');
+    } else if (/structure|trend|chart/i.test(directive.strategy)) {
+      setSelectedSetup('break-retest');
+    } else if (/bearish|supply/i.test(directive.strategy)) {
+      setSelectedSetup('bearish-supply');
+    } else {
+      setSelectedSetup('risk-first');
+    }
+
+    setAiResult({
+      headline: directive.hookHeadline,
+      subline: directive.hookSubline,
+      strategy: directive.strategy,
+      seniorTraderRationale: `Chỉ thị thực chiến từ Hermes: Nỗi đau "${directive.painpoint}". Giờ vàng: ${directive.goldenHour}. Quản lý vốn: $${directive.riskBudget} budget, ${directive.slPips} pips SL, $${directive.lotSize}/pip.`,
+      symbol: 'XAUUSD',
+      basePrice: directive.basePrice,
+      candles: directive.candles,
+      overlays: directive.overlays,
+      provider: '⚡ Hermes Native Director Engine (100% SOT)',
+    });
+  };
+
+  // Call Gemini AI for manual briefs
   const handleAnalyzeWithGemini = async (textToAnalyze?: string) => {
     const text = (textToAnalyze !== undefined ? textToAnalyze : briefText).trim();
     if (!text) return;
 
-    // Apply quick client parse immediately
+    setHermesDirective(null); // Clear Hermes directive when running custom Gemini analysis
     applyTextParse(text);
 
     setIsLoadingAI(true);
@@ -484,7 +525,6 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
       if (data.subline) setParsedSubline(data.subline);
       if (data.basePrice) setBasePrice(data.basePrice);
 
-      // Map strategy to local setup
       if (/sweep|liquidity/i.test(data.strategy)) {
         setSelectedSetup('liquidity-sweep');
       } else if (/fvg|imbalance/i.test(data.strategy)) {
@@ -513,13 +553,8 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
     { id: 'bearish-supply', label: '📉 Bearish Supply Zone', icon: TrendingDown, color: 'text-rose-400 border-rose-500/40' },
   ];
 
-  const handleSelectHermesScript = (s: HermesScript) => {
-    setSelectedHermesId(s.id);
-    setBriefText(s.content);
-    handleAnalyzeWithGemini(s.content);
-  };
-
   const handleSelectSample = (sample: typeof SAMPLE_BRIEFS[0]) => {
+    setHermesDirective(null);
     setBriefText(sample.text);
     handleAnalyzeWithGemini(sample.text);
   };
@@ -532,8 +567,13 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
 
     clearAllCandles();
 
-    // 2. Use AI-generated candles/overlays if available; otherwise use strategy generator
-    if (aiResult && aiResult.candles && aiResult.candles.length > 0) {
+    // 2. Priority: Hermes Directive -> AI Result -> Generator
+    if (hermesDirective && hermesDirective.candles && hermesDirective.candles.length > 0) {
+      hermesDirective.candles.forEach((c) => addCandle(c));
+      if (hermesDirective.overlays) {
+        hermesDirective.overlays.forEach((o) => addOverlay(o));
+      }
+    } else if (aiResult && aiResult.candles && aiResult.candles.length > 0) {
       aiResult.candles.forEach((c) => addCandle(c));
       if (aiResult.overlays) {
         aiResult.overlays.forEach((o) => addOverlay(o));
@@ -556,18 +596,18 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-gradient-to-br from-indigo-500/20 via-sky-500/20 to-purple-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">
-              <Bot className="w-5 h-5 text-indigo-400 animate-pulse" />
+            <div className="p-2 bg-gradient-to-br from-amber-500/20 via-sky-500/20 to-indigo-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+              <Zap className="w-5 h-5 text-amber-400 animate-pulse" />
             </div>
             <div>
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <span>Hermes Agent & Gemini AI • Đồng Bộ Kịch Bản & Sinh Video</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
-                  AUTONOMOUS PIPELINE
+                <span>Hermes Native Execution • Đạo Diễn Kịch Bản Trading</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                  DIRECTOR SOT
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Đồng bộ trực tiếp kịch bản thực chiến từ Hermes CLI và tự động tạo nến chuẩn Smart Money
+                Thực thi 100% nguyên bản chỉ đạo từ Hermes Agent • Không qua Gemini • 0% Sai lệch
               </p>
             </div>
           </div>
@@ -587,17 +627,20 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
               onClick={() => setActiveTab('hermes')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 activeTab === 'hermes'
-                  ? 'bg-indigo-600 text-white shadow-sm'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Bot className="w-3.5 h-3.5 text-sky-400" />
-              <span>⚡ Kịch Bản Từ Hermes Agent ({hermesScripts.length})</span>
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <span>⚡ Hermes Native ({hermesScripts.length} Kịch Bản Sẵn)</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setActiveTab('manual')}
+              onClick={() => {
+                setActiveTab('manual');
+                setHermesDirective(null);
+              }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
                 activeTab === 'manual'
                   ? 'bg-indigo-600 text-white shadow-sm'
@@ -605,27 +648,27 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
               }`}
             >
               <FileText className="w-3.5 h-3.5 text-indigo-400" />
-              <span>📝 Dán Văn Bản Brief Tùy Ý</span>
+              <span>📝 Dán Brief Tùy Ý (Gemini AI)</span>
             </button>
           </div>
 
           <button
             type="button"
             onClick={() => setIsApiKeyModalOpen(true)}
-            className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-mono px-2.5 py-1 rounded-lg hover:bg-indigo-500/10 transition"
+            className="text-[11px] text-slate-400 hover:text-indigo-300 flex items-center gap-1 font-mono px-2.5 py-1 rounded-lg hover:bg-[#1E293B] transition"
           >
-            <Key className="w-3 h-3 text-indigo-400" />
-            <span>{customApiKey ? 'Gemini: 🟢 Đã Lưu Key' : 'Gemini: Cài Đặt Key'}</span>
+            <Key className="w-3 h-3 text-slate-400" />
+            <span>{customApiKey ? 'Gemini: 🟢' : 'Gemini: Cài Key'}</span>
           </button>
         </div>
 
-        {/* TAB 1: Hermes Live Sync */}
+        {/* TAB 1: Hermes Native Execution */}
         {activeTab === 'hermes' && (
-          <div className="flex flex-col gap-2 animate-in fade-in duration-150">
+          <div className="flex flex-col gap-2.5 animate-in fade-in duration-150">
             <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
               <span className="flex items-center gap-1.5">
                 <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                <span>Kịch bản nóng hổi vừa sinh từ Hermes CLI (`video_scripts/`):</span>
+                <span>Chọn kịch bản Hermes để kích hoạt Native Execution:</span>
               </span>
               <button
                 type="button"
@@ -638,25 +681,24 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
               </button>
             </div>
 
-            {/* Hermes Scripts List */}
-            <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto pr-1">
+            {/* Hermes Scripts Horizontal Scroller */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
               {hermesScripts.map((s) => (
                 <div
                   key={s.id}
                   onClick={() => handleSelectHermesScript(s)}
-                  className={`p-2.5 rounded-xl border cursor-pointer transition flex flex-col gap-1 text-left ${
+                  className={`p-2 rounded-xl border cursor-pointer transition flex flex-col gap-1 text-left ${
                     selectedHermesId === s.id
-                      ? 'bg-indigo-600/25 border-indigo-500 text-white shadow-md'
+                      ? 'bg-amber-500/15 border-amber-500/60 text-white shadow-md'
                       : 'bg-[#141B29] border-[#1E293B] hover:bg-[#1A2335] text-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs truncate max-w-[420px] text-white">
+                    <span className="font-bold text-xs truncate max-w-[220px] text-white">
                       {s.title || s.filename}
                     </span>
-                    <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1 flex-shrink-0">
-                      <Clock className="w-3 h-3 text-slate-500" />
-                      <span>{s.date ? new Date(s.date).toLocaleDateString('vi-VN') : 'Mới'}</span>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      {s.date ? new Date(s.date).toLocaleDateString('vi-VN') : ''}
                     </span>
                   </div>
 
@@ -665,26 +707,101 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
                       Hook: "{s.hook}"
                     </div>
                   )}
-
-                  {s.painpoint && (
-                    <div className="text-[10px] text-slate-400 truncate">
-                      💡 Pain point: {s.painpoint}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
 
-            {selectedHermesId && (
-              <div className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg flex items-center gap-2">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                <span className="truncate">Đang đồng bộ file: {selectedHermesId}</span>
+            {/* Hermes Master Directive Inspector Card */}
+            {hermesDirective && (
+              <div className="bg-[#121824] rounded-xl p-3 border border-amber-500/40 flex flex-col gap-2.5 shadow-inner">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+                    <Zap className="w-4 h-4 text-amber-400" />
+                    <span>Chỉ thị đạo diễn của Hermes Agent</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                    100% NATIVE SOT
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="bg-[#0B0F19] p-2 rounded-lg border border-[#1E293B]">
+                    <span className="text-[10px] text-slate-400 block font-semibold">🎬 Tiêu đề video (Hermes Title):</span>
+                    <span className="font-bold text-white text-xs leading-snug">{hermesDirective.title}</span>
+                  </div>
+
+                  <div className="bg-[#0B0F19] p-2 rounded-lg border border-[#1E293B]">
+                    <span className="text-[10px] text-slate-400 block font-semibold">⏰ Khung giờ vàng đăng:</span>
+                    <span className="font-bold text-amber-300 text-xs">{hermesDirective.goldenHour}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="bg-[#0B0F19] p-1.5 rounded-lg border border-[#1E293B] text-center">
+                    <span className="text-[9px] text-slate-400 block">Ngân sách rủi ro:</span>
+                    <span className="font-bold text-emerald-400 font-mono">${hermesDirective.riskBudget}</span>
+                  </div>
+                  <div className="bg-[#0B0F19] p-1.5 rounded-lg border border-[#1E293B] text-center">
+                    <span className="text-[9px] text-slate-400 block">Khoảng cách SL:</span>
+                    <span className="font-bold text-sky-400 font-mono">{hermesDirective.slPips} pips</span>
+                  </div>
+                  <div className="bg-[#0B0F19] p-1.5 rounded-lg border border-[#1E293B] text-center">
+                    <span className="text-[9px] text-slate-400 block">Khối lượng lệnh:</span>
+                    <span className="font-bold text-amber-400 font-mono">${hermesDirective.lotSize}/pip</span>
+                  </div>
+                </div>
+
+                {hermesDirective.painpoint && (
+                  <div className="text-[11px] text-slate-300 bg-[#0B0F19] p-2 rounded-lg border border-[#1E293B]">
+                    <span className="text-amber-400 font-bold">💡 Nỗi đau khán giả thật: </span>
+                    <span>"{hermesDirective.painpoint}"</span>
+                  </div>
+                )}
+
+                {/* Toggle Outline Preview */}
+                {hermesDirective.outline.length > 0 && (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setShowOutlinePreview(!showOutlinePreview)}
+                      className="text-[11px] text-sky-400 hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      <ListOrdered className="w-3.5 h-3.5" />
+                      <span>{showOutlinePreview ? 'Ẩn Dàn ý 8 phần của Hermes' : 'Xem Dàn ý 8 phần của Hermes (Timeline Cues)'}</span>
+                    </button>
+
+                    {showOutlinePreview && (
+                      <div className="mt-1.5 bg-[#080B12] rounded-lg p-2 border border-[#1E293B] max-h-36 overflow-y-auto text-[11px]">
+                        <table className="w-full text-left">
+                          <thead>
+                            <tr className="text-slate-500 border-b border-[#1E293B] pb-1">
+                              <th className="py-0.5">#</th>
+                              <th>Mốc Giây</th>
+                              <th>Ý Chính</th>
+                              <th>Minh Họa</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#1E293B]/50">
+                            {hermesDirective.outline.map((o) => (
+                              <tr key={o.step} className="text-slate-300">
+                                <td className="py-1 font-bold text-amber-400">{o.step}</td>
+                                <td className="font-mono text-sky-300">{o.timestamp}</td>
+                                <td>{o.mainIdea}</td>
+                                <td className="text-slate-400 truncate max-w-[180px]">{o.chartNeed}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
 
-        {/* TAB 2: Manual Paste */}
+        {/* TAB 2: Manual Paste (Gemini AI) */}
         {activeTab === 'manual' && (
           <div className="flex flex-col gap-2.5 animate-in fade-in duration-150">
             {/* 1-Click Sample Presets */}
@@ -721,79 +838,33 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
               placeholder="Dán toàn bộ file brief từ Google Drive hoặc văn bản kịch bản vào đây..."
               className="w-full bg-[#141B29] border border-[#1E293B] rounded-xl p-3 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-mono transition resize-none"
             />
+
+            {/* Gemini AI Action Trigger Button */}
+            <button
+              type="button"
+              onClick={() => handleAnalyzeWithGemini()}
+              disabled={isLoadingAI || !briefText.trim()}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoadingAI ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Đang Phân Tích Với Google Gemini AI...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                  <span>Phân Tích Bằng AI (Tự Động Sinh Setup Nến Mới Khác Biệt)</span>
+                </>
+              )}
+            </button>
           </div>
         )}
 
-        {/* Gemini AI Action Trigger Button */}
-        <button
-          type="button"
-          onClick={() => handleAnalyzeWithGemini()}
-          disabled={isLoadingAI || !briefText.trim()}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoadingAI ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin text-white" />
-              <span>Đang Phân Tích Với Google Gemini AI...</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
-              <span>Phân Tích Bằng AI (Tự Động Sinh Setup Nến Mới Khác Biệt)</span>
-            </>
-          )}
-        </button>
-
-        {/* AI Senior Trader Breakdown Card */}
-        {aiResult && (
-          <div className="bg-[#141B28] rounded-xl p-3 border border-indigo-500/40 flex flex-col gap-2 shadow-inner animate-in fade-in duration-200">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-indigo-400 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Chiến thuật phát hiện: {aiResult.strategy}</span>
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                {aiResult.provider || 'AI Engine'}
-              </span>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed italic bg-[#0D121F] p-2 rounded-lg border border-[#1E293B]">
-              "{aiResult.seniorTraderRationale}"
-            </p>
-          </div>
-        )}
-
-        {/* Setup Type Selector Chips */}
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
-            <span>Chiến thuật nến áp dụng:</span>
-            <span className="text-[10px] font-mono text-amber-400">5 Setup Chiến Thuật Khác Biệt</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {setupOptions.map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => {
-                  setSelectedSetup(opt.id);
-                  setAiResult(null); // Clear manual override of candle generation
-                }}
-                className={`py-2 px-2.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all text-left ${
-                  selectedSetup === opt.id
-                    ? 'bg-indigo-600/40 border-indigo-500 text-white shadow-md shadow-indigo-600/20'
-                    : 'bg-[#141B29] border-[#1E293B] text-slate-400 hover:text-white hover:bg-[#1A2335]'
-                }`}
-              >
-                <opt.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="truncate">{opt.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* AI-Cut Preview */}
-        <div className="bg-[#141B28] rounded-xl p-3.5 border border-indigo-500/40 flex flex-col gap-2.5 shadow-inner">
+        {/* Hook Cut Preview (Common to both modes) */}
+        <div className="bg-[#141B28] rounded-xl p-3.5 border border-amber-500/40 flex flex-col gap-2.5 shadow-inner">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-indigo-400 flex items-center gap-1.5 uppercase tracking-wide">
+            <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5 uppercase tracking-wide">
               <Scissors className="w-3.5 h-3.5" />
               <span>Hook Cắt Gọn Tối Ưu Cho Video 9:16:</span>
             </span>
@@ -812,7 +883,7 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
                 type="text"
                 value={parsedHeadline}
                 onChange={(e) => setParsedHeadline(e.target.value)}
-                className="w-full bg-[#0D121F] border border-[#1E293B] rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-indigo-500 uppercase"
+                className="w-full bg-[#0D121F] border border-[#1E293B] rounded-lg px-2.5 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-amber-500 uppercase font-mono"
               />
             </div>
 
@@ -824,7 +895,7 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
                 type="text"
                 value={parsedSubline}
                 onChange={(e) => setParsedSubline(e.target.value)}
-                className="w-full bg-[#0D121F] border border-[#1E293B] rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-[#0D121F] border border-[#1E293B] rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-amber-500"
               />
             </div>
           </div>
@@ -833,10 +904,10 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
         {/* Action Button */}
         <button
           onClick={handleApply}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition active:scale-[0.98]"
+          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 transition active:scale-[0.98]"
         >
-          <Wand2 className="w-4 h-4" />
-          <span>Áp Dụng Vào Canvas & Sinh Video Ngay (1-Click)</span>
+          <Zap className="w-4 h-4 text-black fill-current" />
+          <span>Áp Dụng Chỉ Thị Của Hermes Vào Canvas & Sinh Video Ngay (1-Click)</span>
         </button>
       </div>
 
