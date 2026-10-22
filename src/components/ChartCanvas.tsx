@@ -17,6 +17,8 @@ export const ChartCanvas: React.FC = () => {
     currentTime,
     duration,
     revealMode,
+    headlineText,
+    sublineText,
     activeWorkspaceTab,
     setActiveWorkspaceTab,
   } = useChartStore();
@@ -164,8 +166,9 @@ export const ChartCanvas: React.FC = () => {
     ctx.fillText(`${settings.symbol || 'XAUUSD'} · ${settings.timeframe || 'M15'}`, 24, 42);
 
     // 3b. High-Impact Video Hook Banner (Custom English text for Shorts/TikTok)
-    if (settings.bannerHook) {
-      const bannerText = settings.bannerHook.toUpperCase();
+    const effectiveBanner = headlineText || settings.bannerHook;
+    if (effectiveBanner) {
+      const bannerText = effectiveBanner.toUpperCase();
       const fontSize = settings.bannerFontSize || 12;
       ctx.font = `900 ${fontSize}px "${activeFont}", sans-serif`;
       
