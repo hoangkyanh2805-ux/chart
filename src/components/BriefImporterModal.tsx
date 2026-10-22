@@ -560,9 +560,12 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
   };
 
   const handleApply = () => {
-    // 1. Set text
+    // 1. Set text & badges
     setHeadlineText(parsedHeadline);
     setSublineText(parsedSubline);
+    if (hermesDirective && hermesDirective.badges) {
+      useChartStore.getState().setBadges(hermesDirective.badges);
+    }
     useChartStore.setState({ duration: 12 });
 
     clearAllCandles();

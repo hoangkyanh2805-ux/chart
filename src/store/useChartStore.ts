@@ -19,6 +19,7 @@ interface ChartState {
   stageTheme: 'white' | 'dark';
   headlineText: string;
   sublineText: string;
+  badges: [string, string, string];
   
   // Timeline State
   currentTime: number; // in seconds
@@ -31,6 +32,7 @@ interface ChartState {
   setStageTheme: (theme: 'white' | 'dark') => void;
   setHeadlineText: (text: string) => void;
   setSublineText: (text: string) => void;
+  setBadges: (badges: [string, string, string]) => void;
 
   setBuilderMode: (mode: 'single' | 'group' | 'zigzag') => void;
   setActiveWorkspaceTab: (tab: 'canvas' | 'timeline') => void;
@@ -118,6 +120,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
   stageTheme: 'white',
   headlineText: 'YOU STOP WATCHING THE SWEEP',
   sublineText: 'You start watching what happens after it',
+  badges: ['1. LOSS $30', '2. ENTRY SL 20p', '3. SIZE $1.5'],
   currentTime: 26.26,
   duration: 52.26,
   isPlaying: false,
@@ -127,6 +130,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
   setStageTheme: (theme) => set({ stageTheme: theme }),
   setHeadlineText: (text) => set({ headlineText: text }),
   setSublineText: (text) => set({ sublineText: text }),
+  setBadges: (badges) => set({ badges }),
 
   setBuilderMode: (mode) => set({ builderMode: mode }),
   setActiveWorkspaceTab: (tab) => set({ activeWorkspaceTab: tab }),

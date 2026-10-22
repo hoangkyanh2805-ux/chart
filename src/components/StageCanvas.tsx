@@ -36,6 +36,7 @@ export const StageCanvas: React.FC = () => {
     settings,
     candles,
     overlays,
+    badges,
   } = useChartStore();
 
   const isWhite = stageTheme === 'white';
@@ -331,10 +332,11 @@ export const StageCanvas: React.FC = () => {
       const availWidth = width - 40;
       const badgeW = Math.floor(availWidth / 3);
 
+      const currentBadges = badges || ['1. LOSS $30', '2. ENTRY SL 20p', '3. SIZE $1.5'];
       const steps = [
-        { label: '1. LOSS $30', col: '#EF4444', active: progress >= 0.1 },
-        { label: '2. ENTRY SL', col: '#0284C7', active: progress >= 0.4 },
-        { label: '3. SIZE $1.5', col: '#10B981', active: progress >= 0.7 },
+        { label: currentBadges[0] || '1. LOSS $30', col: '#EF4444', active: progress >= 0.1 },
+        { label: currentBadges[1] || '2. ENTRY SL', col: '#0284C7', active: progress >= 0.4 },
+        { label: currentBadges[2] || '3. SIZE $1.5', col: '#10B981', active: progress >= 0.7 },
       ];
 
       steps.forEach((s, idx) => {
@@ -434,7 +436,7 @@ export const StageCanvas: React.FC = () => {
       }
     }
 
-  }, [stageTheme, headlineText, sublineText, currentTime, duration, settings, candles, overlays]);
+  }, [stageTheme, headlineText, sublineText, currentTime, duration, settings, candles, overlays, badges]);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center p-3 select-none overflow-hidden">
