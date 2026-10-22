@@ -86,12 +86,13 @@ OUTPUT FORMAT: Return raw JSON matching this schema:
 
     if (apiKey) {
       try {
-        // Call Google Gemini API (gemini-1.5-flash / gemini-2.0-flash)
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // Call Google Gemini API (gemini-flash-lite-latest / gemini-2.5-flash-lite)
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
 
         const geminiRes = await fetch(geminiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(12000),
           body: JSON.stringify({
             contents: [
               {
@@ -113,8 +114,11 @@ OUTPUT FORMAT: Return raw JSON matching this schema:
           const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
           if (rawText) {
             const parsed = JSON.parse(rawText) as SeniorTraderAnalysisResponse;
-            return NextResponse.json({ ...parsed, provider: 'Google Gemini 1.5' });
+            return NextResponse.json({ ...parsed, provider: 'Google Gemini 2.5 Flash' });
           }
+        } else {
+          const errText = await geminiRes.text();
+          console.warn('Gemini API returned error status:', geminiRes.status, errText);
         }
       } catch (err: any) {
         console.warn('Gemini API call failed, falling back to local Senior Trader engine:', err.message);
