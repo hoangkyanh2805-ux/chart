@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:mutation": "powershell -ExecutionPolicy Bypass -File ./scripts/run-mutation-test.ps1",
+    "sync:knowledge": "node scripts/sync_azzam_knowledge.js",
     "verify:goal": "node scripts/verify_goal.js"
   },
   "dependencies": {

@@ -17,6 +17,7 @@ This skill embeds the complete operational standard of **Hermes Agent** for the 
 - Applying new candle patterns and overlays to the ChartAnimator Stage.
 
 ## Core Reference Files
+- Master Live Courses Knowledge: [INDEX.md](file:///g:/Other%20computers/My%20Computer/Project/chart/knowledge/azzam_courses/INDEX.md) (11 Live Courses synced from LearnHouse API `learn.azzamedu.com`)
 - Master Scripts: `C:\Users\Admin\youtube\video_scripts\`
 - Engine Logic: [hermesEngine.ts](file:///g:/Other%20computers/My%20Computer/Project/chart/src/utils/hermesEngine.ts)
 - Chat Copilot: [HermesChatModal.tsx](file:///g:/Other%20computers/My%20Computer/Project/chart/src/components/HermesChatModal.tsx)
