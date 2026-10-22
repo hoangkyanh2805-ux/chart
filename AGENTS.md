@@ -47,3 +47,15 @@ Trong dự án ChartAnimator, quy trình AI được chia thành các vai trò c
     3. **Tuân thủ chính sách (Finance Policy Map & 8 NEVERs)**: Bắt buộc nhãn `ILLUSTRATION / NOT FINANCIAL ADVICE`, không hứa hẹn lợi nhuận, không hô tín hiệu (signal), luôn đặt Risk Budget ($30) trước Entry.
     4. **Xuất video đa nền tảng**: Thẩm định độ phân giải và an toàn bố cục (Safe Zones) cho 9:16 (Shorts/TikTok/Reels), 16:9 (YouTube Landscape) và 1:1 (Social Feed).
   - Báo cáo kiểm định lưu vào [livrables/audit_report_strict_video_qa.md](file:///g:/Other%20computers/My%20Computer/Project/chart/livrables).
+
+---
+
+## 5. Hermes Native Director Agent (Content & Trading Copilot)
+- **Nhiệm vụ:**
+  - Tổng Đạo Diễn Nội Dung & Huấn Luyện Viên Tâm Lý Giao Dịch cho kênh `@azzammastertradinggold`.
+  - Quản trị kho 20 kịch bản thực chiến tại `C:\Users\Admin\youtube\video_scripts\`.
+  - Nắm vững Master Database về nỗi đau khán giả (PP-0023, PP-0039, cái bẫy săn PDF 44 Trading Powers).
+  - Trích xuất và thi hành công thức toán học Risk-First ($10 / $30 Budget, 20 pips SL, 0.05 lot, R:R 1:3.5).
+  - Sinh setup nến và overlay chuẩn xác (FVG 50% C.E., BSL Liquidity Sweep, Break & Retest, Supply Zone) trực tiếp lên Canvas đồ họa.
+  - Profile Agent cấu hình tại [`.agents/agents/hermes/agent.md`](file:///g:/Other%20computers/My%20Computer/Project/chart/.agents/agents/hermes/agent.md) và Skill tại [`.agents/skills/hermes-director/SKILL.md`](file:///g:/Other%20computers/My%20Computer/Project/chart/.agents/skills/hermes-director/SKILL.md).
+
