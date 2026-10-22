@@ -15,7 +15,7 @@ import { Sparkles, BarChart2, Layout, Zap } from 'lucide-react';
 
 export default function Home() {
   const { activeTool, stageTheme, setStageTheme, setIsHermesChatOpen } = useChartStore();
-  const [viewMode, setViewMode] = useState<'stage' | 'chart'>('stage');
+  const [viewMode, setViewMode] = useState<'stage' | 'chart'>('chart');
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
 
   return (
