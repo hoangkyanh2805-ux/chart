@@ -3,15 +3,16 @@
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { AspectRatio } from '../types/chart';
-import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio, Key } from 'lucide-react';
+import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio, Key, Zap } from 'lucide-react';
 import { ExportModal } from './ExportModal';
 import { TemplateModal } from './TemplateModal';
 import { AzzamOpsModal } from './AzzamOpsModal';
 import { ApiKeyModal } from './ApiKeyModal';
+import { HermesChatModal } from './HermesChatModal';
 import { ChartTemplate } from '../data/templates';
 
 export const Header: React.FC = () => {
-  const { settings, updateSettings } = useChartStore();
+  const { settings, updateSettings, isHermesChatOpen, setIsHermesChatOpen } = useChartStore();
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState<boolean>(false);
   const [isAzzamOpsOpen, setIsAzzamOpsOpen] = useState<boolean>(false);
@@ -55,8 +56,20 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Center: Azzam Ops, Template Library button & Aspect Ratio Switcher */}
+        {/* Center: Hermes Copilot Chat, Azzam Ops & Templates */}
         <div className="flex items-center gap-2.5">
+          {/* Hermes Agent Chat Trigger Button */}
+          <button
+            onClick={() => setIsHermesChatOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#17140B] hover:bg-[#261E0F] border border-amber-500/50 hover:border-amber-400 text-amber-300 hover:text-white rounded-lg text-xs font-bold transition shadow-sm group"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>Chat Với Hermes</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-extrabold border border-amber-500/30">
+              ONLINE
+            </span>
+          </button>
+
           {/* Azzam Ops Direct Intelligence Button */}
           <button
             onClick={() => setIsAzzamOpsOpen(true)}
@@ -174,6 +187,9 @@ export const Header: React.FC = () => {
 
       {/* Gemini API Key Management Modal */}
       <ApiKeyModal isOpen={isApiKeyModalOpen} onClose={() => setIsApiKeyModalOpen(false)} />
+
+      {/* Hermes Agent Interactive Chat Modal */}
+      <HermesChatModal isOpen={isHermesChatOpen} onClose={() => setIsHermesChatOpen(false)} />
     </>
   );
 };

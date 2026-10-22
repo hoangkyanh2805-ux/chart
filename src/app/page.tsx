@@ -10,10 +10,10 @@ import { StageCanvas } from '../components/StageCanvas';
 import { ChartCanvas } from '../components/ChartCanvas';
 import { NleTimeline } from '../components/NleTimeline';
 import { ExportModal } from '../components/ExportModal';
-import { Sparkles, BarChart2, Layout } from 'lucide-react';
+import { Sparkles, BarChart2, Layout, Zap } from 'lucide-react';
 
 export default function Home() {
-  const { activeTool, stageTheme, setStageTheme } = useChartStore();
+  const { activeTool, stageTheme, setStageTheme, setIsHermesChatOpen } = useChartStore();
   const [viewMode, setViewMode] = useState<'stage' | 'chart'>('stage');
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
 
@@ -86,6 +86,19 @@ export default function Home() {
 
       {/* Bottom Multi-Track NLE Timeline Scrubber */}
       <NleTimeline onOpenExport={() => setIsExportModalOpen(true)} />
+
+      {/* Floating Hermes Copilot Trigger Pill */}
+      <button
+        onClick={() => setIsHermesChatOpen(true)}
+        className="fixed bottom-24 right-6 z-40 px-3.5 py-2 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-black font-extrabold text-xs rounded-full shadow-2xl shadow-amber-500/30 flex items-center gap-2 border border-amber-300 transition-all hover:scale-105 active:scale-95"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+        </span>
+        <Zap className="w-3.5 h-3.5 fill-current" />
+        <span>Chat Với Hermes</span>
+      </button>
 
       {/* Export Video Modal */}
       <ExportModal

@@ -20,6 +20,7 @@ interface ChartState {
   headlineText: string;
   sublineText: string;
   badges: [string, string, string];
+  isHermesChatOpen: boolean;
   
   // Timeline State
   currentTime: number; // in seconds
@@ -33,6 +34,7 @@ interface ChartState {
   setHeadlineText: (text: string) => void;
   setSublineText: (text: string) => void;
   setBadges: (badges: [string, string, string]) => void;
+  setIsHermesChatOpen: (open: boolean) => void;
 
   setBuilderMode: (mode: 'single' | 'group' | 'zigzag') => void;
   setActiveWorkspaceTab: (tab: 'canvas' | 'timeline') => void;
@@ -121,6 +123,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
   headlineText: 'YOU STOP WATCHING THE SWEEP',
   sublineText: 'You start watching what happens after it',
   badges: ['1. LOSS $30', '2. ENTRY SL 20p', '3. SIZE $1.5'],
+  isHermesChatOpen: false,
   currentTime: 26.26,
   duration: 52.26,
   isPlaying: false,
@@ -131,6 +134,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
   setHeadlineText: (text) => set({ headlineText: text }),
   setSublineText: (text) => set({ sublineText: text }),
   setBadges: (badges) => set({ badges }),
+  setIsHermesChatOpen: (open) => set({ isHermesChatOpen: open }),
 
   setBuilderMode: (mode) => set({ builderMode: mode }),
   setActiveWorkspaceTab: (tab) => set({ activeWorkspaceTab: tab }),
