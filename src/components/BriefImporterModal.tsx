@@ -15,6 +15,10 @@ import {
   TrendingDown,
   Activity,
   Flame,
+  Key,
+  BrainCircuit,
+  Loader2,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface BriefImporterModalProps {
@@ -35,7 +39,19 @@ interface ParsedBrief {
   rrRatio: number;
 }
 
-// Intelligent extractor and setup detector
+interface SeniorTraderAIResult {
+  headline: string;
+  subline: string;
+  strategy: string;
+  seniorTraderRationale: string;
+  symbol: string;
+  basePrice: number;
+  candles: Candle[];
+  overlays: Overlay[];
+  provider?: string;
+}
+
+// Client-side quick parser
 function parseBriefText(text: string): ParsedBrief {
   let headline = 'THE STOP LOSS CAME FIRST';
   let subline = 'The entry came second. That order is the whole video.';
@@ -46,7 +62,6 @@ function parseBriefText(text: string): ParsedBrief {
   let slPips = 20;
   let rrRatio = 3.5;
 
-  // 1. Detect Strategy & Pattern Type
   if (/sweep|liquidity|bsl|ssl|purge|stop watching|fakeout|trap/i.test(text)) {
     setupType = 'liquidity-sweep';
     headline = 'YOU STOP WATCHING THE SWEEP';
@@ -69,7 +84,6 @@ function parseBriefText(text: string): ParsedBrief {
     subline = 'The entry came second. That order is the whole video.';
   }
 
-  // 2. Custom Hook Extraction if present
   const hookShortMatch = text.match(/Hook(?:\s*Short)?(?:\s*\([^)]*\))?:\s*["“]?([^"”\r\n]+)["”]?/i);
   if (hookShortMatch && hookShortMatch[1]) {
     const raw = hookShortMatch[1].trim();
@@ -90,19 +104,16 @@ function parseBriefText(text: string): ParsedBrief {
     }
   }
 
-  // Auto-cut headline: strictly cap at 6-7 words for 9:16 mobile canvas!
   const headWords = headline.split(/\s+/).filter(Boolean);
   if (headWords.length > 7) {
     headline = headWords.slice(0, 6).join(' ');
   }
 
-  // Auto-cut subline: strictly cap at 12 words
   const subWords = subline.split(/\s+/).filter(Boolean);
   if (subWords.length > 12) {
     subline = subWords.slice(0, 10).join(' ') + '...';
   }
 
-  // 3. Extract technical numbers
   const budgetMatch = text.match(/\$(\d+)\s*(?:budget|risk|loss)/i) || text.match(/(?:budget|risk|loss)[^\d]*\$?(\d+)/i);
   if (budgetMatch) riskBudget = parseInt(budgetMatch[1], 10);
 
@@ -133,14 +144,13 @@ function generateSetupData(type: SetupType, baseP: number) {
   let overlays: Overlay[] = [];
 
   if (type === 'liquidity-sweep') {
-    // ⚡ Liquidity Sweep & Rejection Setup
     candles = [
       { id: 'c-1', index: 0, open: baseP, high: baseP + 6.0, low: baseP - 1.0, close: baseP + 5.0 },
-      { id: 'c-2', index: 1, open: baseP + 5.0, high: baseP + 14.0, low: baseP + 4.0, close: baseP + 13.0 }, // Swing High Peak
-      { id: 'c-3', index: 2, open: baseP + 13.0, high: baseP + 14.5, low: baseP + 9.0, close: baseP + 10.0 }, // Indecision
-      { id: 'c-4', index: 3, open: baseP + 10.0, high: baseP + 21.0, low: baseP + 6.0, close: baseP + 7.0 }, // SWEEP CANDLE! Pierces peak, rejects down
-      { id: 'c-5', index: 4, open: baseP + 7.0, high: baseP + 7.5, low: baseP - 4.0, close: baseP - 3.0 }, // Displacement selloff
-      { id: 'c-6', index: 5, open: baseP - 3.0, high: baseP - 2.5, low: baseP - 12.0, close: baseP - 10.0 }, // Expansion to target
+      { id: 'c-2', index: 1, open: baseP + 5.0, high: baseP + 14.0, low: baseP + 4.0, close: baseP + 13.0 },
+      { id: 'c-3', index: 2, open: baseP + 13.0, high: baseP + 14.5, low: baseP + 9.0, close: baseP + 10.0 },
+      { id: 'c-4', index: 3, open: baseP + 10.0, high: baseP + 21.0, low: baseP + 6.0, close: baseP + 7.0 },
+      { id: 'c-5', index: 4, open: baseP + 7.0, high: baseP + 7.5, low: baseP - 4.0, close: baseP - 3.0 },
+      { id: 'c-6', index: 5, open: baseP - 3.0, high: baseP - 2.5, low: baseP - 12.0, close: baseP - 10.0 },
     ];
 
     overlays = [
@@ -166,14 +176,13 @@ function generateSetupData(type: SetupType, baseP: number) {
       },
     ];
   } else if (type === 'fvg') {
-    // 🎯 Fair Value Gap Retest Setup
     candles = [
-      { id: 'c-1', index: 0, open: baseP - 5.0, high: baseP, low: baseP - 6.0, close: baseP - 1.0 }, // Candle 1 High = baseP
-      { id: 'c-2', index: 1, open: baseP - 1.0, high: baseP + 15.0, low: baseP - 1.5, close: baseP + 14.0 }, // Imbalance impulse
-      { id: 'c-3', index: 2, open: baseP + 14.0, high: baseP + 19.0, low: baseP + 9.0, close: baseP + 18.0 }, // Candle 3 Low = baseP + 9.0 (FVG: baseP to baseP + 9.0)
-      { id: 'c-4', index: 3, open: baseP + 18.0, high: baseP + 18.5, low: baseP + 5.0, close: baseP + 6.0 }, // Retest into FVG
-      { id: 'c-5', index: 4, open: baseP + 6.0, high: baseP + 8.0, low: baseP + 4.5, close: baseP + 7.5 }, // 50% CE Reversal bounce
-      { id: 'c-6', index: 5, open: baseP + 7.5, high: baseP + 24.0, low: baseP + 7.0, close: baseP + 23.0 }, // Expansion
+      { id: 'c-1', index: 0, open: baseP - 5.0, high: baseP, low: baseP - 6.0, close: baseP - 1.0 },
+      { id: 'c-2', index: 1, open: baseP - 1.0, high: baseP + 15.0, low: baseP - 1.5, close: baseP + 14.0 },
+      { id: 'c-3', index: 2, open: baseP + 14.0, high: baseP + 19.0, low: baseP + 9.0, close: baseP + 18.0 },
+      { id: 'c-4', index: 3, open: baseP + 18.0, high: baseP + 18.5, low: baseP + 5.0, close: baseP + 6.0 },
+      { id: 'c-5', index: 4, open: baseP + 6.0, high: baseP + 8.0, low: baseP + 4.5, close: baseP + 7.5 },
+      { id: 'c-6', index: 5, open: baseP + 7.5, high: baseP + 24.0, low: baseP + 7.0, close: baseP + 23.0 },
     ];
 
     overlays = [
@@ -199,15 +208,14 @@ function generateSetupData(type: SetupType, baseP: number) {
       },
     ];
   } else if (type === 'break-retest') {
-    // 💥 Break & Retest Setup
     const resLevel = baseP + 4.0;
     candles = [
-      { id: 'c-1', index: 0, open: baseP - 2.0, high: resLevel, low: baseP - 3.0, close: resLevel - 1.0 }, // Test resistance
-      { id: 'c-2', index: 1, open: resLevel - 1.0, high: resLevel + 0.5, low: baseP - 2.0, close: baseP - 1.0 }, // Pullback
-      { id: 'c-3', index: 2, open: baseP - 1.0, high: resLevel + 11.0, low: baseP - 1.5, close: resLevel + 10.0 }, // Breakout bar!
-      { id: 'c-4', index: 3, open: resLevel + 10.0, high: resLevel + 10.5, low: resLevel + 0.5, close: resLevel + 1.5 }, // Retest broken level
-      { id: 'c-5', index: 4, open: resLevel + 1.5, high: resLevel + 6.0, low: resLevel, close: resLevel + 5.0 }, // Confirmation hammer
-      { id: 'c-6', index: 5, open: resLevel + 5.0, high: resLevel + 16.0, low: resLevel + 4.5, close: resLevel + 15.0 }, // Continuation rally
+      { id: 'c-1', index: 0, open: baseP - 2.0, high: resLevel, low: baseP - 3.0, close: resLevel - 1.0 },
+      { id: 'c-2', index: 1, open: resLevel - 1.0, high: resLevel + 0.5, low: baseP - 2.0, close: baseP - 1.0 },
+      { id: 'c-3', index: 2, open: baseP - 1.0, high: resLevel + 11.0, low: baseP - 1.5, close: resLevel + 10.0 },
+      { id: 'c-4', index: 3, open: resLevel + 10.0, high: resLevel + 10.5, low: resLevel + 0.5, close: resLevel + 1.5 },
+      { id: 'c-5', index: 4, open: resLevel + 1.5, high: resLevel + 6.0, low: resLevel, close: resLevel + 5.0 },
+      { id: 'c-6', index: 5, open: resLevel + 5.0, high: resLevel + 16.0, low: resLevel + 4.5, close: resLevel + 15.0 },
     ];
 
     overlays = [
@@ -233,15 +241,14 @@ function generateSetupData(type: SetupType, baseP: number) {
       },
     ];
   } else if (type === 'bearish-supply') {
-    // 📉 Bearish Supply Zone Setup
     const supplyLevel = baseP + 12.0;
     candles = [
       { id: 'c-1', index: 0, open: baseP + 8.0, high: supplyLevel - 1.0, low: baseP + 6.0, close: supplyLevel - 2.0 },
-      { id: 'c-2', index: 1, open: supplyLevel - 2.0, high: supplyLevel + 2.0, low: baseP + 7.0, close: baseP + 8.0 }, // Pinbar rejection
-      { id: 'c-3', index: 2, open: baseP + 8.0, high: baseP + 8.5, low: baseP - 3.0, close: baseP - 2.0 }, // Strong drop
-      { id: 'c-4', index: 3, open: baseP - 2.0, high: baseP + 3.0, low: baseP - 2.5, close: baseP + 2.0 }, // Weak pullback
-      { id: 'c-5', index: 4, open: baseP + 2.0, high: baseP + 2.5, low: baseP - 10.0, close: baseP - 9.0 }, // Breakdown
-      { id: 'c-6', index: 5, open: baseP - 9.0, high: baseP - 8.5, low: baseP - 18.0, close: baseP - 17.0 }, // Target run
+      { id: 'c-2', index: 1, open: supplyLevel - 2.0, high: supplyLevel + 2.0, low: baseP + 7.0, close: baseP + 8.0 },
+      { id: 'c-3', index: 2, open: baseP + 8.0, high: baseP + 8.5, low: baseP - 3.0, close: baseP - 2.0 },
+      { id: 'c-4', index: 3, open: baseP - 2.0, high: baseP + 3.0, low: baseP - 2.5, close: baseP + 2.0 },
+      { id: 'c-5', index: 4, open: baseP + 2.0, high: baseP + 2.5, low: baseP - 10.0, close: baseP - 9.0 },
+      { id: 'c-6', index: 5, open: baseP - 9.0, high: baseP - 8.5, low: baseP - 18.0, close: baseP - 17.0 },
     ];
 
     overlays = [
@@ -257,14 +264,14 @@ function generateSetupData(type: SetupType, baseP: number) {
       },
     ];
   } else {
-    // 🛡️ Default: Risk-First Support Bounce
+    // Risk-First Support Bounce
     candles = [
       { id: 'c-1', index: 0, open: baseP - 8.0, high: baseP + 4.0, low: baseP - 9.0, close: baseP + 2.0 },
       { id: 'c-2', index: 1, open: baseP + 2.0, high: baseP + 3.0, low: baseP - 5.0, close: baseP - 3.5 },
-      { id: 'c-3', index: 2, open: baseP - 3.5, high: baseP + 14.0, low: baseP - 4.0, close: baseP + 12.0 }, // Higher High
-      { id: 'c-4', index: 3, open: baseP + 12.0, high: baseP + 13.0, low: baseP, close: baseP + 1.0 }, // Pullback to support
-      { id: 'c-5', index: 4, open: baseP + 1.0, high: baseP + 8.0, low: baseP - 2.0, close: baseP + 6.5 }, // Rejection trigger
-      { id: 'c-6', index: 5, open: baseP + 6.5, high: baseP + 20.0, low: baseP + 5.5, close: baseP + 18.0 }, // Expansion
+      { id: 'c-3', index: 2, open: baseP - 3.5, high: baseP + 14.0, low: baseP - 4.0, close: baseP + 12.0 },
+      { id: 'c-4', index: 3, open: baseP + 12.0, high: baseP + 13.0, low: baseP, close: baseP + 1.0 },
+      { id: 'c-5', index: 4, open: baseP + 1.0, high: baseP + 8.0, low: baseP - 2.0, close: baseP + 6.5 },
+      { id: 'c-6', index: 5, open: baseP + 6.5, high: baseP + 20.0, low: baseP + 5.5, close: baseP + 18.0 },
     ];
 
     overlays = [
@@ -308,14 +315,85 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
   const [selectedSetup, setSelectedSetup] = useState<SetupType>('risk-first');
   const [basePrice, setBasePrice] = useState<number>(4128.0);
 
-  // Auto-parse on briefText input
+  // Gemini AI Integration States
+  const [customApiKey, setCustomApiKey] = useState<string>('');
+  const [showApiKeySetting, setShowApiKeySetting] = useState<boolean>(false);
+  const [isLoadingAI, setIsLoadingAI] = useState<boolean>(false);
+  const [aiResult, setAiResult] = useState<SeniorTraderAIResult | null>(null);
+
+  // Load saved API key on mount
   useEffect(() => {
-    const res = parseBriefText(briefText);
-    setParsedHeadline(res.headline);
-    setParsedSubline(res.subline);
-    setSelectedSetup(res.setupType);
-    setBasePrice(res.basePrice);
-  }, [briefText]);
+    if (typeof window !== 'undefined') {
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if (savedKey) setCustomApiKey(savedKey);
+    }
+  }, []);
+
+  // Save API key when changed
+  const handleSaveApiKey = (key: string) => {
+    setCustomApiKey(key);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('gemini_api_key', key);
+    }
+  };
+
+  // Quick initial parse
+  useEffect(() => {
+    if (!aiResult) {
+      const res = parseBriefText(briefText);
+      setParsedHeadline(res.headline);
+      setParsedSubline(res.subline);
+      setSelectedSetup(res.setupType);
+      setBasePrice(res.basePrice);
+    }
+  }, [briefText, aiResult]);
+
+  // Call Gemini AI / Senior Trader Brain API
+  const handleAnalyzeWithGemini = async () => {
+    setIsLoadingAI(true);
+    try {
+      const res = await fetch('/api/ai/parse-brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          briefText,
+          customApiKey: customApiKey.trim() || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const data: SeniorTraderAIResult = await res.json();
+      setAiResult(data);
+      setParsedHeadline(data.headline);
+      setParsedSubline(data.subline);
+      setBasePrice(data.basePrice);
+
+      // Map strategy to local setup
+      if (/sweep|liquidity/i.test(data.strategy)) {
+        setSelectedSetup('liquidity-sweep');
+      } else if (/fvg|imbalance/i.test(data.strategy)) {
+        setSelectedSetup('fvg');
+      } else if (/break/i.test(data.strategy)) {
+        setSelectedSetup('break-retest');
+      } else if (/bearish|supply/i.test(data.strategy)) {
+        setSelectedSetup('bearish-supply');
+      } else {
+        setSelectedSetup('risk-first');
+      }
+    } catch (err: any) {
+      console.error('Failed to analyze with Gemini:', err);
+      // Fallback to local heuristic
+      const local = parseBriefText(briefText);
+      setParsedHeadline(local.headline);
+      setParsedSubline(local.subline);
+      setSelectedSetup(local.setupType);
+    } finally {
+      setIsLoadingAI(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -333,12 +411,19 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
     setSublineText(parsedSubline);
     useChartStore.setState({ duration: 12 });
 
-    // 2. Generate setup-specific candles & overlays
-    const { candles: newCandles, overlays: newOverlays } = generateSetupData(selectedSetup, basePrice);
-
     clearAllCandles();
-    newCandles.forEach((c) => addCandle(c));
-    newOverlays.forEach((o) => addOverlay(o));
+
+    // 2. Use AI-generated candles/overlays if available; otherwise use strategy generator
+    if (aiResult && aiResult.candles && aiResult.candles.length > 0) {
+      aiResult.candles.forEach((c) => addCandle(c));
+      if (aiResult.overlays) {
+        aiResult.overlays.forEach((o) => addOverlay(o));
+      }
+    } else {
+      const { candles: newCandles, overlays: newOverlays } = generateSetupData(selectedSetup, basePrice);
+      newCandles.forEach((c) => addCandle(c));
+      newOverlays.forEach((o) => addOverlay(o));
+    }
 
     // 3. Play video immediately
     setCurrentTime(0);
@@ -352,18 +437,18 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-500/30">
-              <FileText className="w-5 h-5" />
+            <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 rounded-xl border border-indigo-500/30">
+              <BrainCircuit className="w-5 h-5 text-indigo-400 animate-pulse" />
             </div>
             <div>
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <span>Trích Xuất Brief & Tự Sinh Setup Nến Khác Biệt</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
-                  AI DYNAMIC
+                <span>Google Gemini AI • Phân Tích Brief & Sinh Setup Nến</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">
+                  SENIOR TRADER
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Brief FVG sinh nến FVG, Brief Sweep sinh nến Quét thanh khoản, không bị trùng setup
+                Tự động trích xuất Hook không tràn màn hình và sinh 6 nến cấu trúc riêng biệt
               </p>
             </div>
           </div>
@@ -378,22 +463,96 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
         {/* Textarea */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
-            <span>Dán nội dung Brief bất kỳ (từ Google Drive hoặc kịch bản):</span>
-            <span className="text-[10px] text-indigo-400 font-mono">Tự nhận diện mô hình & câu Hook</span>
+            <span>Dán nội dung Brief kịch bản (dài đến 1,400 từ từ Drive):</span>
+            <button
+              onClick={() => setShowApiKeySetting(!showApiKeySetting)}
+              className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-mono transition"
+            >
+              <Key className="w-3 h-3" />
+              <span>{customApiKey ? 'Đã cài Gemini API Key' : 'Cài đặt Gemini API Key'}</span>
+            </button>
           </div>
+
+          {/* Optional Gemini API Key Input */}
+          {showApiKeySetting && (
+            <div className="bg-[#141B29] border border-indigo-500/30 rounded-xl p-2.5 flex flex-col gap-1.5 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <span>Google Gemini API Key (Không bắt buộc - mặc định dùng Senior Trader Engine):</span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  placeholder="AIzaSy..."
+                  value={customApiKey}
+                  onChange={(e) => handleSaveApiKey(e.target.value)}
+                  className="flex-1 bg-[#0B0F19] border border-[#1E293B] rounded-lg px-2.5 py-1 text-xs text-slate-200 font-mono focus:outline-none focus:border-indigo-500"
+                />
+                {customApiKey && (
+                  <button
+                    onClick={() => handleSaveApiKey('')}
+                    className="text-[10px] text-rose-400 hover:underline px-2"
+                  >
+                    Xóa
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           <textarea
             rows={4}
             value={briefText}
-            onChange={(e) => setBriefText(e.target.value)}
+            onChange={(e) => {
+              setBriefText(e.target.value);
+              setAiResult(null); // Reset when editing raw text
+            }}
             placeholder="Dán toàn bộ file brief vào đây..."
             className="w-full bg-[#141B29] border border-[#1E293B] rounded-xl p-3 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-mono transition resize-none"
           />
         </div>
 
+        {/* Gemini AI Action Trigger Button */}
+        <button
+          type="button"
+          onClick={handleAnalyzeWithGemini}
+          disabled={isLoadingAI || !briefText.trim()}
+          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoadingAI ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
+              <span>Đang Phân Tích Với Google Gemini AI...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+              <span>Phân Tích Bằng AI (Tự Động Sinh Setup Nến Khác Biệt)</span>
+            </>
+          )}
+        </button>
+
+        {/* AI Senior Trader Breakdown Card */}
+        {aiResult && (
+          <div className="bg-[#141B28] rounded-xl p-3 border border-indigo-500/40 flex flex-col gap-2 shadow-inner animate-in fade-in duration-200">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-indigo-400 flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Chiến thuật: {aiResult.strategy}</span>
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                {aiResult.provider || 'AI Engine'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed italic bg-[#0D121F] p-2 rounded-lg border border-[#1E293B]">
+              "{aiResult.seniorTraderRationale}"
+            </p>
+          </div>
+        )}
+
         {/* Setup Type Selector Chips */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
-            <span>Mô hình nến phát hiện từ Brief (Editor có thể bấm đổi):</span>
+            <span>Chiến thuật nến áp dụng:</span>
             <span className="text-[10px] font-mono text-amber-400">5 Setup Chiến Thuật Khác Biệt</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -401,7 +560,10 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
               <button
                 key={opt.id}
                 type="button"
-                onClick={() => setSelectedSetup(opt.id)}
+                onClick={() => {
+                  setSelectedSetup(opt.id);
+                  setAiResult(null); // Clear manual override of candle generation
+                }}
                 className={`py-2 px-2.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all text-left ${
                   selectedSetup === opt.id
                     ? 'bg-indigo-600/40 border-indigo-500 text-white shadow-md shadow-indigo-600/20'
@@ -422,13 +584,16 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
               <Scissors className="w-3.5 h-3.5" />
               <span>Hook Cắt Gọn Tối Ưu Cho Video 9:16:</span>
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">Tự ngắt câu, không tràn viền</span>
+            <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+              <CheckCircle className="w-3 h-3" />
+              <span>Chuẩn Mobile Safe-Zone</span>
+            </span>
           </div>
 
           <div className="grid grid-cols-1 gap-2">
             <div>
               <span className="text-[10px] font-semibold text-slate-400 block mb-0.5">
-                Headline (Cắt tối đa 6 từ):
+                Headline (Tối đa 6 từ):
               </span>
               <input
                 type="text"
@@ -440,7 +605,7 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
 
             <div>
               <span className="text-[10px] font-semibold text-slate-400 block mb-0.5">
-                Subline (Cắt tối đa 10 từ):
+                Subline (Tối đa 10 từ):
               </span>
               <input
                 type="text"
@@ -455,10 +620,10 @@ Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,
         {/* Action Button */}
         <button
           onClick={handleApply}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition active:scale-[0.98]"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition active:scale-[0.98]"
         >
           <Wand2 className="w-4 h-4" />
-          <span>Sinh Video Setup Khác Biệt & Chạy Ngay (1-Click)</span>
+          <span>Áp Dụng Vào Canvas & Sinh Video Ngay (1-Click)</span>
         </button>
       </div>
     </div>
