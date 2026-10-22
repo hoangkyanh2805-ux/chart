@@ -16,7 +16,18 @@ export const AzzamOpsModal: React.FC<AzzamOpsModalProps> = ({
   onClose,
   onSelectAndExport,
 }) => {
-  const { loadTemplate, updateSettings } = useChartStore();
+  const {
+    loadTemplate,
+    updateSettings,
+    setHeadlineText,
+    setSublineText,
+    setBadges,
+    clearAllCandles,
+    addCandle,
+    addOverlay,
+    setCurrentTime,
+    setIsPlaying,
+  } = useChartStore();
   const [activeTab, setActiveTab] = useState<'all' | 'pain_point' | 'backlog'>('all');
 
   if (!isOpen) return null;
@@ -28,20 +39,34 @@ export const AzzamOpsModal: React.FC<AzzamOpsModalProps> = ({
 
   const handleApplyBrief = (item: AzzamPainPointItem) => {
     loadTemplate(item.recommendedSetup);
+
+    // Synchronize candles & overlays
+    clearAllCandles();
+    item.recommendedSetup.candles.forEach((c) => addCandle(c));
+    item.recommendedSetup.overlays.forEach((o) => addOverlay(o));
+
+    // Update Stage typography & stepper badges
+    setHeadlineText((item.recommendedSetup.bannerHook || item.hookTitle).toUpperCase());
+    setSublineText(item.solutionSummary);
+    setBadges([
+      `1. ${item.type === 'pain_point' ? 'PAIN' : 'BACKLOG'} #${item.rank}`,
+      `2. SCORE ${item.score}`,
+      `3. ${item.category.split('|')[0]?.trim().toUpperCase().slice(0, 10)}`,
+    ]);
+
     updateSettings({
       bannerHook: item.recommendedSetup.bannerHook,
       aspectRatio: item.recommendedSetup.aspectRatio,
     });
+
+    useChartStore.setState({ duration: item.recommendedSetup.duration || 10 });
+    setCurrentTime(0);
+    setIsPlaying(true);
     onClose();
   };
 
   const handleApplyAndExport = (item: AzzamPainPointItem) => {
-    loadTemplate(item.recommendedSetup);
-    updateSettings({
-      bannerHook: item.recommendedSetup.bannerHook,
-      aspectRatio: item.recommendedSetup.aspectRatio,
-    });
-    onClose();
+    handleApplyBrief(item);
     onSelectAndExport();
   };
 

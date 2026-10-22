@@ -117,7 +117,24 @@ function generateHermesLocalReply(userQuery: string): string {
 2. **Cái bẫy săn file PDF (PP-0039):** Người xem liên tục đi tìm cuốn sách tiếp theo (*44 Trading Powers*) để mong tìm chén thánh, thay vì đặt ra một **Predefined Loss Limit**.
 3. **Mất tiền vì đảo ngược thứ tự:** 90% người xem hỏi *"vào lệnh ở đâu?"* nhưng chỉ 20% hỏi *"cắt lỗ ở đâu?"*.
 
-💡 **Khuyến nghị của tôi:** Video tiếp theo nên đánh thẳng vào bài toán: *"Một cuốn PDF không cứu được tài khoản. Một mức lỗ ấn định trước mới làm được."*`;
+💡 **Khuyến nghị từ Hermes:** Đã tạo sẵn setup video giải quyết trực diện nỗi đau lớn nhất này: *"Một cuốn PDF không cứu được bạn. Một mức dừng lỗ ấn định trước mới làm được."*
+
+\`\`\`chart_setup
+{
+  "title": "1 Predefined Loss Limit Keeps New XAUUSD Traders Alive (PP-0023)",
+  "headline": "A PDF WON'T KEEP YOU ALIVE",
+  "subline": "A predefined loss limit will. That is the whole video.",
+  "strategy": "Risk-First Pullback",
+  "basePrice": 4128,
+  "riskBudget": 10,
+  "slPips": 20,
+  "lotSize": "0.05 lot",
+  "rrRatio": 3.5,
+  "badges": ["1. LOSS $10", "2. ENTRY SL 20p", "3. SIZE 0.05L"]
+}
+\`\`\`
+
+Bấm nút **Áp Dụng Lên Canvas** bên dưới để nạp setup giải quyết nỗi đau này lên video ngay!`;
   }
 
   if (/fvg|imbalance|khoảng trống/i.test(query)) {
