@@ -63,10 +63,10 @@ Chart: XAUUSD Higher highs, pullback to support, rejection candle, SL 20 pips ($
       type: 'LONG_SHORT',
       startCandleIndex: 4,
       endCandleIndex: 5,
-      priceStart: 4134.5, // Entry
-      priceEnd: 4148.0,   // TP (+13.5 pts / 1:3.5 RR)
+      priceStart: 4128.0, // Entry at Support ($4,128.00)
+      priceEnd: 4135.0,   // TP (+70 pips / 1:3.5 RR)
       color: '#00F5A0',
-      label: 'Risk Budget: $30 | Size: $1.50/pip',
+      label: 'Risk Budget: $30 | Size: $1.50/pip (1:3.5 RR)',
     });
 
     // 4. Auto-Play Animation

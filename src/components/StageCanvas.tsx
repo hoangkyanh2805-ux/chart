@@ -203,8 +203,9 @@ export const StageCanvas: React.FC = () => {
         const entryX = chartLeft + (entryIdx + 1) * candleSpacing;
         const boxWidth = candleSpacing * 2.5;
 
-        const entryY = toY(4134.5);
-        const tpY = toY(4148.0);
+        // Exact math: Entry at Support $4,128.00 | SL at Swing Low $4,126.00 (20 pips / $30) | TP at $4,135.00 (+70 pips / 1:3.5 RR)
+        const entryY = toY(4128.0);
+        const tpY = toY(4135.0);
         const slY = toY(4126.0);
 
         ctx.save();
@@ -226,16 +227,16 @@ export const StageCanvas: React.FC = () => {
 
         ctx.font = 'bold 9px monospace';
         ctx.fillStyle = isWhite ? '#065F46' : '#6EE7B7';
-        ctx.fillText('TP: $4,148.00 (+1:3.5 RR)', entryX + 6, Math.min(entryY, tpY) + 14);
+        ctx.fillText('TP: $4,135.00 (+1:3.5 RR)', entryX + 6, Math.min(entryY, tpY) + 14);
 
         ctx.fillStyle = isWhite ? '#991B1B' : '#FCA5A5';
-        ctx.fillText('SL: $4,126.00 ($30 Budget)', entryX + 6, Math.max(entryY, slY) - 4);
+        ctx.fillText('SL: $4,126.00 (20 pips · $30)', entryX + 6, Math.max(entryY, slY) - 4);
         ctx.restore();
       }
 
-      // Bottom 3-Step Badges matching Brief
+      // Bottom 3-Step Badges matching Brief (Positioned inside mobile safe zone)
       ctx.save();
-      const badgeY = height - 42;
+      const badgeY = height - 48;
       const badgeW = (width - 80) / 3;
 
       const steps = [
@@ -358,7 +359,7 @@ export const StageCanvas: React.FC = () => {
             : 'bg-[#080C16] border-[#1E293B] shadow-indigo-950/30'
         } ${
           settings.aspectRatio === '9:16'
-            ? 'w-[360px] h-[580px]'
+            ? 'w-[360px] h-[640px]'
             : settings.aspectRatio === '1:1'
             ? 'w-[520px] h-[520px]'
             : 'w-full max-w-[860px] h-[480px]'
