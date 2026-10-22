@@ -21,6 +21,7 @@ import {
   Play,
 } from 'lucide-react';
 import { Candle, Overlay } from '../types/chart';
+import { generateStrategySetup } from '../utils/hermesEngine';
 
 interface ChatMessage {
   id: string;
@@ -154,41 +155,17 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
       setBadges(payload.badges);
     }
 
-    // 2. Generate authentic candles & overlays
+    // 2. Generate authentic strategy-specific candles & overlays
     clearAllCandles();
     const baseP = payload.basePrice || 4128.0;
-
-    const candles: Candle[] = [
-      { id: 'c-1', index: 0, open: baseP - 8.0, high: baseP + 4.0, low: baseP - 9.0, close: baseP + 2.0 },
-      { id: 'c-2', index: 1, open: baseP + 2.0, high: baseP + 3.0, low: baseP - 5.0, close: baseP - 3.5 },
-      { id: 'c-3', index: 2, open: baseP - 3.5, high: baseP + 14.0, low: baseP - 4.0, close: baseP + 12.0 },
-      { id: 'c-4', index: 3, open: baseP + 12.0, high: baseP + 13.0, low: baseP, close: baseP + 1.0 },
-      { id: 'c-5', index: 4, open: baseP + 1.0, high: baseP + 8.0, low: baseP - 2.0, close: baseP + 6.5 },
-      { id: 'c-6', index: 5, open: baseP + 6.5, high: baseP + 20.0, low: baseP + 5.5, close: baseP + 18.0 },
-    ];
-
-    const overlays: Overlay[] = [
-      {
-        id: 'hermes-support',
-        type: 'LIQUIDITY_LINE',
-        startCandleIndex: 1,
-        endCandleIndex: 4,
-        priceStart: baseP,
-        priceEnd: baseP,
-        color: '#38BDF8',
-        label: `Support: $${baseP.toFixed(2)} (SL: ${payload.slPips || 20}p)`,
-      },
-      {
-        id: 'hermes-rr',
-        type: 'LONG_SHORT',
-        startCandleIndex: 4,
-        endCandleIndex: 5,
-        priceStart: baseP,
-        priceEnd: baseP + 7.0,
-        color: '#00F5A0',
-        label: `Budget $${payload.riskBudget} | Size: ${payload.lotSize} | 1:${payload.rrRatio} RR`,
-      },
-    ];
+    const { candles, overlays } = generateStrategySetup(
+      payload.strategy,
+      baseP,
+      payload.riskBudget || 10,
+      payload.slPips || 20,
+      payload.lotSize || '0.05 lot',
+      payload.rrRatio || 3.5
+    );
 
     candles.forEach((c) => addCandle(c));
     overlays.forEach((o) => addOverlay(o));
@@ -199,7 +176,10 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
     setIsPlaying(true);
 
     setAppliedNotice(`✅ Đã nạp thành công setup "${payload.title}" lên Canvas!`);
-    setTimeout(() => setAppliedNotice(''), 4000);
+    setTimeout(() => setAppliedNotice(''), 2000);
+
+    // Auto-close modal so user immediately sees the animated canvas
+    onClose();
   };
 
   return (

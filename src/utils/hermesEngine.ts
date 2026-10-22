@@ -19,6 +19,208 @@ export interface HermesDirectorDirective {
   overlays: Overlay[];
 }
 
+export function generateStrategySetup(
+  strategy: string,
+  basePrice: number = 4128.0,
+  riskBudget: number = 10,
+  slPips: number = 20,
+  lotSize: string = '0.05 lot',
+  rrRatio: number = 3.5
+): { candles: Candle[]; overlays: Overlay[] } {
+  let candles: Candle[] = [];
+  let overlays: Overlay[] = [];
+
+  const stratLower = strategy.toLowerCase();
+
+  if (stratLower.includes('sweep') || stratLower.includes('liquidity') || stratLower.includes('quét')) {
+    // ⚡ Liquidity Sweep Setup
+    candles = [
+      { id: 'c-1', index: 0, open: basePrice, high: basePrice + 6.0, low: basePrice - 1.0, close: basePrice + 5.0 },
+      { id: 'c-2', index: 1, open: basePrice + 5.0, high: basePrice + 14.0, low: basePrice + 4.0, close: basePrice + 13.0 }, // Swing high
+      { id: 'c-3', index: 2, open: basePrice + 13.0, high: basePrice + 14.5, low: basePrice + 9.0, close: basePrice + 10.0 }, // Pause
+      { id: 'c-4', index: 3, open: basePrice + 10.0, high: basePrice + 21.0, low: basePrice + 6.0, close: basePrice + 7.0 }, // SWEEP BAR! Long upper wick
+      { id: 'c-5', index: 4, open: basePrice + 7.0, high: basePrice + 7.5, low: basePrice - 4.0, close: basePrice - 3.0 }, // Displacement drop
+      { id: 'c-6', index: 5, open: basePrice - 3.0, high: basePrice - 2.5, low: basePrice - 12.0, close: basePrice - 10.0 }, // Target run
+    ];
+    overlays = [
+      {
+        id: 'bsl-sweep-line',
+        type: 'LIQUIDITY_LINE',
+        startCandleIndex: 1,
+        endCandleIndex: 3,
+        priceStart: basePrice + 14.0,
+        priceEnd: basePrice + 14.0,
+        color: '#F59E0B',
+        label: `BSL Sweep Level ($${(basePrice + 14.0).toFixed(2)})`,
+      },
+      {
+        id: 'sweep-rr-box',
+        type: 'LONG_SHORT',
+        startCandleIndex: 3,
+        endCandleIndex: 5,
+        priceStart: basePrice + 7.0,
+        priceEnd: basePrice - 10.0,
+        color: '#EF4444',
+        label: `Short Entry | TP: +1:${rrRatio} RR`,
+      },
+    ];
+  } else if (stratLower.includes('fvg') || stratLower.includes('imbalance') || stratLower.includes('fair value gap')) {
+    // 🎯 Fair Value Gap (FVG) Setup
+    candles = [
+      { id: 'c-1', index: 0, open: basePrice - 5.0, high: basePrice, low: basePrice - 6.0, close: basePrice - 1.0 }, // Candle 1 high = basePrice
+      { id: 'c-2', index: 1, open: basePrice - 1.0, high: basePrice + 15.0, low: basePrice - 1.5, close: basePrice + 14.0 }, // Massive imbalance bar
+      { id: 'c-3', index: 2, open: basePrice + 14.0, high: basePrice + 19.0, low: basePrice + 9.0, close: basePrice + 18.0 }, // Candle 3 low = basePrice + 9.0 (Gap: basePrice to basePrice + 9)
+      { id: 'c-4', index: 3, open: basePrice + 18.0, high: basePrice + 18.5, low: basePrice + 4.5, close: basePrice + 5.0 }, // Retest into FVG (50% CE level)
+      { id: 'c-5', index: 4, open: basePrice + 5.0, high: basePrice + 8.0, low: basePrice + 4.0, close: basePrice + 7.5 }, // Reversal bounce
+      { id: 'c-6', index: 5, open: basePrice + 7.5, high: basePrice + 24.0, low: basePrice + 7.0, close: basePrice + 23.0 }, // Strong expansion
+    ];
+    overlays = [
+      {
+        id: 'fvg-box',
+        type: 'FVG',
+        startCandleIndex: 1,
+        endCandleIndex: 4,
+        priceStart: basePrice,
+        priceEnd: basePrice + 9.0,
+        color: '#00F5A0',
+        label: `M15 Bullish FVG [${basePrice.toFixed(1)} - ${(basePrice + 9.0).toFixed(1)}]`,
+      },
+      {
+        id: 'fvg-rr',
+        type: 'LONG_SHORT',
+        startCandleIndex: 4,
+        endCandleIndex: 5,
+        priceStart: basePrice + 7.5,
+        priceEnd: basePrice + 23.0,
+        color: '#00F5A0',
+        label: `Buy FVG 50% CE | 1:${rrRatio} RR`,
+      },
+    ];
+  } else if (stratLower.includes('break') || stratLower.includes('bos') || stratLower.includes('retest')) {
+    // 💥 Break & Retest Setup
+    const resLevel = basePrice + 4.0;
+    candles = [
+      { id: 'c-1', index: 0, open: basePrice - 2.0, high: resLevel, low: basePrice - 3.0, close: resLevel - 1.0 },
+      { id: 'c-2', index: 1, open: resLevel - 1.0, high: resLevel + 0.5, low: basePrice - 2.0, close: basePrice - 1.0 },
+      { id: 'c-3', index: 2, open: basePrice - 1.0, high: resLevel + 11.0, low: basePrice - 1.5, close: resLevel + 10.0 }, // Breakout bar!
+      { id: 'c-4', index: 3, open: resLevel + 10.0, high: resLevel + 10.5, low: resLevel + 0.5, close: resLevel + 1.5 }, // Retest broken level
+      { id: 'c-5', index: 4, open: resLevel + 1.5, high: resLevel + 6.0, low: resLevel, close: resLevel + 5.0 }, // Confirmation hammer
+      { id: 'c-6', index: 5, open: resLevel + 5.0, high: resLevel + 16.0, low: resLevel + 4.5, close: resLevel + 15.0 }, // Rally
+    ];
+    overlays = [
+      {
+        id: 'breakout-line',
+        type: 'LIQUIDITY_LINE',
+        startCandleIndex: 0,
+        endCandleIndex: 4,
+        priceStart: resLevel,
+        priceEnd: resLevel,
+        color: '#38BDF8',
+        label: `Break & Retest Level ($${resLevel.toFixed(2)})`,
+      },
+      {
+        id: 'break-rr',
+        type: 'LONG_SHORT',
+        startCandleIndex: 4,
+        endCandleIndex: 5,
+        priceStart: resLevel + 5.0,
+        priceEnd: resLevel + 15.0,
+        color: '#00F5A0',
+        label: `Retest Entry | 1:${rrRatio} RR`,
+      },
+    ];
+  } else if (stratLower.includes('supply') || stratLower.includes('bearish')) {
+    // 📉 Bearish Supply Zone Setup
+    const supplyLevel = basePrice + 12.0;
+    candles = [
+      { id: 'c-1', index: 0, open: basePrice + 8.0, high: supplyLevel - 1.0, low: basePrice + 6.0, close: supplyLevel - 2.0 },
+      { id: 'c-2', index: 1, open: supplyLevel - 2.0, high: supplyLevel + 2.0, low: basePrice + 7.0, close: basePrice + 8.0 },
+      { id: 'c-3', index: 2, open: basePrice + 8.0, high: basePrice + 8.5, low: basePrice - 3.0, close: basePrice - 2.0 },
+      { id: 'c-4', index: 3, open: basePrice - 2.0, high: basePrice + 3.0, low: basePrice - 2.5, close: basePrice + 2.0 },
+      { id: 'c-5', index: 4, open: basePrice + 2.0, high: basePrice + 2.5, low: basePrice - 10.0, close: basePrice - 9.0 },
+      { id: 'c-6', index: 5, open: basePrice - 9.0, high: basePrice - 8.5, low: basePrice - 18.0, close: basePrice - 17.0 },
+    ];
+    overlays = [
+      {
+        id: 'supply-box',
+        type: 'ORDER_BLOCK',
+        startCandleIndex: 0,
+        endCandleIndex: 2,
+        priceStart: supplyLevel - 2.0,
+        priceEnd: supplyLevel + 2.0,
+        color: '#EF4444',
+        label: `H1 Supply Zone [${(supplyLevel - 2).toFixed(1)} - ${(supplyLevel + 2).toFixed(1)}]`,
+      },
+    ];
+  } else if (stratLower.includes('chart reading') || stratLower.includes('market structure') || stratLower.includes('trend')) {
+    // 📈 3-Skill Chart Reading (HH/HL Trend Formation)
+    candles = [
+      { id: 'c-1', index: 0, open: basePrice - 10, high: basePrice - 2, low: basePrice - 12, close: basePrice - 4 },
+      { id: 'c-2', index: 1, open: basePrice - 4, high: basePrice + 8, low: basePrice - 5, close: basePrice + 6 }, // Higher High 1
+      { id: 'c-3', index: 2, open: basePrice + 6, high: basePrice + 7, low: basePrice - 1, close: basePrice }, // Higher Low 1
+      { id: 'c-4', index: 3, open: basePrice, high: basePrice + 16, low: basePrice - 0.5, close: basePrice + 15 }, // Higher High 2
+      { id: 'c-5', index: 4, open: basePrice + 15, high: basePrice + 15.5, low: basePrice + 6, close: basePrice + 7 }, // Higher Low 2
+      { id: 'c-6', index: 5, open: basePrice + 7, high: basePrice + 24, low: basePrice + 6.5, close: basePrice + 22 }, // Continuation
+    ];
+    overlays = [
+      {
+        id: 'hh-hl-line',
+        type: 'LIQUIDITY_LINE',
+        startCandleIndex: 1,
+        endCandleIndex: 4,
+        priceStart: basePrice + 6.0,
+        priceEnd: basePrice + 6.0,
+        color: '#38BDF8',
+        label: `HH/HL Structure Level ($${(basePrice + 6.0).toFixed(2)})`,
+      },
+      {
+        id: 'trend-box',
+        type: 'LONG_SHORT',
+        startCandleIndex: 4,
+        endCandleIndex: 5,
+        priceStart: basePrice + 7.0,
+        priceEnd: basePrice + 22.0,
+        color: '#00F5A0',
+        label: `Trend Continuation | 1:${rrRatio} RR`,
+      },
+    ];
+  } else {
+    // 🛡️ Predefined Loss Limit / Risk-First Pullback Setup
+    candles = [
+      { id: 'c-1', index: 0, open: basePrice - 8.0, high: basePrice + 4.0, low: basePrice - 9.0, close: basePrice + 2.0 }, // HTF Uptrend Start
+      { id: 'c-2', index: 1, open: basePrice + 2.0, high: basePrice + 3.0, low: basePrice - 5.0, close: basePrice - 3.5 }, // Minor Pullback
+      { id: 'c-3', index: 2, open: basePrice - 3.5, high: basePrice + 14.0, low: basePrice - 4.0, close: basePrice + 12.0 }, // Higher High Wave
+      { id: 'c-4', index: 3, open: basePrice + 12.0, high: basePrice + 13.0, low: basePrice, close: basePrice + 1.0 }, // LTF Pullback to Support ($4,128)
+      { id: 'c-5', index: 4, open: basePrice + 1.0, high: basePrice + 8.0, low: basePrice - 2.0, close: basePrice + 6.5 }, // Rejection Wick Hammer Trigger
+      { id: 'c-6', index: 5, open: basePrice + 6.5, high: basePrice + 20.0, low: basePrice + 5.5, close: basePrice + 18.0 }, // Clean Expansion to Target
+    ];
+    overlays = [
+      {
+        id: 'hermes-support',
+        type: 'LIQUIDITY_LINE',
+        startCandleIndex: 1,
+        endCandleIndex: 4,
+        priceStart: basePrice,
+        priceEnd: basePrice,
+        color: '#38BDF8',
+        label: `Support: $${basePrice.toFixed(2)} (SL: ${slPips} pips)`,
+      },
+      {
+        id: 'hermes-risk-rr',
+        type: 'LONG_SHORT',
+        startCandleIndex: 4,
+        endCandleIndex: 5,
+        priceStart: basePrice,
+        priceEnd: basePrice + 7.0,
+        color: '#00F5A0',
+        label: `Budget $${riskBudget} (1R) | Size: ${lotSize} | 1:${rrRatio} RR`,
+      },
+    ];
+  }
+
+  return { candles, overlays };
+}
+
 export function executeHermesDirective(content: string, filename: string): HermesDirectorDirective {
   // 1. Extract Title
   let title = filename.replace(/\.md$/, '').replace(/^(?:script|prompt_package)_\d{4}-\d{2}-\d{2}_/, '');
@@ -67,7 +269,6 @@ export function executeHermesDirective(content: string, filename: string): Herme
     hookSubline = 'Decided before you enter. That is the whole video.';
   }
 
-  // Cap words strictly for 9:16 mobile canvas
   const headWords = hookHeadline.split(/\s+/).filter(Boolean);
   if (headWords.length > 7) {
     hookHeadline = headWords.slice(0, 6).join(' ');
@@ -98,7 +299,6 @@ export function executeHermesDirective(content: string, filename: string): Herme
   let lotSize = '$1.50/pip';
   let rrRatio = 3.5;
 
-  // Extract risk budget: e.g. $10 = 1R, $30 budget, LOSS = $30, define $30
   const budgetDirectMatch = content.match(/(?:LOSS\s*=\s*\$|define\s*\$|\$)\s*(\d+)\s*(?:=|đúng)?\s*(?:1R|budget|risk|loss|trước)/i)
     || content.match(/\$(\d+)\s*(?:=|đúng)?\s*(?:1R|budget|risk|loss)/i);
   if (budgetDirectMatch) {
@@ -106,11 +306,9 @@ export function executeHermesDirective(content: string, filename: string): Herme
     if (val > 0 && val < 2000) riskBudget = val;
   }
 
-  // Extract pips: e.g. 20 pips
   const pipsMatch = content.match(/(\d+)\s*pips?/i);
   if (pipsMatch) slPips = parseInt(pipsMatch[1], 10);
 
-  // Extract lot size: e.g. 0.05 lot or $1.50/pip
   const lotDirectMatch = content.match(/(\d+(?:\.\d+)?)\s*lots?/i);
   const lotPerPipMatch = content.match(/\$(\d+(?:\.\d+)?)\s*\/\s*pip/i);
   if (lotDirectMatch) {
@@ -119,19 +317,15 @@ export function executeHermesDirective(content: string, filename: string): Herme
     lotSize = `$${lotPerPipMatch[1]}/pip`;
   }
 
-  // Extract RR
   const rrMatch = content.match(/1\s*:\s*(\d+(?:\.\d+)?)/i);
   if (rrMatch) {
     const rVal = parseFloat(rrMatch[1]);
     if (rVal <= 10) rrRatio = rVal;
   }
 
-  // Extract price around Gold range 4000-4500 if present
   const goldPriceMatch = content.match(/\$?(4[0-9]{3}(?:\.\d{1,2})?)/);
   if (goldPriceMatch) {
     basePrice = parseFloat(goldPriceMatch[1]);
-  } else {
-    basePrice = 4128.0;
   }
 
   // 5. Extract 8-part Outline
@@ -169,95 +363,8 @@ export function executeHermesDirective(content: string, filename: string): Herme
     `3. SIZE ${lotSize.replace(' lot', 'L')}`,
   ];
 
-  // 8. Generate Authentic Candlesticks & Overlays strictly following Hermes
-  let candles: Candle[] = [];
-  let overlays: Overlay[] = [];
-
-  if (strategy.includes('Liquidity Sweep')) {
-    candles = [
-      { id: 'c-1', index: 0, open: basePrice, high: basePrice + 6.0, low: basePrice - 1.0, close: basePrice + 5.0 },
-      { id: 'c-2', index: 1, open: basePrice + 5.0, high: basePrice + 14.0, low: basePrice + 4.0, close: basePrice + 13.0 },
-      { id: 'c-3', index: 2, open: basePrice + 13.0, high: basePrice + 14.5, low: basePrice + 9.0, close: basePrice + 10.0 },
-      { id: 'c-4', index: 3, open: basePrice + 10.0, high: basePrice + 21.0, low: basePrice + 6.0, close: basePrice + 7.0 },
-      { id: 'c-5', index: 4, open: basePrice + 7.0, high: basePrice + 7.5, low: basePrice - 4.0, close: basePrice - 3.0 },
-      { id: 'c-6', index: 5, open: basePrice - 3.0, high: basePrice - 2.5, low: basePrice - 12.0, close: basePrice - 10.0 },
-    ];
-    overlays = [
-      {
-        id: 'bsl-sweep-line',
-        type: 'LIQUIDITY_LINE',
-        startCandleIndex: 1,
-        endCandleIndex: 3,
-        priceStart: basePrice + 14.0,
-        priceEnd: basePrice + 14.0,
-        color: '#F59E0B',
-        label: `BSL Sweep Level ($${(basePrice + 14.0).toFixed(2)})`,
-      },
-      {
-        id: 'sweep-rr-box',
-        type: 'LONG_SHORT',
-        startCandleIndex: 3,
-        endCandleIndex: 5,
-        priceStart: basePrice + 7.0,
-        priceEnd: basePrice - 10.0,
-        color: '#EF4444',
-        label: `Short Entry | TP: +1:${rrRatio} RR`,
-      },
-    ];
-  } else if (strategy.includes('Chart Reading')) {
-    candles = [
-      { id: 'c-1', index: 0, open: basePrice - 10, high: basePrice - 2, low: basePrice - 12, close: basePrice - 4 },
-      { id: 'c-2', index: 1, open: basePrice - 4, high: basePrice + 8, low: basePrice - 5, close: basePrice + 6 },
-      { id: 'c-3', index: 2, open: basePrice + 6, high: basePrice + 7, low: basePrice - 1, close: basePrice },
-      { id: 'c-4', index: 3, open: basePrice, high: basePrice + 16, low: basePrice - 0.5, close: basePrice + 15 },
-      { id: 'c-5', index: 4, open: basePrice + 15, high: basePrice + 15.5, low: basePrice + 6, close: basePrice + 7 },
-      { id: 'c-6', index: 5, open: basePrice + 7, high: basePrice + 24, low: basePrice + 6.5, close: basePrice + 22 },
-    ];
-    overlays = [
-      {
-        id: 'hh-hl-line',
-        type: 'LIQUIDITY_LINE',
-        startCandleIndex: 1,
-        endCandleIndex: 4,
-        priceStart: basePrice + 6.0,
-        priceEnd: basePrice + 6.0,
-        color: '#38BDF8',
-        label: `HH/HL Structure Level ($${(basePrice + 6.0).toFixed(2)})`,
-      },
-    ];
-  } else {
-    // Hermes Risk-First Pullback Setup (Matching Section 5 Example: HTF Uptrend + LTF Pullback to Support + Rejection Wick)
-    candles = [
-      { id: 'c-1', index: 0, open: basePrice - 8.0, high: basePrice + 4.0, low: basePrice - 9.0, close: basePrice + 2.0 }, // HTF Uptrend Start
-      { id: 'c-2', index: 1, open: basePrice + 2.0, high: basePrice + 3.0, low: basePrice - 5.0, close: basePrice - 3.5 }, // Minor Pullback
-      { id: 'c-3', index: 2, open: basePrice - 3.5, high: basePrice + 14.0, low: basePrice - 4.0, close: basePrice + 12.0 }, // Higher High Wave
-      { id: 'c-4', index: 3, open: basePrice + 12.0, high: basePrice + 13.0, low: basePrice, close: basePrice + 1.0 }, // LTF Pullback to Support ($4,128)
-      { id: 'c-5', index: 4, open: basePrice + 1.0, high: basePrice + 8.0, low: basePrice - 2.0, close: basePrice + 6.5 }, // Rejection Wick Hammer Trigger
-      { id: 'c-6', index: 5, open: basePrice + 6.5, high: basePrice + 20.0, low: basePrice + 5.5, close: basePrice + 18.0 }, // Clean Expansion to Target
-    ];
-    overlays = [
-      {
-        id: 'hermes-support',
-        type: 'LIQUIDITY_LINE',
-        startCandleIndex: 1,
-        endCandleIndex: 4,
-        priceStart: basePrice,
-        priceEnd: basePrice,
-        color: '#38BDF8',
-        label: `Support: $${basePrice.toFixed(2)} (SL: ${slPips} pips)`,
-      },
-      {
-        id: 'hermes-risk-rr',
-        type: 'LONG_SHORT',
-        startCandleIndex: 4,
-        endCandleIndex: 5,
-        priceStart: basePrice,
-        priceEnd: basePrice + 7.0,
-        color: '#00F5A0',
-        label: `Budget $${riskBudget} (1R) | Size: ${lotSize} | 1:${rrRatio} RR`,
-      },
-    ];
-  }
+  // 8. Generate Authentic Candlesticks & Overlays
+  const { candles, overlays } = generateStrategySetup(strategy, basePrice, riskBudget, slPips, lotSize, rrRatio);
 
   return {
     title,
