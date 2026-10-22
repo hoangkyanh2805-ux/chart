@@ -13,6 +13,12 @@ interface ChartState {
   builderMode: 'single' | 'group' | 'zigzag';
   activeWorkspaceTab: 'canvas' | 'timeline';
   revealAnimation: boolean;
+
+  // Full NLE Editor State
+  activeTool: 'templates' | 'ohlc' | 'text' | 'elements' | 'settings';
+  stageTheme: 'white' | 'dark';
+  headlineText: string;
+  sublineText: string;
   
   // Timeline State
   currentTime: number; // in seconds
@@ -21,6 +27,11 @@ interface ChartState {
   revealMode: RevealAnimationType;
 
   // Actions
+  setActiveTool: (tool: 'templates' | 'ohlc' | 'text' | 'elements' | 'settings') => void;
+  setStageTheme: (theme: 'white' | 'dark') => void;
+  setHeadlineText: (text: string) => void;
+  setSublineText: (text: string) => void;
+
   setBuilderMode: (mode: 'single' | 'group' | 'zigzag') => void;
   setActiveWorkspaceTab: (tab: 'canvas' | 'timeline') => void;
   setRevealAnimation: (enabled: boolean) => void;
@@ -103,10 +114,19 @@ export const useChartStore = create<ChartState>((set, get) => ({
   builderMode: 'single',
   activeWorkspaceTab: 'canvas',
   revealAnimation: true,
-  currentTime: 3,
-  duration: 6,
+  activeTool: 'templates',
+  stageTheme: 'white',
+  headlineText: 'YOU STOP WATCHING THE SWEEP',
+  sublineText: 'You start watching what happens after it',
+  currentTime: 26.26,
+  duration: 52.26,
   isPlaying: false,
   revealMode: 'sequential',
+
+  setActiveTool: (tool) => set({ activeTool: tool }),
+  setStageTheme: (theme) => set({ stageTheme: theme }),
+  setHeadlineText: (text) => set({ headlineText: text }),
+  setSublineText: (text) => set({ sublineText: text }),
 
   setBuilderMode: (mode) => set({ builderMode: mode }),
   setActiveWorkspaceTab: (tab) => set({ activeWorkspaceTab: tab }),

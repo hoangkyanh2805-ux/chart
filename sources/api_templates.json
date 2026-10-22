@@ -1,0 +1,479 @@
+{
+  "templates": [
+    {
+      "id": "cmsh8syom0006le043p01hriq",
+      "title": "Entry Checklist",
+      "description": "How To Identify An Entry Trigger With ICT",
+      "tags": [
+        "cisd",
+        "ict",
+        "sweep",
+        "entrytrigger"
+      ],
+      "access": "PRO",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/ye1h3l92dw/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 2107,
+      "fps": 30,
+      "usageCount": 418,
+      "createdAt": "2026-08-06T08:17:08.758Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "7c6e6e63-ce6d-4d8e-8f2a-ab96f0c2cdd5",
+      "builderType": "Group",
+      "layerCount": 20
+    },
+    {
+      "id": "cmsortx8o0001ky04yvvm2wc4",
+      "title": "ICT Reversal Pattern",
+      "description": "Identify Reversal Patterns With ICT",
+      "tags": [
+        "reversalpattern",
+        "ict",
+        "cisd",
+        "smc"
+      ],
+      "access": "CREATOR",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/xk9fgnjy27/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1837,
+      "fps": 30,
+      "usageCount": 171,
+      "createdAt": "2026-08-11T14:44:09.477Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "52a953fb-ef1d-4994-b267-5a211f16b709",
+      "builderType": "GBM",
+      "layerCount": 28
+    },
+    {
+      "id": "cmrevaip80001l904s4k9t4xv",
+      "title": "SMC Imbalance / FVG",
+      "description": "How To Identify A FVG",
+      "tags": [
+        "imbalance",
+        "fvg",
+        "fairvaluegap"
+      ],
+      "access": "PRO",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/bz6lglkexp/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1502,
+      "fps": 30,
+      "usageCount": 160,
+      "createdAt": "2026-07-10T11:43:38.538Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "157ceffb-171f-48a5-a4cd-9b835ce99ace",
+      "builderType": "Group",
+      "layerCount": 92
+    },
+    {
+      "id": "cmpp8v4j10002ih04ueyaafjx",
+      "title": "Break & Retest",
+      "description": "Price Breaks Key Level Comes Back To Retest Then Look For Entry",
+      "tags": [
+        "breakandretest",
+        "strategy"
+      ],
+      "access": "PRO",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/1cjgzo8qw6/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1309,
+      "fps": 30,
+      "usageCount": 154,
+      "createdAt": "2026-05-28T08:41:52.045Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "551d752e-9d79-4477-a1f1-2d4d54bd6d3f",
+      "builderType": "Group",
+      "layerCount": 24
+    },
+    {
+      "id": "cmsh8zvst003wle04gp0q5iwz",
+      "title": "ICT Entry Trigger",
+      "description": "Strong/Weak CISD Entries",
+      "tags": [
+        "cisd",
+        "ict",
+        "entrytrigger"
+      ],
+      "access": "CREATOR",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/3l6vokvxtw/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 2836,
+      "fps": 30,
+      "usageCount": 131,
+      "createdAt": "2026-08-06T08:22:31.612Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "c35a066f-31a2-4811-a43a-88d521806680",
+      "builderType": "ZigZag",
+      "layerCount": 38
+    },
+    {
+      "id": "cmslyg93c0001jx044g7fq52y",
+      "title": "Failure To Displace Set Up",
+      "description": "How To Identify & Trade A Failure To Displace Pattern",
+      "tags": [
+        "ict",
+        "cisd",
+        "failuretodisplace",
+        "smc"
+      ],
+      "access": "CREATOR",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/ttj1o7wqeu/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 2101,
+      "fps": 30,
+      "usageCount": 79,
+      "createdAt": "2026-08-09T15:26:10.438Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "45ecf0f8-dc87-46b7-ab31-498524111758",
+      "builderType": "ZigZag",
+      "layerCount": 36
+    },
+    {
+      "id": "cmsprp1mj003fjs043g7fuoh7",
+      "title": "ICT Entry Timing",
+      "description": "How To Identify The Best Entry Timing",
+      "tags": [
+        "ict",
+        "cisd",
+        "entrytiming"
+      ],
+      "access": "CREATOR",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/gc4hcq2swn/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 2653,
+      "fps": 30,
+      "usageCount": 13,
+      "createdAt": "2026-08-12T07:28:08.058Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "c22246a5-76b6-4596-ba7e-e996f887cc4d",
+      "builderType": "ZigZag",
+      "layerCount": 40
+    },
+    {
+      "id": "cmsrjscx90001jx04e878690a",
+      "title": "The Only 3 Order Blocks You Need",
+      "description": "How To Identify Order Blocks",
+      "tags": [
+        "orderblocks",
+        "indecisioncandles"
+      ],
+      "access": "PRO",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/ia8cpkjdsi/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 2197,
+      "fps": 30,
+      "usageCount": 5,
+      "createdAt": "2026-08-13T13:22:18.088Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "433e815f-8c91-4d70-b78c-be180a87bc6e",
+      "builderType": "Group",
+      "layerCount": 70
+    },
+    {
+      "id": "cmqv9ciiq0001jv041qgj7vrt",
+      "title": "SMC Liquidity",
+      "description": "How To Identify Liquidity",
+      "tags": [
+        "smc",
+        "liquidity",
+        "smartmoneyconcepts"
+      ],
+      "access": "PRO",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/vuvzk6zna9/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 2026,
+      "fps": 30,
+      "usageCount": 3,
+      "createdAt": "2026-06-26T18:21:42.720Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "5d718725-bd49-4a97-992b-313fba8e3fe8",
+      "builderType": "Group",
+      "layerCount": 102
+    },
+    {
+      "id": "cmqhyoyqz0008l404t5rejdij",
+      "title": "Candle Mastery: Continuation | Reversal | Indecision",
+      "description": "How To Determine Market Bias With Continuation, Reversal & Indecision",
+      "tags": [
+        "continuation",
+        "reversal",
+        "indecision",
+        "bias"
+      ],
+      "access": "FREE",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/17rh1i3ehq/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1474,
+      "fps": 30,
+      "usageCount": 2,
+      "createdAt": "2026-06-17T11:02:27.562Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "81148ca1-7118-431a-a960-550ea0bdb3c2",
+      "builderType": "Single",
+      "layerCount": 30
+    },
+    {
+      "id": "cmod4rr9f0002jf04r15mbqaa",
+      "title": "Head & Shoulders Pattern",
+      "description": "Head & Shoulders: Bearish Reversal Chart Pattern",
+      "tags": [
+        "headandshoulders",
+        "bearishreversalpattern",
+        "reversal"
+      ],
+      "access": "FREE",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/von23xgnwk/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1912,
+      "fps": 30,
+      "usageCount": 2,
+      "createdAt": "2026-04-24T16:34:19.970Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "5b512d35-28cc-455b-bef9-7f6a7bd7efa5",
+      "builderType": "Single",
+      "layerCount": 24
+    },
+    {
+      "id": "cmqibrsnh0001jl059susu7vr",
+      "title": "CISD Entry Model",
+      "description": "Learn To Master Entries With CISD",
+      "tags": [
+        "smc",
+        "ict",
+        "cisd",
+        "entrymodel",
+        "entrypattern"
+      ],
+      "access": "CREATOR",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/hkb30lbat6/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 3025,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-06-17T17:08:34.634Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "5a40ebe2-4f37-4258-ace4-644182ecc3ab",
+      "builderType": "Group",
+      "layerCount": 55
+    },
+    {
+      "id": "cmqi8nmcp0001ky0437htc9ku",
+      "title": "Weekly Candle Entry Model",
+      "description": "How To Catch a Reversal Trade Off The Weekly High",
+      "tags": [
+        "cisd",
+        "weeklycandlereversal",
+        "reversal",
+        "entrysignal"
+      ],
+      "access": "CREATOR",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/rudv52wu6i/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 3100,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-06-17T15:41:21.000Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "f3823d62-4a21-405b-8834-bbfa3ee6ba4d",
+      "builderType": "ZigZag",
+      "layerCount": 30
+    },
+    {
+      "id": "cmqauzshi0003js046kyknr6m",
+      "title": "SMC BOS / CHOC Strategy",
+      "description": "Learn To Identify Break Of Structure & Change In Character",
+      "tags": [
+        "bos/choch",
+        "smc",
+        "priceaction",
+        "supplyanddemand"
+      ],
+      "access": "PRO",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/t4pwq8wahb/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 2113,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-06-12T11:44:30.964Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "6ea368d6-4eda-4ebc-9701-6792ff72d0e3",
+      "builderType": "Overlay",
+      "layerCount": 80
+    },
+    {
+      "id": "cmocttfsw0001l2041gyidlf2",
+      "title": "Triple Top Pattern",
+      "description": "Triple Top: Bearish Reversal Chart Pattern",
+      "tags": [
+        "tripletop",
+        "bearishreversalpattern",
+        "reversal"
+      ],
+      "access": "FREE",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/i3k1sidk6s/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1201,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-04-24T11:27:42.655Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "21989c62-a67b-441d-9a1a-67b85b569555",
+      "builderType": "Single",
+      "layerCount": 26
+    },
+    {
+      "id": "cmspqqhvw0001l804yhld11bj",
+      "title": "CISD Set Up",
+      "description": "How To Identify Continuation Or Reversal",
+      "tags": [
+        "cisd",
+        "ict",
+        "smc",
+        "continuation",
+        "reversal"
+      ],
+      "access": "CREATOR",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/dfo3q7hik1/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1603,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-08-12T07:01:16.171Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "ce20b99f-b2aa-4733-9dbe-599a6fd21b13",
+      "builderType": "Group",
+      "layerCount": 36
+    },
+    {
+      "id": "cmod24m2e0001l205o4501pa6",
+      "title": "Inverted Head & Shoulders Pattern",
+      "description": "Inverted Head & Shoulders: Bullish Reversal Chart Pattern",
+      "tags": [
+        "invertedhead&shoulders",
+        "bullishreversalpattern",
+        "reversal"
+      ],
+      "access": "FREE",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/vfjjw57lq3/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1321,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-04-24T15:20:20.917Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "4f9fbc05-351e-4354-bbfd-713c5be820a5",
+      "builderType": "Single",
+      "layerCount": 24
+    },
+    {
+      "id": "cmqi5f86f0001l2044tst55h8",
+      "title": "Bullish Flag Pattern",
+      "description": "Bullish Flag: Bullish Continuation Chart Pattern",
+      "tags": [
+        "bullishflag",
+        "bullishcontinuationpattern",
+        "continuation"
+      ],
+      "access": "FREE",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/dxazuncnct/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1195,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-06-17T14:10:50.534Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "c2111100-060e-4349-a03d-c305bb2b408b",
+      "builderType": "Single",
+      "layerCount": 14
+    },
+    {
+      "id": "cmqibm7ry0003jp045it9grft",
+      "title": "Entry Model",
+      "description": "Learn To Master The CISD",
+      "tags": [
+        "smc",
+        "ict",
+        "cisd"
+      ],
+      "access": "CREATOR",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/x6xv5tkbxu/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 7195,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-06-17T17:04:14.300Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "a1c6bc84-020d-4760-984a-aaa088e76a2b",
+      "builderType": "ZigZag",
+      "layerCount": 89
+    },
+    {
+      "id": "cmpe0ld7x0001jm04ubymxw96",
+      "title": "Candle Mastery: OHLC Contraction Logic",
+      "description": "Indecision Candle Bias",
+      "tags": [
+        "ohlc",
+        "indecision",
+        "contraction",
+        "indecisioncandle",
+        "doji"
+      ],
+      "access": "FREE",
+      "thumbnailUrl": "https://s3.us-east-1.amazonaws.com/remotionlambda-useast1-1ceqpy6wxw/renders/ja5sxqmfwt/out.jpeg",
+      "aspectRatio": "16:9",
+      "durationFrames": 1918,
+      "fps": 30,
+      "usageCount": 1,
+      "createdAt": "2026-05-20T12:04:51.848Z",
+      "creator": {
+        "name": "ChartAnimator"
+      },
+      "shareToken": "a7c15818-0dde-4a53-9120-ec401c6025ae",
+      "builderType": "Single",
+      "layerCount": 47
+    }
+  ],
+  "total": 36,
+  "page": 1,
+  "pageSize": 20,
+  "totalPages": 2,
+  "userTier": null
+}
