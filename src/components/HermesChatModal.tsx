@@ -51,8 +51,8 @@ interface HermesChatModalProps {
 
 const QUICK_PROMPTS = [
   '⚡ Lên setup nến FVG M15 hồi 50% CE tối nay',
+  '🎯 /goal: Lên video XAUUSD Risk-First chuẩn SPEC.md. Done: tests pass & canvas ready',
   '💡 Pain point nào đang nhiều comment nhất?',
-  '🛡️ Công thức tính $10 Risk Budget hoạt động ntn?',
   '🚀 Setup Quét thanh khoản BSL $4,154',
 ];
 

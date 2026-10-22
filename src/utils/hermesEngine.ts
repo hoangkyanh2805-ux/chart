@@ -330,16 +330,16 @@ export function executeHermesDirective(content: string, filename: string): Herme
 
   // 5. Extract 8-part Outline
   const outline: { step: number; timestamp: string; mainIdea: string; chartNeed: string }[] = [];
-  const outlineTableMatches = content.matchAll(/\|\s*(\d+)\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|/g);
-
-  for (const m of outlineTableMatches) {
-    const stepNum = parseInt(m[1].trim(), 10);
+  const outlineRegex = /\|\s*(\d+)\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)\|/g;
+  let match: RegExpExecArray | null;
+  while ((match = outlineRegex.exec(content)) !== null) {
+    const stepNum = parseInt(match[1].trim(), 10);
     if (!isNaN(stepNum) && stepNum >= 1 && stepNum <= 8) {
       outline.push({
         step: stepNum,
-        timestamp: m[2].trim(),
-        mainIdea: m[3].trim(),
-        chartNeed: m[4].trim(),
+        timestamp: match[2].trim(),
+        mainIdea: match[3].trim(),
+        chartNeed: match[4].trim(),
       });
     }
   }

@@ -44,17 +44,17 @@ describe('Hermes Native Engine', () => {
     expect(fvg.candles.length).toBe(6);
 
     const sweep = generateStrategySetup('Liquidity Sweep', 4140, 30, 20, '$1.50/pip', 3.2);
-    expect(sweep.overlays.some((o) => o.label.includes('BSL'))).toBe(true);
+    expect(sweep.overlays.some((o) => o.label?.includes('BSL'))).toBe(true);
     // Candle 3 should have a high sweep wick
     expect(sweep.candles[3].high).toBeGreaterThan(sweep.candles[1].high);
 
     const breakRetest = generateStrategySetup('Break & Retest', 4130, 20, 15, '0.1 lot', 3.0);
-    expect(breakRetest.overlays.some((o) => o.label.includes('Break & Retest'))).toBe(true);
+    expect(breakRetest.overlays.some((o) => o.label?.includes('Break & Retest'))).toBe(true);
 
     const supply = generateStrategySetup('Supply Zone', 4150, 25, 20, '0.08 lot', 3.0);
-    expect(supply.overlays.some((o) => o.label.includes('Supply Zone'))).toBe(true);
+    expect(supply.overlays.some((o) => o.label?.includes('Supply Zone'))).toBe(true);
 
     const pullback = generateStrategySetup('Risk-First Pullback', 4128, 10, 20, '0.05 lot', 3.5);
-    expect(pullback.overlays.some((o) => o.label.includes('Support'))).toBe(true);
+    expect(pullback.overlays.some((o) => o.label?.includes('Support'))).toBe(true);
   });
 });

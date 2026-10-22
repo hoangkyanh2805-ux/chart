@@ -59,3 +59,33 @@ Trong dự án ChartAnimator, quy trình AI được chia thành các vai trò c
   - Sinh setup nến và overlay chuẩn xác (FVG 50% C.E., BSL Liquidity Sweep, Break & Retest, Supply Zone) trực tiếp lên Canvas đồ họa.
   - Profile Agent cấu hình tại [`.agents/agents/hermes/agent.md`](file:///g:/Other%20computers/My%20Computer/Project/chart/.agents/agents/hermes/agent.md) và Skill tại [`.agents/skills/hermes-director/SKILL.md`](file:///g:/Other%20computers/My%20Computer/Project/chart/.agents/skills/hermes-director/SKILL.md).
 
+---
+
+## 6. Mô hình Điều phối `/goal` (The /goal Architecture)
+
+Dự án áp dụng mô hình điều phối theo chuẩn **"The /goal Cheat Sheet"** với **Hermes đóng vai trò Orchestrator trung tâm**:
+
+```mermaid
+flowchart TD
+    User(["👤 USER"]) -->|"/goal Build X"| Hermes["👑 HERMES (Orchestrator)\n(The only /goal you write yourself)"]
+
+    Hermes -->|"/goal Build per SPEC.md.\nDone means tests pass, git clean."| Builder["🛠️ BUILDER (Clean-Room Coder)"]
+    Hermes -->|"/goal Review the diff.\nDone means PASS or BLOCKED."| Reviewer["🔍 REVIEWER (Compliance QA / Auditor)"]
+
+    Reviewer -->|"review result"| Hermes
+    Reviewer -.->|"/goal Fix findings,\nif blocked"| Builder
+
+    Hermes -->|"Automated Verifier\nnpm run verify:goal"| Done(["✅ DONE (Verified in Shell)"])
+```
+
+### Quy tắc `/goal` cốt lõi:
+1. **Cấu trúc 1 câu `/goal` chuẩn:**
+   `"/goal <Việc cần làm cụ thể>. Done means <tiêu chí xác minh bằng lệnh shell>"`
+2. **Nguyên lý bất biến:** *"If you cannot verify it from a shell, it is not done."* (Nếu không xác minh được bằng lệnh shell, coi như chưa xong).
+3. **Bộ kiểm tra Verifier Checklist tự động:**
+   Chạy `npm run verify:goal` để đảm bảo:
+   - [x] Unit & Engine tests PASS 100%.
+   - [x] Runtime Server phản hồi 200 OK.
+   - [x] Git working tree sạch, không sửa file ngoài phạm vi.
+
+
