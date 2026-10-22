@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
-import { Plus, Trash2, Wand2, Sliders, Layers, Type, Sparkles, Palette } from 'lucide-react';
+import { Plus, Trash2, Wand2, Sliders, Layers, Type, Sparkles, Palette, Activity, TrendingUp, TrendingDown, ArrowDownUp } from 'lucide-react';
 
 export const ControlsPanel: React.FC = () => {
   const {
@@ -11,22 +11,36 @@ export const ControlsPanel: React.FC = () => {
     settings,
     addCandle,
     removeLastCandle,
+    clearAllCandles,
     generateRandomWalk,
+    addGroupCandles,
+    addZigZagLegs,
     updateSettings,
     addOverlay,
     updateOverlayLabel,
   } = useChartStore();
 
   const [activeTab, setActiveTab] = useState<'candles' | 'text'>('candles');
+  const [builderMode, setBuilderMode] = useState<'single' | 'group' | 'zigzag'>('single');
 
-  // Local state for single candle builder (Calibrated for XAUUSD Gold ~4,129.00)
+  // Single Candle State
   const lastClose = candles.length > 0 ? candles[candles.length - 1].close : 4129.0;
   const [open, setOpen] = useState(lastClose);
   const [high, setHigh] = useState(Math.round((lastClose + 5.5) * 10) / 10);
   const [low, setLow] = useState(Math.round((lastClose - 3.0) * 10) / 10);
   const [close, setClose] = useState(Math.round((lastClose + 4.0) * 10) / 10);
 
-  const handleAddCandle = () => {
+  // Group Candle State (Pro)
+  const [groupCount, setGroupCount] = useState<number>(5);
+  const [groupDirection, setGroupDirection] = useState<'bullish' | 'bearish' | 'range'>('bullish');
+  const [groupMomentum, setGroupMomentum] = useState<'high' | 'moderate' | 'grind'>('high');
+
+  // ZigZag Candle State (Creator)
+  const [leg1Price, setLeg1Price] = useState<number>(4148.0);
+  const [leg2Price, setLeg2Price] = useState<number>(4132.0);
+  const [leg3Price, setLeg3Price] = useState<number>(4162.0);
+
+  const handleAddSingle = () => {
     addCandle({
       open: Number(open),
       high: Number(high),
@@ -38,6 +52,22 @@ export const ControlsPanel: React.FC = () => {
     setHigh(Math.round((nextO + 4.5) * 10) / 10);
     setLow(Math.round((nextO - 3.5) * 10) / 10);
     setClose(Math.round((nextO + 2.5) * 10) / 10);
+  };
+
+  const handleAddGroup = () => {
+    addGroupCandles({
+      count: groupCount,
+      direction: groupDirection,
+      momentum: groupMomentum,
+    });
+  };
+
+  const handleAddZigZag = () => {
+    addZigZagLegs([
+      { targetPrice: leg1Price, candleCount: 4, label: 'Leg 1 (HH)' },
+      { targetPrice: leg2Price, candleCount: 3, label: 'Leg 2 (HL)' },
+      { targetPrice: leg3Price, candleCount: 5, label: 'Leg 3 (Expansion)' },
+    ]);
   };
 
   const handleAddFVG = () => {
@@ -77,7 +107,7 @@ export const ControlsPanel: React.FC = () => {
               : 'text-slate-400 hover:text-white hover:bg-[#161F2E]'
           }`}
         >
-          <Sliders className="w-3.5 h-3.5 text-primary" /> Candles & Setup
+          <Sliders className="w-3.5 h-3.5 text-primary" /> Builders
         </button>
         <button
           onClick={() => setActiveTab('text')}
@@ -94,133 +124,315 @@ export const ControlsPanel: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
         {activeTab === 'candles' ? (
           <>
-            {/* Header info */}
-            <div className="flex items-center justify-between border-b border-[#1E293B] pb-2">
-              <span className="text-xs font-bold text-white uppercase tracking-wider">OHLC & Price Action</span>
-              <span className="text-xs px-2 py-0.5 rounded bg-primary/20 text-primary font-mono">
-                {candles.length} Candles
-              </span>
+            {/* 3-Mode Builder Switcher (Matching ChartAnimator.io) */}
+            <div className="flex flex-col gap-1.5">
+              <div className="grid grid-cols-3 gap-1 bg-[#121824] p-1 rounded-xl border border-[#1E293B]">
+                <button
+                  onClick={() => setBuilderMode('single')}
+                  className={`py-1.5 rounded-lg text-[11px] font-bold transition flex flex-col items-center justify-center ${
+                    builderMode === 'single'
+                      ? 'bg-primary text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>Single</span>
+                  <span className="text-[9px] opacity-70">Free</span>
+                </button>
+                <button
+                  onClick={() => setBuilderMode('group')}
+                  className={`py-1.5 rounded-lg text-[11px] font-bold transition flex flex-col items-center justify-center ${
+                    builderMode === 'group'
+                      ? 'bg-amber-500 text-black shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>Group</span>
+                  <span className="text-[9px] uppercase font-mono font-black text-amber-400">PRO</span>
+                </button>
+                <button
+                  onClick={() => setBuilderMode('zigzag')}
+                  className={`py-1.5 rounded-lg text-[11px] font-bold transition flex flex-col items-center justify-center ${
+                    builderMode === 'zigzag'
+                      ? 'bg-gradient-to-tr from-indigo-500 to-cyan-400 text-white shadow'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>ZigZag</span>
+                  <span className="text-[9px] uppercase font-mono font-black text-cyan-300">CREATOR</span>
+                </button>
+              </div>
             </div>
 
-            {/* OHLC Sliders */}
-            <div className="flex flex-col gap-3 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
-              <div className="flex justify-between items-center text-xs text-slate-400">
-                <span>OHLC Manual Tuning</span>
-                <span className={close >= open ? 'text-bullish font-bold' : 'text-bearish font-bold'}>
-                  {close >= open ? 'BULLISH' : 'BEARISH'}
-                </span>
-              </div>
-
-              {/* Open */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Open</span>
-                  <span className="font-mono text-white">${open.toFixed(1)}</span>
+            {/* MODE 1: SINGLE CANDLE BUILDER */}
+            {builderMode === 'single' && (
+              <div className="flex flex-col gap-3 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
+                <div className="flex justify-between items-center text-xs text-slate-400">
+                  <span className="font-semibold text-white">Single Candle OHLC</span>
+                  <span className={close >= open ? 'text-bullish font-bold' : 'text-bearish font-bold'}>
+                    {close >= open ? 'BULLISH' : 'BEARISH'}
+                  </span>
                 </div>
-                <input
-                  type="range"
-                  min="4080"
-                  max="4220"
-                  step="0.5"
-                  value={open}
-                  onChange={(e) => setOpen(Number(e.target.value))}
-                  className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
-                />
-              </div>
 
-              {/* High */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">High</span>
-                  <span className="font-mono text-white">${high.toFixed(1)}</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Open</span>
+                      <span className="font-mono text-white">${open.toFixed(1)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="4080"
+                      max="4220"
+                      step="0.5"
+                      value={open}
+                      onChange={(e) => setOpen(Number(e.target.value))}
+                      className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">High</span>
+                      <span className="font-mono text-white">${high.toFixed(1)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="4080"
+                      max="4220"
+                      step="0.5"
+                      value={high}
+                      onChange={(e) => setHigh(Number(e.target.value))}
+                      className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Low</span>
+                      <span className="font-mono text-white">${low.toFixed(1)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="4080"
+                      max="4220"
+                      step="0.5"
+                      value={low}
+                      onChange={(e) => setLow(Number(e.target.value))}
+                      className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Close</span>
+                      <span className="font-mono text-white">${close.toFixed(1)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="4080"
+                      max="4220"
+                      step="0.5"
+                      value={close}
+                      onChange={(e) => setClose(Number(e.target.value))}
+                      className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min="4080"
-                  max="4220"
-                  step="0.5"
-                  value={high}
-                  onChange={(e) => setHigh(Number(e.target.value))}
-                  className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
-                />
-              </div>
 
-              {/* Low */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Low</span>
-                  <span className="font-mono text-white">${low.toFixed(1)}</span>
+                <button
+                  onClick={handleAddSingle}
+                  className="mt-1 w-full py-2 bg-primary hover:bg-primary/90 text-white rounded font-medium text-xs flex items-center justify-center gap-2 transition"
+                >
+                  <Plus className="w-4 h-4" /> Add 1 Candle to Canvas
+                </button>
+              </div>
+            )}
+
+            {/* MODE 2: GROUP CANDLE BUILDER (PRO) */}
+            {builderMode === 'group' && (
+              <div className="flex flex-col gap-3 bg-[#131A26] p-3 rounded-lg border border-amber-500/30">
+                <div className="flex items-center justify-between border-b border-[#1E293B] pb-2">
+                  <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5" /> Group Candle Builder
+                  </span>
+                  <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">
+                    PRO BATCH
+                  </span>
                 </div>
-                <input
-                  type="range"
-                  min="4080"
-                  max="4220"
-                  step="0.5"
-                  value={low}
-                  onChange={(e) => setLow(Number(e.target.value))}
-                  className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
-                />
-              </div>
 
-              {/* Close */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Close</span>
-                  <span className="font-mono text-white">${close.toFixed(1)}</span>
+                {/* Direction */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] text-slate-400">Trend Direction:</label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <button
+                      onClick={() => setGroupDirection('bullish')}
+                      className={`py-1 rounded text-xs font-semibold flex items-center justify-center gap-1 transition ${
+                        groupDirection === 'bullish'
+                          ? 'bg-bullish text-black font-bold'
+                          : 'bg-[#1C2638] text-slate-300'
+                      }`}
+                    >
+                      <TrendingUp className="w-3 h-3" /> Bullish
+                    </button>
+                    <button
+                      onClick={() => setGroupDirection('bearish')}
+                      className={`py-1 rounded text-xs font-semibold flex items-center justify-center gap-1 transition ${
+                        groupDirection === 'bearish'
+                          ? 'bg-bearish text-white font-bold'
+                          : 'bg-[#1C2638] text-slate-300'
+                      }`}
+                    >
+                      <TrendingDown className="w-3 h-3" /> Bearish
+                    </button>
+                    <button
+                      onClick={() => setGroupDirection('range')}
+                      className={`py-1 rounded text-xs font-semibold flex items-center justify-center gap-1 transition ${
+                        groupDirection === 'range'
+                          ? 'bg-sky-400 text-black font-bold'
+                          : 'bg-[#1C2638] text-slate-300'
+                      }`}
+                    >
+                      Range
+                    </button>
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min="4080"
-                  max="4220"
-                  step="0.5"
-                  value={close}
-                  onChange={(e) => setClose(Number(e.target.value))}
-                  className="w-full accent-primary h-1.5 bg-[#1E293B] rounded cursor-pointer"
-                />
+
+                {/* Candle Count */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Number of Candles:</span>
+                    <span className="font-mono text-white font-bold">{groupCount} Candles</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="3"
+                    max="10"
+                    value={groupCount}
+                    onChange={(e) => setGroupCount(Number(e.target.value))}
+                    className="w-full accent-amber-400 h-1.5 bg-[#1E293B] rounded cursor-pointer"
+                  />
+                </div>
+
+                {/* Momentum */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] text-slate-400">Impulse Momentum:</label>
+                  <select
+                    value={groupMomentum}
+                    onChange={(e) => setGroupMomentum(e.target.value as any)}
+                    className="bg-[#0B0E14] border border-[#1E293B] rounded p-1.5 text-xs text-white"
+                  >
+                    <option value="high">High Momentum (News & Expansion)</option>
+                    <option value="moderate">Moderate Trend (Standard Wave)</option>
+                    <option value="grind">Slow Grind (Consolidation)</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={handleAddGroup}
+                  className="mt-1 w-full py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 text-black font-bold text-xs rounded shadow-md transition flex items-center justify-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4" /> Add +{groupCount} Candle Group
+                </button>
               </div>
+            )}
 
-              {/* Buttons */}
-              <button
-                onClick={handleAddCandle}
-                className="mt-2 w-full py-2 bg-primary hover:bg-primary/90 text-white rounded font-medium text-xs flex items-center justify-center gap-2 transition"
-              >
-                <Plus className="w-4 h-4" /> Add Candle to Canvas
-              </button>
+            {/* MODE 3: ZIGZAG BUILDER (CREATOR) */}
+            {builderMode === 'zigzag' && (
+              <div className="flex flex-col gap-3 bg-[#131A26] p-3 rounded-lg border border-cyan-500/30">
+                <div className="flex items-center justify-between border-b border-[#1E293B] pb-2">
+                  <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                    <ArrowDownUp className="w-3.5 h-3.5" /> ZigZag Wave Builder
+                  </span>
+                  <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">
+                    CREATOR 4K
+                  </span>
+                </div>
 
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Tự động sinh chuỗi nến tự nhiên bám sát theo 3 nhịp sóng Đỉnh/Đáy (Swing High & Low):
+                </p>
+
+                {/* Leg 1 Target */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-slate-400">Leg 1: Swing High (HH)</span>
+                    <span className="font-mono text-cyan-300 font-bold">${leg1Price.toFixed(1)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="4130"
+                    max="4190"
+                    step="0.5"
+                    value={leg1Price}
+                    onChange={(e) => setLeg1Price(Number(e.target.value))}
+                    className="w-full accent-cyan-400 h-1 bg-[#1E293B] rounded cursor-pointer"
+                  />
+                </div>
+
+                {/* Leg 2 Target */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-slate-400">Leg 2: Pullback Low (HL)</span>
+                    <span className="font-mono text-amber-300 font-bold">${leg2Price.toFixed(1)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="4110"
+                    max="4150"
+                    step="0.5"
+                    value={leg2Price}
+                    onChange={(e) => setLeg2Price(Number(e.target.value))}
+                    className="w-full accent-amber-400 h-1 bg-[#1E293B] rounded cursor-pointer"
+                  />
+                </div>
+
+                {/* Leg 3 Target */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-slate-400">Leg 3: Expansion Surge</span>
+                    <span className="font-mono text-bullish font-bold">${leg3Price.toFixed(1)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="4140"
+                    max="4220"
+                    step="0.5"
+                    value={leg3Price}
+                    onChange={(e) => setLeg3Price(Number(e.target.value))}
+                    className="w-full accent-bullish h-1 bg-[#1E293B] rounded cursor-pointer"
+                  />
+                </div>
+
+                <button
+                  onClick={handleAddZigZag}
+                  className="mt-1 w-full py-2.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 text-white font-bold text-xs rounded shadow-md transition flex items-center justify-center gap-1.5"
+                >
+                  <Activity className="w-4 h-4" /> Generate 3-Leg ZigZag Wave
+                </button>
+              </div>
+            )}
+
+            {/* Quick Actions & Canvas Clear */}
+            <div className="flex gap-2">
               <button
                 onClick={removeLastCandle}
                 disabled={candles.length === 0}
-                className="w-full py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 rounded font-medium text-xs flex items-center justify-center gap-1.5 transition disabled:opacity-40"
+                className="flex-1 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 rounded font-medium text-xs flex items-center justify-center gap-1.5 transition disabled:opacity-40"
               >
-                <Trash2 className="w-3.5 h-3.5" /> Remove Last Candle
+                <Trash2 className="w-3.5 h-3.5" /> Remove Last
               </button>
-            </div>
-
-            {/* Generative GBM Simulation (XAUUSD Gold Price Walk) */}
-            <div className="flex flex-col gap-2.5 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                <Wand2 className="w-3.5 h-3.5 text-amber-400" /> Mô phỏng Giá Vàng (XAUUSD)
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-1">
-                <button
-                  onClick={() => generateRandomWalk(5, 0.002, 0.004)}
-                  className="py-1.5 px-2 bg-[#1C2638] hover:bg-[#25334D] text-bullish text-xs rounded border border-bullish/20 transition text-center font-mono"
-                >
-                  +50 Pips Rally
-                </button>
-                <button
-                  onClick={() => generateRandomWalk(5, -0.002, 0.004)}
-                  className="py-1.5 px-2 bg-[#1C2638] hover:bg-[#25334D] text-bearish text-xs rounded border border-bearish/20 transition text-center font-mono"
-                >
-                  -50 Pips Drop
-                </button>
-              </div>
+              <button
+                onClick={clearAllCandles}
+                className="px-3 py-1.5 bg-[#1E293B] hover:bg-[#2B384E] text-slate-400 hover:text-white rounded text-xs transition"
+              >
+                Clear All
+              </button>
             </div>
 
             {/* Overlays Add */}
             <div className="flex flex-col gap-2.5 bg-[#131A26] p-3 rounded-lg border border-[#1E293B]">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                <Layers className="w-3.5 h-3.5 text-cyan-400" /> Quick Overlays
+                <Layers className="w-3.5 h-3.5 text-cyan-400" /> Quick Smart Money Tools
               </div>
               <button
                 onClick={handleAddFVG}

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { Candle, Overlay, ChartSettings, RevealAnimationType } from '../types/chart';
 import { generateGBMCandle } from '../math/gbm';
+import { generateGroupCandleSequence } from '../math/groupCandles';
+import { generateZigZagCandles } from '../math/zigzag';
 
 interface ChartState {
   candles: Candle[];
@@ -17,7 +19,10 @@ interface ChartState {
   addCandle: (candle: Omit<Candle, 'id' | 'index'>) => void;
   updateCandle: (index: number, updates: Partial<Candle>) => void;
   removeLastCandle: () => void;
+  clearAllCandles: () => void;
   generateRandomWalk: (count: number, drift?: number, volatility?: number) => void;
+  addGroupCandles: (options: { count: number; direction: 'bullish' | 'bearish' | 'range'; momentum: 'high' | 'moderate' | 'grind'; avgCandleSize?: number }) => void;
+  addZigZagLegs: (legs: { targetPrice: number; candleCount: number; label?: string }[]) => void;
   
   addOverlay: (overlay: Omit<Overlay, 'id'>) => void;
   removeOverlay: (id: string) => void;
@@ -111,6 +116,39 @@ export const useChartStore = create<ChartState>((set, get) => ({
     set((state) => ({
       candles: state.candles.slice(0, -1),
     })),
+
+  clearAllCandles: () =>
+    set({
+      candles: [],
+      overlays: [],
+      currentTime: 0,
+    }),
+
+  addGroupCandles: (options) =>
+    set((state) => {
+      const startIndex = state.candles.length;
+      const lastPrice = state.candles.length > 0 ? state.candles[state.candles.length - 1].close : 4129.0;
+      const newCandles = generateGroupCandleSequence(lastPrice, startIndex, options);
+      return {
+        candles: [...state.candles, ...newCandles],
+        currentTime: (state.candles.length + newCandles.length) * 0.6,
+        duration: Math.max(state.duration, (state.candles.length + newCandles.length) * 0.6),
+      };
+    }),
+
+  addZigZagLegs: (legs) =>
+    set((state) => {
+      const startIndex = state.candles.length;
+      const lastPrice = state.candles.length > 0 ? state.candles[state.candles.length - 1].close : 4129.0;
+      const { candles: newCandles, swingPoints } = generateZigZagCandles(lastPrice, startIndex, legs);
+      
+      // Optionally add a liquidity line or wave overlay
+      return {
+        candles: [...state.candles, ...newCandles],
+        currentTime: (state.candles.length + newCandles.length) * 0.6,
+        duration: Math.max(state.duration, (state.candles.length + newCandles.length) * 0.6),
+      };
+    }),
 
   generateRandomWalk: (count, drift = 0.001, volatility = 0.004) =>
     set((state) => {

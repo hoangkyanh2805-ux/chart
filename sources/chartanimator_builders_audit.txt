@@ -1,0 +1,68 @@
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): "stroke-opacity"],["strokeWidth","stroke-width"],["textAnchor","text-anchor"],["textDecoration","text-decoration"],["textRendering","text-rendering"],["transformOrigin","transform-origin"],["underlinePosition","underline-position"],["underlineThickness","underline-thickness"],["unicodeBidi","unicode-bidi"],["unicodeRange","
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): peof n?n(e):n}function aI(e){return aM(aT(),ac,e)}function aM(e,n,t){var r=e.queue;if(null===r)throw Error(u(311));r.lastRenderedReducer=t;var l=e.baseQueue,a=r.pending;if(null!==a){if(null!==l){var o=l.next;l.next=a.next,a.next=o}n.baseQueue=l=a,r.pending=null}if(a=e.baseState,null===l)e.memoizedState=a;else{n=l.next;var i
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): =a:s.next=i,!tB(a,e.memoizedState)&&(oH=!0,f&&null!==(t=lb)))throw t;e.memoizedState=a,e.baseState=o,e.baseQueue=s,r.lastRenderedState=a}return null===l&&(r.lanes=0),[e.memoizedState,r.dispatch]}function aA(e){var n=aT(),t=n.queue;if(null===t)throw Error(u(311));t.lastRenderedReducer=e;var r=t.dispatch,l=t.pending,a=n.memoi
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): action),o=o.next;while(o!==l);tB(a,n.memoizedState)||(oH=!0),n.memoizedState=a,null===n.baseQueue&&(n.baseState=a),t.lastRenderedState=a}return[a,r]}function aR(e,n,t){var r=as,l=aT(),a=rY;if(a){if(void 0===t)throw Error(u(407));t=t()}else t=n();var o=!tB((ac||l).memoizedState,t);if(o&&(l.memoizedState=t,oH=!0),l=l.queue,a7
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): am){eP(!0);try{t()}finally{eP(!1)}}}return n.memoizedState=n.baseState=e,n.queue={pending:null,lanes:0,dispatch:null,lastRenderedReducer:aF,lastRenderedState:e},n}function aQ(e,n,t,r){return e.baseState=t,aM(e,ac,"function"==typeof r?r:aF)}function aW(e,n,t,r,l){if(oE(e))throw Error(u(485));if(null!==(e=n.action)){var a={pa
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): ta;break e}}rZ(r)}r=!1}r&&(n=t[0])}}return(t=aP()).memoizedState=t.baseState=n,r={pending:null,lanes:0,dispatch:null,lastRenderedReducer:aZ,lastRenderedState:n},t.queue=r,t=ow.bind(null,as,r),r.dispatch=t,r=aH(!1),a=oS.bind(null,as,!1,r.queue),r=aP(),l={state:n,dispatch:null,action:e,pending:null},r.queue=l,t=aW.bind(null,a
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): ==n)return n;var t={};return(n={memoizedState:Y,baseState:Y,baseQueue:null,queue:{pending:null,lanes:0,dispatch:null,lastRenderedReducer:aF,lastRenderedState:Y},next:null}).next={memoizedState:t,baseState:t,baseQueue:null,queue:{pending:null,lanes:0,dispatch:null,lastRenderedReducer:aF,lastRenderedState:t},next:null},e.memo
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): erState:null,next:null};if(oE(e))ox(n,l);else{var a=e.alternate;if(0===e.lanes&&(null===a||0===a.lanes)&&null!==(a=n.lastRenderedReducer))try{var o=n.lastRenderedState,i=a(o,t);if(l.hasEagerState=!0,l.eagerState=i,tB(i,o))return rm(e,n,l,0),null===uP&&rp(),!1}catch(e){}finally{}if(null!==(t=rh(e,n,l,r)))return st(t,e,r),oN(
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): ry{t(n)}finally{eP(!1)}}}else l=n;return r.memoizedState=r.baseState=l,r.queue=e={pending:null,lanes:0,dispatch:null,lastRenderedReducer:e,lastRenderedState:l},e=e.dispatch=ob.bind(null,as,e),[r.memoizedState,e]},useRef:function(e){return aP().memoizedState={current:e}},useState:function(e){var n=(e=aH(e)).queue,t=ow.bind(n
+
+[/_next/static/chunks/4bd1b696-5232ac987792671c.js] (trend): tate:aJ,useOptimistic:function(e){var n=aP();n.memoizedState=n.baseState=e;var t={pending:null,lanes:0,dispatch:null,lastRenderedReducer:null,lastRenderedState:null};return n.queue=t,n=oS.bind(null,as,!0,t),t.dispatch=n,[e,n]},useMemoCache:aD,useCacheRefresh:function(){return aP().memoizedState=oy.bind(null,as)},useEffectEv
+
+[/_next/static/chunks/9065-ef2cec3f6727b582.js] (trend): eturn{pathToSegment:i.slice(0,-1),segmentPath:i,segment:i[i.length-1]??"",tree:t,seedData:r,head:n,isHeadPartial:a,isRootRender:4===e.length}}function u(e,t){let r=(0,o.getRenderedPathname)(e),n=(0,o.getRenderedSearch)(e),a=(0,s.createHrefFromUrl)(new URL(location.href)),i=t.f[0],l=i[0],u={c:a.split("/"),q:n,i:t.i,f:[[funct
+
+[/_next/static/chunks/9065-ef2cec3f6727b582.js] (trend): _REQUEST_KEY,refreshState:null,varyPath:e,isPage:!0,slots:null,prefetchHints:0}}function ea(e,t,r,n,a,i,o){let s=(0,c.getRenderedSearchFromVaryPath)(n)??"";return t.status=2,t.tree=r,t.metadata=en(n),t.staleAt=e+_.STATIC_STALETIME_MS,t.couldBeIntercepted=a,t.canonicalUrl=i,t.renderedSearch=s,t.supportsPerSegmentPrefetching=
+
+[/_next/static/chunks/9065-ef2cec3f6727b582.js] (trend): NEXT_NAV_DEPLOYMENT_ID_HEADER)??f.buildId)!==(0,T.getNavigationBuildId)())return el(e,Date.now()+1e4),null;let d=(0,p.getRenderedPathname)(t),g=(0,p.getRenderedSearch)(t),y={metadataVaryPath:null},b=(n=d.split("/").filter(e=>""!==e),o=m.ROOT_SEGMENT_REQUEST_KEY,function e(t,r,n,a,i,o,s,l){let u,f,d=null,h=t.slots;if(null!==
+
+[/_next/static/chunks/9065-ef2cec3f6727b582.js] (trend): (e,Date.now()+1e4),null;let f=c.h,d=null!==f?(0,o.readVaryParams)(f):null;!function(e,t,r,n,a,i,o,l,u,c,f){let d=(0,p.getRenderedSearch)(r),h=(0,g.normalizeFlightData)(n.f);if("string"==typeof h||1!==h.length)return el(a,e+1e4);let m=h[0];if(!m.isRootRender)return el(a,e+1e4);let _=m.tree,y="1"===r.headers.get(s.NEXT_DID_PO
+
+[/_next/static/chunks/9065-ef2cec3f6727b582.js] (trend): UTER_PREFETCH_HEADER]="1"}try{let e,i=await eb(u,f);if(!i||!i.ok||!i.body)return e_(a,Date.now()+1e4),null;let s=(0,p.getRenderedSearch)(i);if(s!==t.renderedSearch)return e_(a,Date.now()+1e4),null;let c=(0,E.createPromiseWithResolvers)(),y=null,v=null;if(r===b.FetchStrategy.Full){var d,m,_;let t,r;d=i.body,m=c.resolve,_=fun
+
+[/_next/static/chunks/9065-ef2cec3f6727b582.js] (trend): !h,route:b,node:p,dynamicRequestTree:j(b,y,h,_,s),refreshState:null,children:g}}function w(e){if(e.isPage){let t=(0,b.getRenderedSearchFromVaryPath)(e.varyPath);if(null===t)return s.PAGE_SEGMENT_KEY;let r=JSON.stringify(Object.fromEntries(new URLSearchParams(t)));return"{}"!==r?s.PAGE_SEGMENT_KEY+"?"+r:s.PAGE_SEGMENT_KEY}re
+
+[/_next/static/chunks/9065-ef2cec3f6727b582.js] (trend): arent?null:e(t.parent,r)}}},getPartialLayoutVaryPath:function(){return d},getPartialPageVaryPath:function(){return h},getRenderedSearchFromVaryPath:function(){return y},getRouteVaryPath:function(){return l},getSegmentVaryPathForRequest:function(){return g}};for(var a in n)Object.defineProperty(t,a,{enumerable:!0,get:n[a]});
+
+[/_next/static/chunks/9065-ef2cec3f6727b582.js] (trend): L:function(){return f},getCacheKeyForDynamicParam:function(){return d},getParamValueFromCacheKey:function(){return h},getRenderedPathname:function(){return u},getRenderedSearch:function(){return l},parseDynamicParamFromURLPart:function(){return c},urlSearchParamsToParsedUrlQuery:function(){return m},urlToUrlWithoutFlightMar
+
+[/_next/static/chunks/app/layout-6c92ebda80392fab.js] (GroupCandle): CREATOR":p?.tier??"FREE")||null===t,l="PRO"===t,{isFree:r,isPro:l,isCreator:d="CREATOR"===t,canUseWireframeTool:d,canUseGroupCandles:l||d,canUsePatternBuilder:d,canUseGBMBuilder:d,canUseAdvancedTimeline:d,canUseTTS:d,canUseScreenRecorder:l||d,canUploadMedia:l||d,canExport1080p:l||d,canExport4K:d,canRemoveWatermark:l||d,canAccessP
+
+[/_next/static/chunks/app/layout-6c92ebda80392fab.js] (PatternBuilder): )||null===t,l="PRO"===t,{isFree:r,isPro:l,isCreator:d="CREATOR"===t,canUseWireframeTool:d,canUseGroupCandles:l||d,canUsePatternBuilder:d,canUseGBMBuilder:d,canUseAdvancedTimeline:d,canUseTTS:d,canUseScreenRecorder:l||d,canUploadMedia:l||d,canExport1080p:l||d,canExport4K:d,canRemoveWatermark:l||d,canAccessProTemplates:l||d,canAccessE
+
+[/_next/static/chunks/app/layout-6c92ebda80392fab.js] (GBMBuilder): ,{isFree:r,isPro:l,isCreator:d="CREATOR"===t,canUseWireframeTool:d,canUseGroupCandles:l||d,canUsePatternBuilder:d,canUseGBMBuilder:d,canUseAdvancedTimeline:d,canUseTTS:d,canUseScreenRecorder:l||d,canUploadMedia:l||d,canExport1080p:l||d,canExport4K:d,canRemoveWatermark:l||d,canAccessProTemplates:l||d,canAccessEliteTemplates:d,can
+
+[/_next/static/chunks/9da6db1e-fc45889f8caf9e0e.js] (trend): nbot","nessus","petalbot","pinterest","prerender","rogerbot","screaming frog","sebot-wa","sitebulb","slackbot","slurp","trendictionbot","turnitin","twitterbot","vercel-screenshot","vercelbot","yahoo! slurp","yandexbot","zoombot","bot.htm","bot.php","(bot;","bot/","crawler","ahrefsbot","ahrefssiteaudit","semrushbot","siteaud
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (Group Candle): display:"flex",gap:8,marginBottom:24,justifyContent:"center"},children:[["single","Single Candle","★ Free",R],["group","Group Candle","★ Pro",$],["zigzag","ZigZag Candle","★ Creator",A]].map(([e,t,r,o])=>{let i="single"!==e;return(0,n.jsxs)("button",{onClick:()=>!i&&eT(e),style:{padding:"9px 20px",borderRadius:10,border:`1px solid
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (Group Candle): ol","Unlimited projects","Full timeline, canvas & live preview"],color:R}),(0,n.jsx)(X,{label:"Builder & Tools",items:["Group Candle Builder","Pixel Editor","Advanced trading tools","Screen Recorder"],color:R}),(0,n.jsx)(X,{label:"Workflow",items:["Chart Blocks: group overlays into reusable blocks","Static Content Mode: thumbnails
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (Group Candle): IF + PNG export \xb7 no watermark","Up to 30-min export length"],color:$}),(0,n.jsx)(X,{label:"Builder & Tools",items:["Group Candle Builder","Pixel Editor","Advanced trading tools","Screen Recorder","Commercial licence"],color:$}),(0,n.jsx)(X,{label:"Workflow",items:["Chart Blocks: group overlays into reusable blocks","Static Con
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (Group Candle): ,marginTop:3},children:r})]},e))]}),[["Candle Builders",null,null,null,null],["","Single Candle Builder",!0,!0,!0],["","Group Candle Builder",!0,!0,!0],["","Pattern Builder",!1,!1,!0],["","ZigZag Candle Builder",!1,!1,!0],["","GBM Builder (price simulation)",!1,!1,!0],["","Brownian Reveal animation",!1,!1,!0],["Editor & Workflow",
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (ZigZag): Bottom:24,justifyContent:"center"},children:[["single","Single Candle","★ Free",R],["group","Group Candle","★ Pro",$],["zigzag","ZigZag Candle","★ Creator",A]].map(([e,t,r,o])=>{let i="single"!==e;return(0,n.jsxs)("button",{onClick:()=>!i&&eT(e),style:{padding:"9px 20px",borderRadius:10,border:`1px solid ${eS===e?o+"60":k}`,
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (ZigZag): t)=>(0,n.jsx)("div",{style:{flex:1,height:5,borderRadius:2,background:t<ez?z:v,transition:"background 0.2s"}},t))})]}),"zigzag"===eS&&(0,n.jsxs)("div",{style:{background:"rgba(240,184,112,0.06)",border:"1px solid rgba(240,184,112,0.2)",borderRadius:10,padding:14,textAlign:"center"},children:[(0,n.jsx)("div",{style:{fontSize:
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (ZigZag): ottom:6},children:"\uD83D\uDD12"}),(0,n.jsx)("div",{style:{fontSize:12,fontWeight:700,color:A,marginBottom:4},children:"ZigZag Builder"}),(0,n.jsx)("div",{style:{fontSize:11,color:T,lineHeight:1.5,marginBottom:10},children:"Swing-aware candle sequences with automatic wave analysis. Creator only."}),(0,n.jsx)("button",{onClic
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (ZigZag): l,null],["","Single Candle Builder",!0,!0,!0],["","Group Candle Builder",!0,!0,!0],["","Pattern Builder",!1,!1,!0],["","ZigZag Candle Builder",!1,!1,!0],["","GBM Builder (price simulation)",!1,!1,!0],["","Brownian Reveal animation",!1,!1,!0],["Editor & Workflow",null,null,null,null],["","Chart Blocks (reusable overlay groups
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (Zig Zag): in export length"],color:A}),(0,n.jsx)(X,{label:"Advanced Builder",items:["Pattern Builder: chart pattern composition","Zig Zag Candle Builder","GBM Builder: generative price simulation","Brownian Reveal: GBM-powered candle animation","Market Line: animated price path","Baseline Chart: dual-zone area chart","Advanced Keyframe
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (Brownian): tems:["Pattern Builder: chart pattern composition","Zig Zag Candle Builder","GBM Builder: generative price simulation","Brownian Reveal: GBM-powered candle animation","Market Line: animated price path","Baseline Chart: dual-zone area chart","Advanced Keyframes: animate any property","AI voice narration with auto-sync"],color:A
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (Brownian): ","Pattern Builder",!1,!1,!0],["","ZigZag Candle Builder",!1,!1,!0],["","GBM Builder (price simulation)",!1,!1,!0],["","Brownian Reveal animation",!1,!1,!0],["Editor & Workflow",null,null,null,null],["","Chart Blocks (reusable overlay groups)",!0,!0,!0],["","Static Content Mode (thumbnails & graphics)",!0,!0,!0],["Drawing & Tr
+
+[/_next/static/chunks/app/page-7ac7fb13d87530f5.js] (trend): e:"Wyckoff Accumulation",tags:["Stocks","Swing"],access:"creator",thumbnailUrl:null,aspectRatio:"16:9"},{id:"t6",title:"Trend Continuation",tags:["Forex","Free"],access:"free",thumbnailUrl:null,aspectRatio:"16:9"}]).map(e=>{let t="creator"===e.access?A:"pro"===e.access?$:R;return"creator"===e.access||e.access,(0,n.jsxs)("di
+
