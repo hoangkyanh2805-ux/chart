@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
-import { Search, Plus, Sparkles, Play, Clock, Flame } from 'lucide-react';
+import { Search, Plus, Sparkles, Play, Clock, Flame, FileText } from 'lucide-react';
+import { BriefImporterModal } from './BriefImporterModal';
 
 interface TemplateItem {
   id: string;
@@ -21,6 +22,15 @@ interface TemplateItem {
 }
 
 const REAL_TEMPLATES: TemplateItem[] = [
+  {
+    id: 'brief-risk-first-20261019',
+    title: '🔥 Define Loss First (Brief A01)',
+    category: 'Top',
+    access: 'PRO',
+    duration: 12,
+    headline: 'THE STOP LOSS CAME FIRST',
+    subline: 'The entry came second. That order is the whole video.',
+  },
   {
     id: 't-1',
     title: 'Entry Checklist',
@@ -164,6 +174,8 @@ export const TemplateSidebar: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  const [isBriefModalOpen, setIsBriefModalOpen] = useState<boolean>(false);
+
   const categories = ['All', 'Top', 'ICT', 'Crypto', 'Forex'];
 
   const filtered = REAL_TEMPLATES.filter((t) => {
@@ -179,22 +191,53 @@ export const TemplateSidebar: React.FC = () => {
     // Apply template duration
     useChartStore.setState({ duration: t.duration || 10 });
 
-    // Apply clean illustrative liquidity sweep candles
     clearAllCandles();
-    addCandle({ open: 4125.0, high: 4134.0, low: 4124.0, close: 4133.0 });
-    addCandle({ open: 4133.0, high: 4145.0, low: 4132.0, close: 4143.5 }); // Push High
-    addCandle({ open: 4143.5, high: 4149.0, low: 4128.0, close: 4130.0 }); // SWEEP Wick & Sharp Rejection!
-    addCandle({ open: 4130.0, high: 4132.0, low: 4118.0, close: 4120.0 }); // Displacement Down
 
-    addOverlay({
-      type: 'LIQUIDITY_LINE',
-      startCandleIndex: 1,
-      endCandleIndex: 2,
-      priceStart: 4145.0,
-      priceEnd: 4145.0,
-      color: '#F59E0B',
-      label: 'BSL Sweep Level ($4,145.00)',
-    });
+    if (t.id === 'brief-risk-first-20261019') {
+      // Setup from Google Drive Brief: Risk-First 3-Step Setup
+      addCandle({ open: 4120.0, high: 4132.0, low: 4119.0, close: 4130.0 });
+      addCandle({ open: 4130.0, high: 4131.0, low: 4123.0, close: 4124.5 });
+      addCandle({ open: 4124.5, high: 4142.0, low: 4124.0, close: 4140.0 });
+      addCandle({ open: 4140.0, high: 4141.0, low: 4128.0, close: 4129.0 }); // Pullback to support
+      addCandle({ open: 4129.0, high: 4136.0, low: 4126.0, close: 4134.5 }); // Rejection entry
+      addCandle({ open: 4134.5, high: 4148.0, low: 4133.5, close: 4146.0 }); // Target expansion
+
+      addOverlay({
+        type: 'LIQUIDITY_LINE',
+        startCandleIndex: 1,
+        endCandleIndex: 5,
+        priceStart: 4128.0,
+        priceEnd: 4128.0,
+        color: '#38BDF8',
+        label: 'Previous High Support ($4,128.00)',
+      });
+
+      addOverlay({
+        type: 'LONG_SHORT',
+        startCandleIndex: 4,
+        endCandleIndex: 5,
+        priceStart: 4134.5,
+        priceEnd: 4148.0,
+        color: '#00F5A0',
+        label: 'Risk Budget: $30 | Size: $1.50/pip',
+      });
+    } else {
+      // Standard illustrative liquidity sweep candles
+      addCandle({ open: 4125.0, high: 4134.0, low: 4124.0, close: 4133.0 });
+      addCandle({ open: 4133.0, high: 4145.0, low: 4132.0, close: 4143.5 }); // Push High
+      addCandle({ open: 4143.5, high: 4149.0, low: 4128.0, close: 4130.0 }); // SWEEP Wick & Sharp Rejection!
+      addCandle({ open: 4130.0, high: 4132.0, low: 4118.0, close: 4120.0 }); // Displacement Down
+
+      addOverlay({
+        type: 'LIQUIDITY_LINE',
+        startCandleIndex: 1,
+        endCandleIndex: 2,
+        priceStart: 4145.0,
+        priceEnd: 4145.0,
+        color: '#F59E0B',
+        label: 'BSL Sweep Level ($4,145.00)',
+      });
+    }
 
     // Reset and start playing immediately!
     setCurrentTime(0);
@@ -230,11 +273,12 @@ export const TemplateSidebar: React.FC = () => {
           </div>
 
           <button
-            onClick={() => handleApplyTemplate(REAL_TEMPLATES[0])}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-[11px] font-bold transition"
+            onClick={() => setIsBriefModalOpen(true)}
+            title="Dán Brief tạo Video tự động cho Editor"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold transition shadow-sm"
           >
-            <Plus className="w-3 h-3" />
-            <span>NEW</span>
+            <FileText className="w-3 h-3 text-emerald-400" />
+            <span>+ BRIEF</span>
           </button>
         </div>
 
@@ -330,6 +374,12 @@ export const TemplateSidebar: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Brief-to-Video Modal */}
+      <BriefImporterModal
+        isOpen={isBriefModalOpen}
+        onClose={() => setIsBriefModalOpen(false)}
+      />
     </div>
   );
 };
