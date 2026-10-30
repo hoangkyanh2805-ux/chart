@@ -24,12 +24,14 @@ export interface Overlay {
   color?: string;
   opacity?: number;
   label?: string;
+  [key: string]: any;
 }
 
 export interface ScriptSubtitle {
   timePercent: number; // 0.0 -> 1.0 (or progress milestone)
   text: string;
-  stageName?: 'Hook' | 'Trap' | 'Setup' | 'Execution' | 'Lesson';
+  stageName?: 'Hook' | 'Trap' | 'Setup' | 'Execution' | 'Lesson' | string;
+  [key: string]: any;
 }
 
 export interface ExecutionOrder {
@@ -39,6 +41,9 @@ export interface ExecutionOrder {
   tp: number;
   lot: number;
   risk: number; // e.g. 30 ($30)
+  reward?: number;
+  pips?: number;
+  [key: string]: any;
 }
 
 export interface SetupValidationReport {
