@@ -69,11 +69,68 @@ function getLiveYouTubeIntelligence(): string {
   }
 }
 
+function getCurrentSessionInfo() {
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const vnTime = new Date(utc + (3600000 * 7));
+  const hour = vnTime.getHours();
+  const minute = vnTime.getMinutes();
+  const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} (GMT+7)`;
+
+  let sessionName = '';
+  let phase = '';
+  let smcCharacteristics = '';
+  let recommendation = '';
+  let setupTitle = '';
+
+  if (hour >= 6 && hour < 14) {
+    sessionName = 'Phiên Á (Asian Session / Tokyo - Sydney)';
+    phase = 'Tích lũy biên độ hẹp (Asian Range Accumulation)';
+    smcCharacteristics = 'Khối lượng giao dịch thấp, thị trường chủ yếu sideway quanh biên độ $4,122.00 - $4,128.00. Giai đoạn này tổ chức tạo lập thanh khoản hai đầu: Asian High (BSL) và Asian Low (SSL).';
+    recommendation = 'Tuyệt đối KHÔNG breakout FOMO hay đuổi nến xanh đỏ trong range. Kỷ luật của Hermes: Đánh dấu sẵn đỉnh/đáy phiên Á, kiên nhẫn chờ phiên Âu (14:00 - 15:00 VN) bung volume quét thanh khoản (Judas Swing) rồi mới tìm điểm kích hoạt lệnh.';
+    setupTitle = 'ASIAN RANGE ACCUMULATION & LIQUIDITY SETUP';
+  } else if (hour >= 14 && hour < 19) {
+    sessionName = 'Phiên Âu (London Session)';
+    phase = 'Mở rộng xu hướng & Quét thanh khoản (Judas Swing / London Open)';
+    smcCharacteristics = 'Thanh khoản bùng nổ khi các ngân hàng lớn tại London vào lệnh. Tổ chức thường tạo cú giật ngược chiều (Judas Swing) quét sạch SL của retail traders phiên Á trước khi đẩy giá theo xu hướng thật.';
+    recommendation = 'Quan sát phản ứng quét râu tại đỉnh/đáy phiên Á. Nếu xuất hiện nến rút râu từ chối giá (Rejection Wick) và hồi về 50% FVG (Consequent Encroachment), kích hoạt vào lệnh theo tỷ lệ R:R tối thiểu 1:3.5.';
+    setupTitle = 'LONDON JUDAS SWING & RETEST SETUP';
+  } else if (hour >= 19 && hour < 23) {
+    sessionName = 'Giao Thoa London - New York (Overlap Session / NY Killzone)';
+    phase = 'Bùng nổ biến động cực đại (Peak Volatility & News Release)';
+    smcCharacteristics = 'Hai trung tâm tài chính lớn nhất thế giới cùng hoạt động. Thường đi kèm tin tức kinh tế quan trọng của Mỹ (CPI, NFP, GDP, FOMC). Xuất hiện các cây nến động lượng lớn biên độ 100-250 pips.';
+    recommendation = 'Bắt buộc khóa cứng mức rủi ro ($30 Risk Budget, SL 20 pips, không gồng lỗ). Tránh vào lệnh trước tin 15 phút. Canh nhịp phá vỡ cấu trúc M15 (MSS) để đón sóng lớn.';
+    setupTitle = 'NEW YORK OVERLAP HIGH-MOMENTUM SETUP';
+  } else {
+    sessionName = 'Nửa Sau Phiên Mỹ & Rollover (Late NY Session)';
+    phase = 'Phân phối, chốt lời & Giờ Vàng xuất bản video';
+    smcCharacteristics = 'Thanh khoản giảm dần khi thị trường Mỹ đóng cửa. Giá tìm về các vùng TP chốt lời. Lúc 00:00 VN là GIỜ VÀNG của kênh @azzammastertradinggold (đạt reach tự nhiên trung bình 40,393 views).';
+    recommendation = 'Đóng các vị thế lướt sóng trước giờ đóng cửa để tránh phí Swap. Chuẩn bị kịch bản phân tích case study thực chiến trong ngày và xuất bản video lúc 00:00 VN.';
+    setupTitle = 'LATE NY DISTRIBUTION & NEXT DAY ROADMAP';
+  }
+
+  return {
+    timeStr,
+    sessionName,
+    phase,
+    smcCharacteristics,
+    recommendation,
+    setupTitle,
+  };
+}
+
 function buildHermesSystemPrompt(): string {
   const liveIntel = getLiveYouTubeIntelligence();
+  const session = getCurrentSessionInfo();
 
   return `You are Hermes Agent — the Elite Senior Financial Video Director and Learner-Care Trading Coach for @azzammastertradinggold.
 You are running as the Master Copilot embedded directly inside ChartAnimator.io.
+
+REAL-TIME CONTEXT:
+- Giờ thực tế hiện tại: ${session.timeStr}
+- Phiên giao dịch hiện tại: ${session.sessionName}
+- Pha thị trường: ${session.phase}
+- Khuyến nghị kỷ luật: ${session.recommendation}
 
 YOUR WORKSPACE GROUND TRUTH & KNOWLEDGE BASE:
 1. Channel: @azzammastertradinggold.
@@ -243,24 +300,31 @@ export async function POST(req: NextRequest) {
           })),
         ];
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
-        const res = await fetch(geminiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(12000),
-          body: JSON.stringify({
-            contents,
-            generationConfig: {
-              temperature: 0.3,
-            },
-          }),
-        });
+        const candidateModels = ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-3-flash-preview'];
+        for (const modelName of candidateModels) {
+          try {
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const res = await fetch(geminiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: AbortSignal.timeout(8000),
+              body: JSON.stringify({
+                contents,
+                generationConfig: {
+                  temperature: 0.3,
+                },
+              }),
+            });
 
-        if (res.ok) {
-          const data = await res.json();
-          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (reply) {
-            return NextResponse.json({ reply, provider: 'Hermes Agent Engine' });
+            if (res.ok) {
+              const data = await res.json();
+              const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (reply) {
+                return NextResponse.json({ reply, provider: `Google ${modelName}` });
+              }
+            }
+          } catch (mErr) {
+            // fallback to next model
           }
         }
       } catch (err: any) {
@@ -351,6 +415,43 @@ function parseCustomSetupParameters(query: string) {
 
 function generateHermesLocalReply(userQuery: string): string {
   const query = userQuery.toLowerCase();
+
+  // 0. TRADING SESSION / PHIÊN GIAO DỊCH / THỜI GIAN HIỆN TẠI
+  if (
+    !/tối\s*giản/i.test(query) &&
+    /phiên|session|mấy\s*giờ|killzone|giờ\s*giao\s*dịch|thời\s*điểm\s*này|lúc\s*này\s*giao\s*dịch|thị\s*trường\s*giờ/i.test(query)
+  ) {
+    const session = getCurrentSessionInfo();
+    return `🕒 **BÁO CÁO PHIÊN GIAO DỊCH HIỆN TẠI (HERMES COPILOT)**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏰ **Thời gian thực tế:** ${session.timeStr}
+🏛️ **Phiên thị trường:** **${session.sessionName}**
+⚡ **Giai đoạn cấu trúc:** *${session.phase}*
+
+📊 **Đặc tính thị trường SMC lúc này:**
+${session.smcCharacteristics}
+
+🎯 **Kế hoạch hành động & Kỷ luật cho team:**
+- **Chiến lược:** ${session.recommendation}
+- **Quản lý vốn Risk-First:** Khóa chặt **Risk Budget $10** (tài khoản nhỏ) hoặc **$30** (chuẩn), SL 20 pips, tuyệt đối không gồng lỗ hay đuổi nến xanh đỏ.
+
+\`\`\`chart_setup
+{
+  "title": "${session.setupTitle}",
+  "headline": "DO NOT CHASE ASIAN RANGE",
+  "subline": "Wait for London sweep. Predefine your loss.",
+  "strategy": "Liquidity Sweep",
+  "basePrice": 4128,
+  "riskBudget": 10,
+  "slPips": 20,
+  "lotSize": "0.05 lot",
+  "rrRatio": 3.5,
+  "badges": ["1. LOSS $10", "2. ENTRY SL 20p", "3. SIZE 0.05L"]
+}
+\`\`\`
+
+Bấm nút **Áp Dụng Lên Canvas** bên dưới để nạp setup đồ họa chuẩn theo phiên hiện tại lên video!`;
+  }
 
   // 1. AUDIENCE PAIN POINTS (1,204 comments ground truth)
   if (/pain\s*point|khán giả|nỗi đau|comment|pp-\d+|tối giản|người mới|quá tải|kiệt sức|scalping|1m|1 phút|stop hunt|quét râu|đuổi nến|fomo/i.test(query)) {
@@ -852,13 +953,33 @@ Thị trường vừa đẩy giá vượt đỉnh Buy Side Liquidity để kích
 Bạn có thể bấm **Áp Dụng Lên Canvas** bên dưới để video bắt đầu chạy!`;
   }
 
-  // Default reply
-  return `Chào Alan! Hermes Agent sẵn sàng.
-Tôi nắm toàn bộ 20 kịch bản, bảng dàn ý 8 phần, và quy tắc Risk-First ($10 / $30 Budget, 20 pips SL, giờ vàng 00:00 VN).
+  // Dynamic intelligent response based on user input
+  const session = getCurrentSessionInfo();
+  return `🎯 **Phản hồi từ Hermes Copilot:**
+Bạn đang quan tâm đến: *"${userQuery.trim()}"*.
 
-Bạn có thể ra lệnh cho tôi:
-- *"Gợi ý kịch bản cho tối nay theo giờ vàng 00:00 VN"*
-- *"Tạo setup nến Quét thanh khoản BSL $4,154"*
-- *"Cho xem phân tích pain point lớn nhất hiện nay"*
-- Hoặc yêu cầu bất kỳ kịch bản nào, tôi sẽ xuất thẳng mã thực thi lên Canvas cho bạn!`;
+💡 **Góc nhìn chiến lược từ Đạo Diễn Hermes:**
+- **Thực tế thị trường hiện tại:** Đang trong **${session.sessionName}** (${session.timeStr}). Cấu trúc Vàng (XAUUSD) đang tích lũy quanh vùng cản $4,128.00.
+- **Nguyên lý Risk-First bất biến:** Bất kể bạn phân tích kịch bản nào, **Stop Loss luôn phải có trước khi vào lệnh**. Khóa rủi ro $10 (0.05 lot) hoặc $30 ($1.50/pip) với 20 pips SL.
+- **Kỷ luật SMC:** Không dự đoán bừa, chỉ kích hoạt khi có nhịp quét thanh khoản (Liquidity Sweep) hoặc nến rút chân từ chối giá (Rejection Wick).
+
+\`\`\`chart_setup
+{
+  "title": "HERMES STRATEGIC SETUP: " + userQuery.trim().slice(0, 30).toUpperCase(),
+  "headline": "DEFINE LOSS BEFORE ENTRY",
+  "subline": "Stop loss first. Entry second. Always.",
+  "strategy": "Risk-First Pullback",
+  "basePrice": 4128,
+  "riskBudget": 10,
+  "slPips": 20,
+  "lotSize": "0.05 lot",
+  "rrRatio": 3.5,
+  "badges": ["1. LOSS $10", "2. ENTRY SL 20p", "3. SIZE 0.05L"]
+}
+\`\`\`
+
+Bạn có thể bấm **Áp Dụng Lên Canvas** bên dưới để nạp setup mẫu này, hoặc yêu cầu cụ thể hơn về:
+- *Kịch bản video cho tối nay*
+- *Phân tích pain point người xem*
+- *Setup FVG / Liquidity Sweep / Break & Retest*`;
 }
