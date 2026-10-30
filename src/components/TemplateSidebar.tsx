@@ -25,6 +25,37 @@ interface TemplateItem {
 }
 
 const REAL_TEMPLATES: TemplateItem[] = [
+  // 3 Dedicated Hexagold TikTok Viral Setups
+  {
+    id: 'hexagold-asia-sweep',
+    title: '📱 [TikTok] Hexagold: Bẫy Quét Đỉnh Á XAUUSD',
+    category: 'Top',
+    access: 'CREATOR',
+    duration: 6,
+    headline: 'TẠI SAO BẠN THUA LỖ KHI BUY GOLD TẠI ĐỈNH?',
+    subline: 'Bẫy Liquidity Sweep M15 & Điểm vào lệnh chuẩn SMC',
+    courseTag: 'Hexagold TikTok',
+  },
+  {
+    id: 'hexagold-cpi-dump',
+    title: '📱 [TikTok] Hexagold: Cú Giật Râu Nến CPI',
+    category: 'Top',
+    access: 'PRO',
+    duration: 6,
+    headline: 'ĐỪNG GIAO DỊCH KHI TIN CPI VỪA RA!',
+    subline: 'Chờ Judas Swing quét sạch thanh khoản rồi Retest FVG',
+    courseTag: 'Hexagold TikTok',
+  },
+  {
+    id: 'hexagold-risk-first-30',
+    title: '📱 [TikTok] Hexagold: Bí Quyết Đặt SL $30',
+    category: 'Top',
+    access: 'CREATOR',
+    duration: 6,
+    headline: 'THE STOP LOSS CAME FIRST',
+    subline: 'Quy tắc vàng sống còn: Risk Budget trước Entry',
+    courseTag: 'Hexagold TikTok',
+  },
   // Presets from Course + Pain Point Matrix
   ...COURSE_PAINPOINT_PRESETS.map((p) => ({
     id: p.id,
@@ -203,7 +234,17 @@ export const TemplateSidebar: React.FC = () => {
   });
 
   const handleApplyTemplate = (t: TemplateItem) => {
-    // Check if this is a Course + Pain Point Preset
+    // 1. Check if matching in core TEMPLATES (including Hexagold TikTok Viral Templates)
+    const { TEMPLATES } = require('../data/templates');
+    const matchedCore = TEMPLATES?.find((tpl: any) => tpl.id === t.id);
+    if (matchedCore) {
+      useChartStore.getState().loadTemplate(matchedCore);
+      setCurrentTime(0);
+      setIsPlaying(true);
+      return;
+    }
+
+    // 2. Check if this is a Course + Pain Point Preset
     const preset = COURSE_PAINPOINT_PRESETS.find((p) => p.id === t.id);
     if (preset) {
       setCandles(preset.candles);

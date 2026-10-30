@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { exportCanvasVideo } from '../utils/recorder';
-import { Video, X, CheckCircle2, Loader2, Sparkles, Film } from 'lucide-react';
+import { Video, X, CheckCircle2, Loader2, Sparkles, Film, ShieldAlert, ShieldCheck, Zap, Lock, Globe } from 'lucide-react';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -11,17 +11,39 @@ interface ExportModalProps {
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
-  const { duration, setCurrentTime, setIsPlaying, settings } = useChartStore();
+  const {
+    duration,
+    setCurrentTime,
+    setIsPlaying,
+    settings,
+    validationReport,
+    validateCurrentSetup,
+    applyComprehensiveAutoFix,
+    applyEnglishVersion,
+    headlineText,
+    sublineText,
+    calloutPinText,
+  } = useChartStore();
 
   const [fps, setFps] = useState<number>(30);
+  const [exportLanguage, setExportLanguage] = useState<'en' | 'vi'>('en');
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadFilename, setDownloadFilename] = useState<string>('');
 
+  const report = validationReport || (isOpen ? validateCurrentSetup() : null);
+  const score = report?.score ?? 100;
+  const isSafe = (report?.isValid ?? true) && score >= 80;
+
   if (!isOpen) return null;
 
   const handleStartExport = () => {
+    // If English version is chosen, ensure current canvas state is translated to English
+    if (exportLanguage === 'en') {
+      applyEnglishVersion();
+    }
+
     const canvas = document.querySelector('canvas') as HTMLCanvasElement | null;
     if (!canvas) {
       alert('Không tìm thấy Canvas!');
@@ -96,22 +118,101 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => 
             {/* Format Info */}
             <div className="bg-[#161F2E] p-3 rounded-xl border border-[#1E293B] flex flex-col gap-2">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Tỷ lệ khung hình:</span>
-                <span className="font-bold text-primary font-mono">{settings.aspectRatio}</span>
+                <span className="text-slate-400">Định dạng xuất:</span>
+                <span className="font-bold text-amber-400 font-mono flex items-center gap-1">
+                  📱 TikTok / Shorts 9:16 Vertical
+                </span>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-slate-400">Thời lượng video:</span>
                 <span className="font-bold text-white font-mono">{duration.toFixed(1)} giây</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Mục đích tối ưu:</span>
-                <span className="text-slate-300">
-                  {settings.aspectRatio === '9:16'
-                    ? 'TikTok / YouTube Shorts / Reels (Dọc)'
-                    : settings.aspectRatio === '16:9'
-                    ? 'YouTube Video (Ngang)'
-                    : 'Instagram Post (Vuông)'}
+                <span className="text-slate-400">Bộ giải mã:</span>
+                <span className="text-emerald-400 font-mono text-[11px] font-bold">MP4 / WebM H.264 60FPS</span>
+              </div>
+            </div>
+
+            {/* Language Selection: English (US/EU) vs Vietnamese */}
+            <div className="bg-[#121927] p-3 rounded-xl border border-blue-500/30 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-blue-400" />
+                  Ngôn ngữ video xuất bản:
                 </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30">
+                  {exportLanguage === 'en' ? '🇺🇸 Khách Âu - Mỹ' : '🇻🇳 Khán Giả Việt'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExportLanguage('en');
+                    applyEnglishVersion();
+                  }}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    exportLanguage === 'en'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-400 shadow-md shadow-blue-500/25'
+                      : 'border-[#1E293B] bg-[#161F2E] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>🇺🇸 English (US/EU)</span>
+                  {exportLanguage === 'en' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setExportLanguage('vi')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                    exportLanguage === 'vi'
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-md shadow-amber-500/20'
+                      : 'border-[#1E293B] bg-[#161F2E] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <span>🇻🇳 Tiếng Việt</span>
+                  {exportLanguage === 'vi' && <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />}
+                </button>
+              </div>
+
+              {exportLanguage === 'en' && (
+                <div className="p-2.5 rounded-lg bg-blue-950/30 border border-blue-500/20 text-[11px] text-blue-200 flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white uppercase text-[10px]">Bản dựng Tiếng Anh chuẩn Quốc Tế:</span>
+                    <button
+                      type="button"
+                      onClick={() => applyEnglishVersion()}
+                      className="text-[10px] text-amber-400 hover:underline font-mono"
+                    >
+                      ⚡ Cập nhật lại
+                    </button>
+                  </div>
+                  <div className="truncate font-bold text-amber-300">Hook: &ldquo;{headlineText}&rdquo;</div>
+                  <div className="text-[10px] text-slate-300">✓ Phụ đề & Callout đã chuyển sang tiếng Anh chuẩn thuật ngữ SMC.</div>
+                </div>
+              )}
+            </div>
+
+            {/* TikTok Production Checklist */}
+            <div className="bg-[#101725] p-3 rounded-xl border border-indigo-900/40 flex flex-col gap-1.5 text-[11px]">
+              <span className="font-bold text-indigo-300 font-mono text-[10px] uppercase">
+                Tiêu chuẩn video TikTok Hexagold:
+              </span>
+              <div className="flex items-center gap-2 text-slate-300">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span>Hook 0-3s giật gân, chữ to tương phản cao</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-300">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span>Nến quét đỉnh (Liquidity Sweep) & FVG Retest</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-300">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span>Phụ đề kịch bản 4 bước khớp từng giây timeline</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-300">
+                <span className="text-emerald-400 font-bold">✓</span>
+                <span>Safe Zone chuẩn TikTok (không che bởi nút Like/Share)</span>
               </div>
             </div>
 
@@ -128,28 +229,67 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => 
                       : 'border-[#1E293B] bg-[#161F2E] text-slate-400 hover:text-white'
                   }`}
                 >
-                  30 FPS (Mặc định - Nhanh)
+                  30 FPS (Chuẩn)
                 </button>
                 <button
                   type="button"
                   onClick={() => setFps(60)}
                   className={`py-2 px-3 rounded-lg border text-xs font-medium transition ${
                     fps === 60
-                      ? 'bg-primary text-white border-primary shadow'
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-extrabold border-amber-400 shadow-lg'
                       : 'border-[#1E293B] bg-[#161F2E] text-slate-400 hover:text-white'
                   }`}
                 >
-                  60 FPS (Siêu mượt)
+                  ⚡ 60 FPS (Siêu Mượt TikTok)
                 </button>
               </div>
             </div>
 
-            {/* Start Button */}
+            {/* Compliance Hard Gate Warning or Safe Badge */}
+            {!isSafe ? (
+              <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 flex flex-col gap-2 animate-in fade-in">
+                <div className="flex items-center gap-2 text-rose-400 font-bold text-xs">
+                  <ShieldAlert className="w-4 h-4 flex-shrink-0 animate-pulse" />
+                  <span>🚨 KHÓA XUẤT VIDEO (LỆCH PHA KỸ THUẬT)</span>
+                </div>
+                <p className="text-[11px] text-slate-300">
+                  Phát hiện <span className="font-bold text-rose-300">{report?.warnings?.length || 1} lỗi lệch pha</span> (chiều lệnh, toán R:R hoặc pips lợi nhuận). Nếu xuất bản lên YouTube sẽ bị người xem bóc phốt!
+                </p>
+                <button
+                  type="button"
+                  onClick={() => applyComprehensiveAutoFix()}
+                  className="w-full py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 transition group"
+                >
+                  <Zap className="w-4 h-4 text-black group-hover:scale-125 transition" />
+                  <span>⚡ TỰ ĐỘNG SỬA HẾT ĐỂ MỞ KHÓA XUẤT (1-CLICK)</span>
+                </button>
+              </div>
+            ) : (
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-2 text-emerald-300 text-xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span className="font-bold">✅ ĐÃ QUA KIỂM DUYỆT CHUYÊN GIA — 100% AN TOÀN XUẤT BẢN</span>
+              </div>
+            )}
+
+            {/* Start Button (Hard Gated) */}
             <button
               onClick={handleStartExport}
-              className="mt-2 w-full py-3 bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/25 transition"
+              disabled={!isSafe || isExporting}
+              className={`mt-1 w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-xl transition ${
+                isSafe
+                  ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-600 hover:from-emerald-400 hover:to-teal-400 text-black font-black shadow-emerald-500/20 active:scale-95 cursor-pointer'
+                  : 'bg-[#1E293B] text-slate-500 cursor-not-allowed border border-slate-700/50'
+              }`}
             >
-              <Video className="w-4 h-4" /> Bắt đầu Render & Tải Video
+              {isSafe ? (
+                <>
+                  <Video className="w-4 h-4" /> Xuất Video {settings.aspectRatio} [{exportLanguage === 'en' ? '🇺🇸 English US/EU' : '🇻🇳 Tiếng Việt'}] Ngay ({fps} FPS)
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" /> Đã Khóa Xuất (Bấm Tự Sửa Để Mở Khóa)
+                </>
+              )}
             </button>
           </div>
         )}

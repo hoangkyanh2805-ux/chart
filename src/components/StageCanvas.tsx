@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import { useChartStore } from '../store/useChartStore';
-import { ShieldCheck, Smartphone, Edit3, Check, Type } from 'lucide-react';
+import { ShieldCheck, Smartphone, Edit3, Check, Type, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 
 // Clean text auto-wrapping utility
 function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -40,6 +40,23 @@ export const StageCanvas: React.FC = () => {
     badges,
     showSafeZones,
     setShowSafeZones,
+    showCalloutPin,
+    calloutPinText,
+    calloutCandleIndex,
+    showPipCounter,
+    targetPips,
+    showExecutionBadge,
+    executionOrder,
+    scriptSubtitles,
+    showPhoneFrame,
+    setShowPhoneFrame,
+    showTikTokUIOverlay,
+    setShowTikTokUIOverlay,
+    beforeAfterMode,
+    setBeforeAfterMode,
+    validationReport,
+    validateCurrentSetup,
+    applyAutoNormalize,
   } = useChartStore();
 
   const [isEditingInline, setIsEditingInline] = React.useState<boolean>(false);
@@ -81,18 +98,40 @@ export const StageCanvas: React.FC = () => {
       ctx.fillRect(0, 0, width, height);
     }
 
-    // 2. Top Watermark & Compliance Pill (NO COLLISION - SPATIAL SEPARATION)
+    // 2. Top Watermark & Compliance Pill (NO COLLISION - DYNAMIC ISLAND SAFE)
     ctx.save();
     // Left: Asset Tag
-    ctx.font = 'bold 10px monospace';
-    ctx.fillStyle = isWhite ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)';
-    ctx.fillText(`${settings.symbol || 'XAUUSD'} · M15`, 20, 26);
+    ctx.font = 'bold 9.5px monospace';
+    ctx.fillStyle = isWhite ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)';
+    ctx.fillText(`${settings.symbol || 'XAUUSD'} · M15`, 18, 25);
+
+    // Pre-Flight Semantic Integrity Pill (Positioned on Left side next to Asset tag, leaving center Dynamic Island 100% CLEAR)
+    const isVerified = validationReport ? validationReport.isValid : true;
+    const vPillW = isVerified ? 74 : 84;
+    const vPillX = 105;
+    const pillH = 17;
+    const pillY = 13;
+
+    ctx.fillStyle = isVerified
+      ? (isWhite ? '#ECFDF5' : 'rgba(16, 185, 129, 0.16)')
+      : (isWhite ? '#FEF2F2' : 'rgba(239, 68, 68, 0.18)');
+    ctx.strokeStyle = isVerified ? '#10B981' : '#EF4444';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(vPillX, pillY, vPillW, pillH, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = 'bold 8px monospace';
+    ctx.fillStyle = isVerified
+      ? (isWhite ? '#065F46' : '#34D399')
+      : (isWhite ? '#991B1B' : '#F87171');
+    ctx.textAlign = 'center';
+    ctx.fillText(isVerified ? '✓ VERIFIED' : '⚠️ LỆCH PHA', vPillX + vPillW / 2, pillY + 11.5);
 
     // Right: Compact Compliance Pill
     const pillW = 86;
-    const pillH = 17;
-    const pillX = width - pillW - 20;
-    const pillY = 14;
+    const pillX = width - pillW - 16;
 
     ctx.fillStyle = isWhite ? '#FEF3C7' : 'rgba(245, 158, 11, 0.15)';
     ctx.strokeStyle = '#F59E0B';
@@ -223,7 +262,11 @@ export const StageCanvas: React.FC = () => {
           }
         } else if (overlay.type === 'FVG') {
           // Fair Value Gap with 50% Consequent Encroachment (C.E.) Line
-          ctx.fillStyle = isWhite ? 'rgba(16, 185, 129, 0.18)' : 'rgba(0, 245, 160, 0.2)';
+          // REA-Enriched: Glow Shimmer Effect when animated
+          const fvgPulse = (Math.sin(currentTime * 3.5) + 1) / 2;
+          ctx.fillStyle = isWhite
+            ? `rgba(16, 185, 129, ${0.16 + fvgPulse * 0.08})`
+            : `rgba(0, 245, 160, ${0.18 + fvgPulse * 0.12})`;
           ctx.fillRect(startX, yTop, boxWidth, boxHeight);
 
           ctx.strokeStyle = '#10B981';
@@ -233,7 +276,7 @@ export const StageCanvas: React.FC = () => {
           // 50% C.E. Dotted Line
           const midY = yTop + boxHeight / 2;
           ctx.setLineDash([4, 3]);
-          ctx.strokeStyle = '#10B981';
+          ctx.strokeStyle = isWhite ? '#059669' : '#00F5A0';
           ctx.beginPath();
           ctx.moveTo(startX, midY);
           ctx.lineTo(startX + boxWidth, midY);
@@ -330,6 +373,291 @@ export const StageCanvas: React.FC = () => {
         ctx.fillRect(x, bodyTop, cWidth, bodyHeight);
         ctx.restore();
       });
+
+      // 4b. Viral TikTok Callout Pin on Key Candle (e.g. Sweep Wick)
+      const isBeforeState =
+        beforeAfterMode === 'before' ||
+        (beforeAfterMode === 'auto' && progress <= 0.38);
+
+      const isAfterState =
+        beforeAfterMode === 'after' ||
+        (beforeAfterMode === 'auto' && progress > 0.38);
+
+      // Render Before/After Badges & Messy Indicators
+      if (beforeAfterMode && beforeAfterMode !== 'off') {
+        ctx.save();
+        const baBadgeX = chartLeft + 4;
+        const baBadgeY = chartTop + 6;
+        const baBadgeH = 22;
+
+        if (isBeforeState) {
+          // ❌ BEFORE: 99% RETAIL OVERLOAD BADGE
+          const beforeText = '❌ BEFORE: 99% RETAIL OVERLOAD';
+          ctx.font = 'bold 9px monospace';
+          const bMetrics = ctx.measureText(beforeText);
+          const baBadgeW = bMetrics.width + 14;
+
+          ctx.fillStyle = isWhite ? '#FEF2F2' : 'rgba(239, 68, 68, 0.25)';
+          ctx.strokeStyle = '#EF4444';
+          ctx.lineWidth = 1.2;
+          ctx.shadowColor = 'rgba(239, 68, 68, 0.4)';
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.roundRect(baBadgeX, baBadgeY, baBadgeW, baBadgeH, 5);
+          ctx.fill();
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          ctx.fillStyle = '#EF4444';
+          ctx.textAlign = 'left';
+          ctx.fillText(beforeText, baBadgeX + 7, baBadgeY + 14.5);
+
+          // DRAW MESSY INDICATORS (Simulating Cluttered Retail Chart)
+          // 1. EMA 20 (Wavy Orange Curve)
+          ctx.strokeStyle = '#F97316';
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          candles.slice(0, revealedCount).forEach((c, idx) => {
+            const cx = chartLeft + (idx + 1) * candleSpacing;
+            const cy = toY(c.close + Math.sin(idx * 1.5) * 5);
+            if (idx === 0) ctx.moveTo(cx, cy);
+            else ctx.lineTo(cx, cy);
+          });
+          ctx.stroke();
+
+          // 2. EMA 50 (Purple Dashed Curve)
+          ctx.strokeStyle = '#A855F7';
+          ctx.lineWidth = 1.8;
+          ctx.setLineDash([4, 3]);
+          ctx.beginPath();
+          candles.slice(0, revealedCount).forEach((c, idx) => {
+            const cx = chartLeft + (idx + 1) * candleSpacing;
+            const cy = toY(c.open - Math.cos(idx * 1.2) * 6);
+            if (idx === 0) ctx.moveTo(cx, cy);
+            else ctx.lineTo(cx, cy);
+          });
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // 3. Confusing FVG Box Overlay
+          if (revealedCount >= 3) {
+            const fvgX = chartLeft + 1 * candleSpacing;
+            const fvgW = 2.5 * candleSpacing;
+            const fvgY = toY(candles[1].high + 3);
+            const fvgH = Math.max(20, Math.abs(toY(candles[0].low - 2) - fvgY));
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(fvgX, fvgY, fvgW, fvgH);
+            ctx.fillRect(fvgX, fvgY, fvgW, fvgH);
+
+            ctx.font = 'bold 7.5px monospace';
+            ctx.fillStyle = '#DC2626';
+            ctx.textAlign = 'left';
+            ctx.fillText('⚠️ CONFUSING FVG / OVERLOAD', fvgX + 4, fvgY + 12);
+          }
+
+          // 4. Overbought Indicator Tag
+          const indW = 155;
+          const indH = 18;
+          const indX = width - indW - 24;
+          const indY = chartTop + chartHeight - 24;
+          ctx.fillStyle = isWhite ? 'rgba(254, 242, 242, 0.95)' : 'rgba(15, 23, 42, 0.9)';
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(indX, indY, indW, indH, 4);
+          ctx.fill();
+          ctx.stroke();
+          ctx.font = 'bold 7.5px monospace';
+          ctx.fillStyle = '#EF4444';
+          ctx.textAlign = 'center';
+          ctx.fillText('RSI: 78.4 (OB) | MACD: DIVERGENCE', indX + indW / 2, indY + 12);
+        } else if (isAfterState) {
+          // ✅ AFTER: CLEAN PRICE ACTION BADGE
+          const afterText = '✅ AFTER: CLEAN PRICE ACTION';
+          ctx.font = 'bold 9px monospace';
+          const aMetrics = ctx.measureText(afterText);
+          const baBadgeW = aMetrics.width + 14;
+
+          ctx.fillStyle = isWhite ? '#ECFDF5' : 'rgba(16, 185, 129, 0.2)';
+          ctx.strokeStyle = '#10B981';
+          ctx.lineWidth = 1.2;
+          ctx.shadowColor = 'rgba(16, 185, 129, 0.4)';
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.roundRect(baBadgeX, baBadgeY, baBadgeW, baBadgeH, 5);
+          ctx.fill();
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          ctx.fillStyle = isWhite ? '#065F46' : '#10B981';
+          ctx.textAlign = 'left';
+          ctx.fillText(afterText, baBadgeX + 7, baBadgeY + 14.5);
+        }
+        ctx.restore();
+      }
+
+      if (showCalloutPin && candles.length > calloutCandleIndex && calloutCandleIndex < revealedCount && !isBeforeState) {
+        const pinCandle = candles[calloutCandleIndex];
+        const pinX = chartLeft + (calloutCandleIndex + 1) * candleSpacing;
+        const pinY = toY(pinCandle.high);
+
+        ctx.save();
+        // Pulsing radar ripple
+        const pulse = (Math.sin(currentTime * 5) + 1) / 2; // 0..1
+        const ringRadius = 7 + pulse * 8;
+        ctx.strokeStyle = '#F59E0B';
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.85 - pulse * 0.45;
+        ctx.beginPath();
+        ctx.arc(pinX, pinY, ringRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Solid center dot
+        ctx.fillStyle = '#F59E0B';
+        ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.arc(pinX, pinY, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pointer line up & badge pill (Elevated by 40px to prevent colliding with Entry / Risk-Reward labels)
+        const pillText = calloutPinText || '🎯 BẪY DỤ BUY QUÉT ĐỈNH';
+        ctx.font = 'bold 8.5px monospace';
+        const pillMetrics = ctx.measureText(pillText);
+        const cpWidth = pillMetrics.width + 16;
+        const cpHeight = 20;
+        const cpX = Math.max(14, Math.min(width - cpWidth - 14, pinX - cpWidth / 2));
+        const cpY = Math.max(68, pinY - 40);
+
+        // Connecting line
+        ctx.strokeStyle = '#F59E0B';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(pinX, pinY - 4);
+        ctx.lineTo(cpX + cpWidth / 2, cpY + cpHeight);
+        ctx.stroke();
+
+        // Badge container
+        ctx.fillStyle = isWhite ? '#FEF3C7' : 'rgba(15, 23, 42, 0.95)';
+        ctx.strokeStyle = '#F59E0B';
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = 'rgba(245, 158, 11, 0.4)';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.roundRect(cpX, cpY, cpWidth, cpHeight, 5);
+        ctx.fill();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = isWhite ? '#92400E' : '#FDE047';
+        ctx.textAlign = 'center';
+        ctx.fillText(pillText, cpX + cpWidth / 2, cpY + 13.5);
+        ctx.restore();
+      }
+
+      // 4c. Live Pip Counter Badge (Floating top-right inside chart)
+      if (showPipCounter && progress > 0.3 && !isBeforeState) {
+        ctx.save();
+        const pipRatio = Math.min(1, Math.max(0, (progress - 0.3) / 0.7));
+        const currentPips = progress >= 0.95 ? (targetPips || 70) : Math.round((targetPips || 70) * pipRatio);
+
+        const badgeW = 92;
+        const badgeH = 24;
+        const badgeX = width - badgeW - 24;
+        const badgeY = chartTop + 6;
+
+        ctx.fillStyle = isWhite ? '#ECFDF5' : 'rgba(15, 23, 42, 0.94)';
+        ctx.strokeStyle = '#00F5A0';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = 'rgba(0, 245, 160, 0.4)';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 6);
+        ctx.fill();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        ctx.font = '900 11px monospace';
+        ctx.fillStyle = isWhite ? '#065F46' : '#00F5A0';
+        ctx.textAlign = 'center';
+        ctx.fillText(`+${currentPips} PIPS 🚀`, badgeX + badgeW / 2, badgeY + 16);
+        ctx.restore();
+      }
+
+      // 4d. Trade Execution Order Pill (Positioned cleanly right above Subtitle Box - Zero Overlap)
+      if (showExecutionBadge && executionOrder && progress > 0.45 && !isBeforeState) {
+        ctx.save();
+        const isSell = executionOrder.type === 'SELL';
+        const badgeW = 155;
+        const badgeH = 30;
+        const bx = 20;
+        const by = height - 78 - badgeH - 4; // Exactly 4px above the subtitle teleprompter box!
+
+        ctx.fillStyle = isWhite ? 'rgba(248, 250, 252, 0.96)' : 'rgba(15, 23, 42, 0.96)';
+        ctx.strokeStyle = isSell ? '#FF3366' : '#00F5A0';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, badgeW, badgeH, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = 'bold 8.5px monospace';
+        ctx.fillStyle = isSell ? (isWhite ? '#991B1B' : '#FF3366') : (isWhite ? '#065F46' : '#00F5A0');
+        ctx.textAlign = 'left';
+        ctx.fillText(`${executionOrder.type} ${executionOrder.lot} LOT @ ${executionOrder.entry.toFixed(1)}`, bx + 7, by + 11.5);
+
+        ctx.font = '7.5px monospace';
+        ctx.fillStyle = isWhite ? '#475569' : '#94A3B8';
+        ctx.fillText(`SL: $${executionOrder.sl.toFixed(1)} ($${executionOrder.risk}) · TP: $${executionOrder.tp.toFixed(1)}`, bx + 7, by + 23);
+        ctx.restore();
+      }
+
+      // 4e. Dynamic Kinetic Teleprompter Subtitles (Bottom Third Safe Zone)
+      if (scriptSubtitles && scriptSubtitles.length > 0) {
+        let activeSub = scriptSubtitles[0];
+        for (const sub of scriptSubtitles) {
+          if (progress >= sub.timePercent) {
+            activeSub = sub;
+          }
+        }
+
+        if (activeSub) {
+          ctx.save();
+          const subW = width - 40;
+          const subH = 34;
+          const subX = 20;
+          const subY = height - 78;
+
+          ctx.fillStyle = isWhite ? 'rgba(255, 255, 255, 0.95)' : 'rgba(11, 15, 25, 0.92)';
+          ctx.strokeStyle = isWhite ? '#CBD5E1' : 'rgba(99, 102, 241, 0.35)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(subX, subY, subW, subH, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          // Stage tag
+          if (activeSub.stageName) {
+            ctx.font = 'bold 7px monospace';
+            ctx.fillStyle = '#F59E0B';
+            ctx.textAlign = 'left';
+            ctx.fillText(`[${activeSub.stageName.toUpperCase()}]`, subX + 7, subY + 11);
+          }
+
+          // Subtitle text (auto-wrapped)
+          ctx.font = `600 9px "${activeFont}", sans-serif`;
+          ctx.fillStyle = isWhite ? '#0F172A' : '#F8FAFC';
+          ctx.textAlign = 'left';
+          const maxTextW = subW - 14;
+          const subLines = wrapTextLines(ctx, activeSub.text, maxTextW).slice(0, 2);
+          subLines.forEach((l, idx) => {
+            ctx.fillText(l, subX + 7, subY + (activeSub.stageName ? 22 : 15) + idx * 10);
+          });
+          ctx.restore();
+        }
+      }
 
       // Bottom 3-Step Stepper Badges (COMPACT, NO SMASHING, NO OVERLAP)
       ctx.save();
@@ -476,50 +804,126 @@ export const StageCanvas: React.FC = () => {
       ctx.restore();
     }
 
-  }, [stageTheme, headlineText, sublineText, currentTime, duration, settings, candles, overlays, badges, showSafeZones]);
+    // 8. Optional TikTok UI Simulation Overlay
+    if (showTikTokUIOverlay && settings.aspectRatio === '9:16') {
+      ctx.save();
+      const rightX = width - 24;
+      const startActionY = height * 0.44;
+
+      // Right action rail
+      const actions = [
+        { icon: '❤️', count: '14.2K' },
+        { icon: '💬', count: '382' },
+        { icon: '⭐', count: '1.2K' },
+        { icon: '↗️', count: '540' },
+      ];
+
+      actions.forEach((act, idx) => {
+        const itemY = startActionY + idx * 36;
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(act.icon, rightX, itemY);
+
+        ctx.font = 'bold 7px monospace';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(act.count, rightX, itemY + 11);
+      });
+
+      // Bottom Author Tag & Audio Title
+      ctx.font = 'bold 9.5px Montserrat, sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'left';
+      ctx.fillText('@hexagold_vn ✓', 16, height - 98);
+
+      ctx.font = '8px Montserrat, sans-serif';
+      ctx.fillStyle = '#CBD5E1';
+      ctx.fillText('🎵 Âm thanh gốc - Phân tích Vàng SMC', 16, height - 86);
+      ctx.restore();
+    }
+
+  }, [
+    stageTheme,
+    headlineText,
+    sublineText,
+    currentTime,
+    duration,
+    settings,
+    candles,
+    overlays,
+    badges,
+    showSafeZones,
+    showCalloutPin,
+    calloutPinText,
+    calloutCandleIndex,
+    showPipCounter,
+    targetPips,
+    showExecutionBadge,
+    executionOrder,
+    scriptSubtitles,
+    showTikTokUIOverlay,
+  ]);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center p-3 select-none overflow-hidden">
       {/* Central Canvas Container with 9:16 (360x640) Aspect Ratio */}
       <div
         onDoubleClick={() => setIsEditingInline(true)}
-        className={`relative transition-all duration-300 shadow-2xl rounded-2xl overflow-hidden border flex items-center justify-center ${
-          isWhite
-            ? 'bg-white border-slate-200 shadow-slate-300/40'
-            : 'bg-[#080C16] border-[#1E293B] shadow-indigo-950/30'
-        } ${
-          settings.aspectRatio === '9:16'
-            ? 'w-[360px] h-[640px]'
-            : settings.aspectRatio === '1:1'
-            ? 'w-[520px] h-[520px]'
-            : 'w-full max-w-[860px] h-[480px]'
+        className={`relative transition-all duration-300 shadow-2xl flex items-center justify-center ${
+          settings.aspectRatio === '9:16' && showPhoneFrame
+            ? 'w-[368px] h-[648px] rounded-[36px] border-[6px] border-[#242E42] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] ring-1 ring-white/10 p-1 bg-[#05080E]'
+            : `rounded-2xl overflow-hidden border ${
+                isWhite
+                  ? 'bg-white border-slate-200 shadow-slate-300/40'
+                  : 'bg-[#080C16] border-[#1E293B] shadow-indigo-950/30'
+              } ${
+                settings.aspectRatio === '9:16'
+                  ? 'w-[360px] h-[640px]'
+                  : settings.aspectRatio === '1:1'
+                  ? 'w-[520px] h-[520px]'
+                  : 'w-full max-w-[860px] h-[480px]'
+              }`
         }`}
       >
-        <canvas ref={canvasRef} className="w-full h-full block cursor-pointer" />
+        {/* Dynamic Island on Phone Bezel */}
+        {settings.aspectRatio === '9:16' && showPhoneFrame && (
+          <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-4 bg-black/90 rounded-full z-40 flex items-center justify-center gap-2 pointer-events-none border border-white/10">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#1E293B]" />
+            <div className="w-1 h-1 rounded-full bg-emerald-500/70" />
+          </div>
+        )}
 
-        {/* Floating Quick Inline Edit Trigger Button on Canvas */}
-        <button
-          type="button"
-          onClick={() => setIsEditingInline(!isEditingInline)}
-          title="Nhấp đúp chuột vào canvas hoặc bấm đây để sửa chữ trực tiếp"
-          className={`absolute top-3 right-3 z-30 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition shadow-lg backdrop-blur-md border ${
-            isEditingInline
-              ? 'bg-amber-500 text-black border-amber-400'
-              : 'bg-black/50 hover:bg-black/80 text-slate-300 hover:text-white border-white/10'
+        <canvas
+          ref={canvasRef}
+          className={`w-full h-full block cursor-pointer ${
+            settings.aspectRatio === '9:16' && showPhoneFrame ? 'rounded-[28px]' : ''
           }`}
-        >
-          {isEditingInline ? (
-            <>
-              <Check className="w-3 h-3 text-black" />
-              <span>Xong</span>
-            </>
-          ) : (
-            <>
-              <Edit3 className="w-3 h-3 text-amber-400" />
-              <span>Sửa Chữ Trực Tiếp</span>
-            </>
-          )}
-        </button>
+        />
+
+        {/* Floating Quick Inline Edit Trigger Button on Canvas (Only shown when not in phone frame to keep frame clean) */}
+        {!showPhoneFrame && (
+          <button
+            type="button"
+            onClick={() => setIsEditingInline(!isEditingInline)}
+            title="Nhấp đúp chuột vào canvas hoặc bấm đây để sửa chữ trực tiếp"
+            className={`absolute top-3 right-3 z-30 px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition shadow-lg backdrop-blur-md border ${
+              isEditingInline
+                ? 'bg-amber-500 text-black border-amber-400'
+                : 'bg-black/50 hover:bg-black/80 text-slate-300 hover:text-white border-white/10'
+            }`}
+          >
+            {isEditingInline ? (
+              <>
+                <Check className="w-3 h-3 text-black" />
+                <span>Xong</span>
+              </>
+            ) : (
+              <>
+                <Edit3 className="w-3 h-3 text-amber-400" />
+                <span>Sửa Chữ</span>
+              </>
+            )}
+          </button>
+        )}
 
         {/* Direct In-Place Text Editor Overlay */}
         {isEditingInline && (
@@ -596,19 +1000,103 @@ export const StageCanvas: React.FC = () => {
         />
 
         {settings.aspectRatio === '9:16' && (
-          <button
-            type="button"
-            onClick={() => setShowSafeZones(!showSafeZones)}
-            title="Bật/Tắt đường căn lề Safe Zones cho TikTok / YouTube Shorts"
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono transition border select-none ${
-              showSafeZones
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                : 'bg-black/30 text-slate-400 border-white/10 hover:text-white'
-            }`}
-          >
-            <ShieldCheck className="w-3 h-3 text-rose-400" />
-            <span>Safe Zones</span>
-          </button>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowPhoneFrame(!showPhoneFrame)}
+              title="Khung viền điện thoại Smartphone 9:16"
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono transition border select-none ${
+                showPhoneFrame
+                  ? 'bg-indigo-600/30 text-indigo-300 border-indigo-500/50'
+                  : 'bg-black/30 text-slate-400 border-white/10 hover:text-white'
+              }`}
+            >
+              <Smartphone className="w-3 h-3 text-indigo-400" />
+              <span>Viền ĐT</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowTikTokUIOverlay(!showTikTokUIOverlay)}
+              title="Mô phỏng icon tương tác TikTok (Like, Share, Audio)"
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono transition border select-none ${
+                showTikTokUIOverlay
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                  : 'bg-black/30 text-slate-400 border-white/10 hover:text-white'
+              }`}
+            >
+              <span>TikTok UI</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsEditingInline(!isEditingInline)}
+              title="Sửa tiêu đề Hook và mô tả trực tiếp trên canvas (hoặc nhấp đúp vào hình)"
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono transition border select-none ${
+                isEditingInline
+                  ? 'bg-amber-500 text-black border-amber-400 font-bold'
+                  : 'bg-black/30 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
+              }`}
+            >
+              <Edit3 className="w-3 h-3 text-amber-400" />
+              <span>Sửa Chữ</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowSafeZones(!showSafeZones)}
+              title="Bật/Tắt đường căn lề Safe Zones cho TikTok / YouTube Shorts"
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono transition border select-none ${
+                showSafeZones
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                  : 'bg-black/30 text-slate-400 border-white/10 hover:text-white'
+              }`}
+            >
+              <ShieldCheck className="w-3 h-3 text-rose-400" />
+              <span>Safe Zones</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const nextMode: Record<string, 'auto' | 'before' | 'after' | 'off'> = {
+                  off: 'auto',
+                  auto: 'before',
+                  before: 'after',
+                  after: 'off',
+                };
+                setBeforeAfterMode(nextMode[beforeAfterMode || 'off'] || 'auto');
+              }}
+              title="Chế độ So Sánh Before / After (Bấm để đổi: Auto -> Ép Before -> Ép After -> Tắt)"
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono transition border select-none ${
+                beforeAfterMode === 'auto'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
+                  : beforeAfterMode === 'before'
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-sm'
+                  : beforeAfterMode === 'after'
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-sm'
+                  : 'bg-black/30 text-slate-400 border-white/10 hover:text-white'
+              }`}
+            >
+              <RefreshCw className="w-3 h-3 text-amber-400" />
+              <span>
+                {beforeAfterMode === 'auto' && '🔄 Auto (B➔A)'}
+                {beforeAfterMode === 'before' && '❌ Before'}
+                {beforeAfterMode === 'after' && '✅ After'}
+                {(!beforeAfterMode || beforeAfterMode === 'off') && '🔄 B/A: Tắt'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={applyAutoNormalize}
+              title="Tự động đối soát và chuẩn hóa SL, TP, hướng lệnh khớp 100% với tiêu đề"
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono transition border select-none bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30 active:scale-95 shadow-sm"
+            >
+              <CheckCircle className="w-3 h-3 text-emerald-400" />
+              <span>{validationReport?.isValid ? 'Chuẩn 100%' : '⚡ Tự Cân Chỉnh'}</span>
+            </button>
+          </div>
         )}
       </div>
     </div>

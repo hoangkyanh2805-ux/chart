@@ -41,6 +41,9 @@ function runStep(name, cmd) {
 // 1. Tests pass
 runStep('Unit & Engine Tests (Vitest)', 'node ./node_modules/vitest/vitest.mjs run');
 
+// 1.5 Grounded Citations & Ledger Invariants
+runStep('Grounded Citations & Evidence Ledger (Hermes v0.20)', 'node scripts/verify_grounding.js');
+
 // 2. Git status clean of unrelated files
 console.log('▶ Checking [Git Status / File Scope]...');
 try {

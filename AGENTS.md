@@ -78,7 +78,12 @@ flowchart TD
     Hermes -->|"Automated Verifier\nnpm run verify:goal"| Done(["✅ DONE (Verified in Shell)"])
 ```
 
-### Quy tắc `/goal` cốt lõi:
+## 7. Quy chuẩn Trích dẫn Bằng chứng Tất định (Hermes v0.20 Grounded Citations Protocol)
+- **Nguyên tắc cốt lõi:** *"Traceability ≠ Verified Provenance ≠ Truth"*. Mọi khẳng định (claim) về code hoặc dữ liệu khán giả phải liên kết qua Sổ cái Ledger `[n]` và đính kèm trích dẫn nguyên văn (Verbatim Quote).
+- **Code Audit & Debug:** Định danh `[n] path/to/file.tsx#L<start>-L<end> (SHA: <git_commit_hash>)`. Quote code phải trùng khớp 100% với file thật trong working tree.
+- **Audience & Market Intelligence:** Trích dẫn comment phải trùng khớp với `channel-brain-v3.md` (1,204 comments thật). Nhận định chưa kiểm chứng bắt buộc gắn nhãn `[unverified]`.
+- **Chế độ Nghiêm ngặt (Strict Gate - Fail Fast):** Quote sai lệch hoặc model tự chế URL sẽ bị REJECT ngay lập tức (`E_GROUNDING_QUOTE_MISMATCH`). Mục Sources do Harness tự động render từ Ledger.
+
 1. **Cấu trúc 1 câu `/goal` chuẩn:**
    `"/goal <Việc cần làm cụ thể>. Done means <tiêu chí xác minh bằng lệnh shell>"`
 2. **Nguyên lý bất biến:** *"If you cannot verify it from a shell, it is not done."* (Nếu không xác minh được bằng lệnh shell, coi như chưa xong).

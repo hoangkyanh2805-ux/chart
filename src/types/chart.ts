@@ -26,6 +26,44 @@ export interface Overlay {
   label?: string;
 }
 
+export interface ScriptSubtitle {
+  timePercent: number; // 0.0 -> 1.0 (or progress milestone)
+  text: string;
+  stageName?: 'Hook' | 'Trap' | 'Setup' | 'Execution' | 'Lesson';
+}
+
+export interface ExecutionOrder {
+  type: 'BUY' | 'SELL';
+  entry: number;
+  sl: number;
+  tp: number;
+  lot: number;
+  risk: number; // e.g. 30 ($30)
+}
+
+export interface SetupValidationReport {
+  isValid: boolean;
+  score: number; // 0 - 100
+  expectedDirection: 'BUY' | 'SELL' | 'NEUTRAL';
+  checks: {
+    titleDirectionMatch: boolean;
+    candleDriftMatch: boolean;
+    triggerWickValid: boolean;
+    riskRewardValid: boolean;
+    subtitlesAligned: boolean;
+  };
+  warnings: string[];
+  normalizedSetup?: {
+    executionOrder: ExecutionOrder;
+    calloutPinText: string;
+    calloutCandleIndex: number;
+    targetPips: number;
+    scriptSubtitles: ScriptSubtitle[];
+  };
+}
+
+export type BeforeAfterMode = 'auto' | 'before' | 'after' | 'off';
+
 export interface ChartSettings {
   symbol: string;
   timeframe: string;
@@ -43,4 +81,5 @@ export interface ChartSettings {
   candleGap: number;
   showGrid: boolean;
   spotlightEnabled: boolean;
+  beforeAfterMode?: BeforeAfterMode;
 }

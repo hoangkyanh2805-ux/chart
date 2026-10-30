@@ -571,21 +571,71 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
     clearAllCandles();
 
     // 2. Priority: Hermes Directive -> AI Result -> Generator
+    let dir: 'BUY' | 'SELL' = 'BUY';
+    let riskB = 10;
+    let slP = 20;
+    let rr = 3.5;
+    let lotStr = '0.05 lot';
+
     if (hermesDirective && hermesDirective.candles && hermesDirective.candles.length > 0) {
       hermesDirective.candles.forEach((c) => addCandle(c));
       if (hermesDirective.overlays) {
         hermesDirective.overlays.forEach((o) => addOverlay(o));
       }
+      dir = /sweep|supply|bearish/i.test(hermesDirective.strategy) ? 'SELL' : 'BUY';
+      riskB = hermesDirective.riskBudget || 10;
+      slP = hermesDirective.slPips || 20;
+      rr = hermesDirective.rrRatio || 3.5;
+      lotStr = hermesDirective.lotSize || '0.05 lot';
     } else if (aiResult && aiResult.candles && aiResult.candles.length > 0) {
       aiResult.candles.forEach((c) => addCandle(c));
       if (aiResult.overlays) {
         aiResult.overlays.forEach((o) => addOverlay(o));
       }
+      dir = /sweep|supply|bearish/i.test(aiResult.strategy) ? 'SELL' : 'BUY';
     } else {
       const { candles: newCandles, overlays: newOverlays } = generateSetupData(selectedSetup, basePrice);
       newCandles.forEach((c) => addCandle(c));
       newOverlays.forEach((o) => addOverlay(o));
+      dir = selectedSetup === 'liquidity-sweep' || selectedSetup === 'bearish-supply' ? 'SELL' : 'BUY';
     }
+
+    // 2.5 State Hygiene: Update executionOrder, targetPips, calloutPin, and subtitles
+    const baseP = basePrice || 4128.0;
+    const slDist = slP * 0.1;
+    const tpDist = slP * rr * 0.1;
+    const slPrice = dir === 'BUY' ? baseP - slDist : baseP + slDist;
+    const tpPrice = dir === 'BUY' ? baseP + tpDist : baseP - tpDist;
+    const targetPips = Math.round(slP * rr);
+    const lotNum = parseFloat(lotStr.replace(/[^0-9.]/g, '')) || 0.05;
+
+    useChartStore.setState({
+      executionOrder: {
+        type: dir,
+        lot: lotNum,
+        entry: parseFloat(baseP.toFixed(1)),
+        sl: parseFloat(slPrice.toFixed(1)),
+        tp: parseFloat(tpPrice.toFixed(1)),
+        risk: riskB,
+        reward: Math.round(riskB * rr),
+        pips: targetPips,
+      },
+      targetPips,
+      showPipCounter: true,
+      showExecutionBadge: true,
+      calloutPinText: dir === 'BUY' ? `🎯 RÚT CHÂN HỖ TRỢ ($${baseP.toFixed(0)})` : `🎯 BẪY DỤ BUY QUÉT ĐỈNH ($${baseP.toFixed(0)})`,
+      calloutCandleIndex: 4,
+      showCalloutPin: true,
+      scriptSubtitles: [
+        { timePercent: 0.0, text: `Khóa rủi ro 1R ($${riskB}) trước khi nhìn chart!`, stageName: 'Hook' },
+        { timePercent: 0.28, text: `Thị trường test lại cản kỹ thuật, dụ đám đông vào lệnh cảm xúc.`, stageName: 'Trap' },
+        { timePercent: 0.58, text: `Nến xác nhận đảo chiều. Chuẩn bị vào lệnh ${dir} ${lotNum} lot.`, stageName: 'Setup' },
+        { timePercent: 0.82, text: `Khóa SL ${slP} pips ($${riskB}), chốt lời +${targetPips} pips (1:${rr} R:R).`, stageName: 'Execution' },
+      ],
+    });
+
+    // 2.6 Run Runtime Validation
+    useChartStore.getState().validateCurrentSetup();
 
     // 3. Play video immediately
     setCurrentTime(0);

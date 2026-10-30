@@ -1,7 +1,24 @@
 # SPEC.md — Đặc tả kỹ thuật ứng dụng ChartAnimator
 
-## 1. Mục tiêu sản phẩm
-Xây dựng công cụ đồ họa trực tuyến giúp nhà sáng tạo nội dung tài chính biến các thiết lập giao dịch (OHLC, SMC, ICT) thành video hoạt họa độ nét cao phục vụ truyền thông xã hội (YouTube Shorts, TikTok, Reels, 16:9 ngang và 9:16 dọc).
+## 1. Mục tiêu sản phẩm & Tôn chỉ cốt lõi (Core Purpose & Boundaries)
+Xây dựng công cụ đồ họa trực tuyến giúp nhà sáng tạo nội dung tài chính biến các thiết lập giao dịch (OHLC, SMC, ICT) thành video hoạt họa độ nét cao phục vụ truyền thông xã hội (YouTube Shorts, TikTok, Reels, 16:9 ngang và 9:16 dọc) theo triết lý **Risk-First** của kênh `@azzammastertradinggold`.
+
+### 1.1. Ranh giới cốt lõi: Educational Video Maker vs Trading Terminal
+* **CHARTANIMATOR LÀ GÌ:** Là công cụ sản xuất video giáo dục tài chính và phân tích tình huống (Educational Case Study Studio).
+* **CHARTANIMATOR KHÔNG PHẢI LÀ GÌ:**
+  * Không phải là nền tảng giao dịch (Trading Terminal) hay bảng điện tử nhảy giá tick-by-tick.
+  * Không phải là bot bắn tín hiệu trực tiếp (Live Signal Caller).
+* **Tuân thủ quy chuẩn 8 NEVERs & Finance Policy:**
+  * Mọi video xuất bản bắt buộc dán nhãn `ILLUSTRATION / EDUCATIONAL CASE STUDY — NOT FINANCIAL ADVICE`.
+  * Không hứa hẹn lợi nhuận, không kêu gọi mở tài khoản hay lôi kéo giao dịch phái sinh.
+  * Luôn xác định mức dừng lỗ (\$30 Risk Budget, SL 20 pips) và tỷ lệ $R:R \ge 1:3.0$ trước khi đề cập đến điểm vào lệnh.
+
+### 1.2. Hai chế độ dữ liệu nến của hệ thống (Dual-Engine Candlestick Modes)
+1. **Chế độ 1 — Mô Phỏng Lý Thuyết (Synthetic Simulation Mode):**
+   * Sử dụng thuật toán Chuyển động Brown hình học (GBM Engine), cụm nến (Group Candles) và sóng Zigzag để minh họa các bài giảng kinh điển về cấu trúc thị trường.
+2. **Chế độ 2 — Phân Tích Thực Chiến (Real-Market Case Study Mode):**
+   * Lấy nến thực tế gần nhất vừa đóng từ thị trường Vàng giao ngay (XAUUSD / PAXG) để tái hiện và giải phẫu các bẫy thanh khoản vừa diễn ra trong ngày.
+   * **Mục đích:** Giải quyết triệt để phản ứng tâm lý của khán giả (Pain Point PP-0020: *"recorded charts are too easy when you know where it moves"*), chứng minh giá trị của tư duy Risk-First trên hành động giá thực tế của thị trường hôm nay.
 
 ---
 

@@ -3,19 +3,30 @@
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { AspectRatio } from '../types/chart';
-import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio, Key, Zap } from 'lucide-react';
+import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio, Key, Zap, Youtube, Globe } from 'lucide-react';
 import { ExportModal } from './ExportModal';
 import { TemplateModal } from './TemplateModal';
 import { AzzamOpsModal } from './AzzamOpsModal';
 import { ApiKeyModal } from './ApiKeyModal';
 import { HermesChatModal } from './HermesChatModal';
+import { YouTubeAuditModal } from './YouTubeAuditModal';
 import { ChartTemplate } from '../data/templates';
 
 export const Header: React.FC = () => {
-  const { settings, updateSettings, isHermesChatOpen, setIsHermesChatOpen } = useChartStore();
+  const {
+    settings,
+    updateSettings,
+    isHermesChatOpen,
+    setIsHermesChatOpen,
+    isAzzamOpsOpen,
+    setIsAzzamOpsOpen,
+    applyEnglishVersion,
+    activeTool,
+    setActiveTool,
+  } = useChartStore();
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState<boolean>(false);
-  const [isAzzamOpsOpen, setIsAzzamOpsOpen] = useState<boolean>(false);
+  const [isYouTubeAuditOpen, setIsYouTubeAuditOpen] = useState<boolean>(false);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
 
   const handleExportPNG = () => {
@@ -58,14 +69,22 @@ export const Header: React.FC = () => {
 
         {/* Center: Hermes Copilot Chat, Azzam Ops & Templates */}
         <div className="flex items-center gap-2.5">
-          {/* Hermes Agent Chat Trigger Button */}
+          {/* Hermes Agent Chat Trigger Button (Toggles Docked Sidebar) */}
           <button
-            onClick={() => setIsHermesChatOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#17140B] hover:bg-[#261E0F] border border-amber-500/50 hover:border-amber-400 text-amber-300 hover:text-white rounded-lg text-xs font-bold transition shadow-sm group"
+            onClick={() => setActiveTool(activeTool === 'hermes' ? 'templates' : 'hermes')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs font-bold transition shadow-sm group ${
+              activeTool === 'hermes'
+                ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-md shadow-amber-500/20'
+                : 'bg-[#17140B] hover:bg-[#261E0F] border-amber-500/50 hover:border-amber-400 text-amber-300 hover:text-white'
+            }`}
           >
-            <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <Zap className={`w-3.5 h-3.5 ${activeTool === 'hermes' ? 'fill-current text-slate-950' : 'text-amber-400 animate-pulse'}`} />
             <span>Chat Với Hermes</span>
-            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-extrabold border border-amber-500/30">
+            <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-extrabold border ${
+              activeTool === 'hermes'
+                ? 'bg-slate-950/20 text-slate-950 border-slate-950/30'
+                : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+            }`}>
               ONLINE
             </span>
           </button>
@@ -73,12 +92,25 @@ export const Header: React.FC = () => {
           {/* Azzam Ops Direct Intelligence Button */}
           <button
             onClick={() => setIsAzzamOpsOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#121A28] hover:bg-[#1E293B] border border-sky-500/50 hover:border-sky-400 text-sky-300 hover:text-white rounded-lg text-xs font-bold transition shadow-sm group"
+            title="Mở Dashboard Azzam, 8 Điểm Mù, Content Package & 62 Kịch Bản"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-950/40 hover:bg-sky-900/60 border border-sky-400/60 hover:border-sky-300 text-sky-200 hover:text-white rounded-lg text-xs font-bold transition shadow-md shadow-sky-500/15 group"
           >
             <Radio className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
-            <span>Azzam Ops Hub</span>
-            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-extrabold border border-sky-500/30">
-              PAIN POINTS
+            <span>Azzam Dashboard & Ops</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-500/30 text-sky-200 font-extrabold border border-sky-400/40">
+              LIVE DATA
+            </span>
+          </button>
+
+          {/* YouTube Live Channel Audit Button */}
+          <button
+            onClick={() => setIsYouTubeAuditOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1F1215] hover:bg-[#2C181D] border border-red-500/50 hover:border-red-400 text-red-300 hover:text-white rounded-lg text-xs font-bold transition shadow-sm group"
+          >
+            <Youtube className="w-3.5 h-3.5 text-red-400 fill-current" />
+            <span>Khám Kênh @azzam</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 font-extrabold border border-red-500/30">
+              LIVE
             </span>
           </button>
 
@@ -127,6 +159,16 @@ export const Header: React.FC = () => {
               <Square className="w-3.5 h-3.5" /> 1:1
             </button>
           </div>
+
+          {/* Quick English Switcher for US/EU Audience */}
+          <button
+            onClick={() => applyEnglishVersion()}
+            title="Chuyển toàn bộ Hook, phụ đề, callout và badges sang Tiếng Anh cho khách Âu - Mỹ"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-950/40 hover:bg-blue-900/60 border border-blue-400/50 hover:border-blue-300 text-blue-200 hover:text-white rounded-lg text-xs font-bold transition shadow-sm group"
+          >
+            <Globe className="w-3.5 h-3.5 text-blue-400 group-hover:rotate-45 transition-transform" />
+            <span>🇺🇸 EN (Âu - Mỹ)</span>
+          </button>
         </div>
 
         {/* Actions: Gemini Key, Spotlight, Export PNG, Export Video */}
@@ -159,6 +201,23 @@ export const Header: React.FC = () => {
             <Download className="w-3.5 h-3.5" /> Ảnh PNG
           </button>
 
+          {/* Auditor Quick Pill */}
+          <button
+            onClick={() => useChartStore.getState().setActiveTool('audit')}
+            title="Mở Bảng Kiểm Duyệt Chuyên Gia (Trading & YouTube Auditor)"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition ${
+              (useChartStore.getState().validationReport?.score ?? 100) >= 80
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                : 'bg-rose-500/15 border-rose-500/30 text-rose-300 hover:bg-rose-500/25 animate-pulse'
+            }`}
+          >
+            <span>
+              {(useChartStore.getState().validationReport?.score ?? 100) >= 80
+                ? '✓ An Toàn'
+                : '⚠️ Lệch Pha'}
+            </span>
+          </button>
+
           <button
             onClick={() => setIsExportModalOpen(true)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 text-white rounded-lg font-semibold text-xs shadow-lg shadow-primary/20 transition"
@@ -172,7 +231,7 @@ export const Header: React.FC = () => {
       <AzzamOpsModal
         isOpen={isAzzamOpsOpen}
         onClose={() => setIsAzzamOpsOpen(false)}
-        onSelectAndExport={() => setIsExportModalOpen(true)}
+        onSelectAndExport={() => setIsAzzamOpsOpen(false)}
       />
 
       {/* Template Library Modal */}
@@ -190,6 +249,9 @@ export const Header: React.FC = () => {
 
       {/* Hermes Agent Interactive Chat Modal */}
       <HermesChatModal isOpen={isHermesChatOpen} onClose={() => setIsHermesChatOpen(false)} />
+
+      {/* YouTube Live Channel Audit Modal */}
+      <YouTubeAuditModal isOpen={isYouTubeAuditOpen} onClose={() => setIsYouTubeAuditOpen(false)} />
     </>
   );
 };

@@ -1,8 +1,11 @@
 import { create } from 'zustand';
-import { Candle, Overlay, ChartSettings, RevealAnimationType } from '../types/chart';
+import { Candle, Overlay, ChartSettings, RevealAnimationType, ScriptSubtitle, ExecutionOrder, SetupValidationReport } from '../types/chart';
 import { generateGBMCandle } from '../math/gbm';
 import { generateGroupCandleSequence } from '../math/groupCandles';
 import { generateZigZagCandles } from '../math/zigzag';
+import { validateAndNormalizeSetup } from '../utils/dynamicValidator';
+import { convertStateToEnglish } from '../utils/englishLocalization';
+import { generateDynamicScriptSubtitles } from '../utils/dynamicScriptNarrator';
 
 interface ChartState {
   candles: Candle[];
@@ -15,13 +18,51 @@ interface ChartState {
   revealAnimation: boolean;
 
   // Full NLE Editor State
-  activeTool: 'templates' | 'ohlc' | 'text' | 'elements' | 'settings';
+  activeTool: 'templates' | 'ohlc' | 'text' | 'elements' | 'settings' | 'audit' | 'hermes' | 'script';
   stageTheme: 'white' | 'dark';
   headlineText: string;
   sublineText: string;
   badges: [string, string, string];
   isHermesChatOpen: boolean;
+  isAzzamOpsOpen: boolean;
   showSafeZones: boolean;
+  activeScriptMeta: { id: string; title: string; format?: string } | null;
+  setActiveScriptMeta: (meta: { id: string; title: string; format?: string } | null) => void;
+
+  // TikTok / Reels Video Dynamics
+  showCalloutPin: boolean;
+  calloutPinText: string;
+  calloutCandleIndex: number;
+  showPipCounter: boolean;
+  targetPips: number;
+  showExecutionBadge: boolean;
+  executionOrder: ExecutionOrder | null;
+  scriptSubtitles: ScriptSubtitle[];
+  showPhoneFrame: boolean;
+  showTikTokUIOverlay: boolean;
+  beforeAfterMode: 'auto' | 'before' | 'after' | 'off';
+  setBeforeAfterMode: (mode: 'auto' | 'before' | 'after' | 'off') => void;
+  
+  // Validation State
+  validationReport: SetupValidationReport | null;
+  validateCurrentSetup: () => SetupValidationReport;
+  applyAutoNormalize: () => void;
+  applyComprehensiveAutoFix: () => void;
+  applyEnglishVersion: () => void;
+  
+  // Voice & Audio State (Google AI Studio Gemini 3.8 Flash TTS + Web Speech Engine)
+  voiceAudioUrl: string | null;
+  voiceAudioBase64: string | null;
+  isVoiceGenerating: boolean;
+  selectedVoice: 'Charon' | 'Puck' | 'Aoede' | 'Kore' | 'Fenrir';
+  isAudioMuted: boolean;
+  audioEngine: 'gemini' | 'webspeech';
+  hasTtsQuotaExceeded: boolean;
+  setAudioEngine: (engine: 'gemini' | 'webspeech') => void;
+  setVoiceAudio: (audioBase64: string | null, mimeType?: string) => void;
+  setSelectedVoice: (voice: 'Charon' | 'Puck' | 'Aoede' | 'Kore' | 'Fenrir') => void;
+  setIsAudioMuted: (muted: boolean) => void;
+  generateVoiceover: () => Promise<boolean>;
   
   // Timeline State
   currentTime: number; // in seconds
@@ -30,18 +71,33 @@ interface ChartState {
   revealMode: RevealAnimationType;
 
   // Actions
-  setActiveTool: (tool: 'templates' | 'ohlc' | 'text' | 'elements' | 'settings') => void;
+  setActiveTool: (tool: 'templates' | 'ohlc' | 'text' | 'elements' | 'settings' | 'audit' | 'hermes' | 'script') => void;
   setStageTheme: (theme: 'white' | 'dark') => void;
   setHeadlineText: (text: string) => void;
   setSublineText: (text: string) => void;
   setBadges: (badges: [string, string, string]) => void;
   setIsHermesChatOpen: (open: boolean) => void;
+  isAzzamOpsOpen: boolean;
+  setIsAzzamOpsOpen: (open: boolean) => void;
   setShowSafeZones: (show: boolean) => void;
+
+  setShowCalloutPin: (show: boolean) => void;
+  setCalloutPinText: (text: string) => void;
+  setCalloutCandleIndex: (index: number) => void;
+  setShowPipCounter: (show: boolean) => void;
+  setTargetPips: (pips: number) => void;
+  setShowExecutionBadge: (show: boolean) => void;
+  setExecutionOrder: (order: ExecutionOrder | null) => void;
+  setScriptSubtitles: (subtitles: ScriptSubtitle[]) => void;
+  setShowPhoneFrame: (show: boolean) => void;
+  setShowTikTokUIOverlay: (show: boolean) => void;
 
   setBuilderMode: (mode: 'single' | 'group' | 'zigzag') => void;
   setActiveWorkspaceTab: (tab: 'canvas' | 'timeline') => void;
   setRevealAnimation: (enabled: boolean) => void;
   
+  setCandles: (candles: Candle[]) => void;
+  setOverlays: (overlays: Overlay[]) => void;
   addCandle: (candle: Omit<Candle, 'id' | 'index'>) => void;
   updateCandle: (index: number, updates: Partial<Candle>) => void;
   removeLastCandle: () => void;
@@ -62,41 +118,52 @@ interface ChartState {
   resetChart: () => void;
 }
 
-// Initial demo candles for XAUUSD (Gold - Live Price Range ~4,129.00)
+// Initial demo candles: Hexagold Asia Sweep (Bẫy Quét Đỉnh Á XAUUSD - Sell +240 Pips)
 const INITIAL_CANDLES: Candle[] = [
-  { id: 'c-1', index: 0, open: 4125.0, high: 4132.5, low: 4123.0, close: 4130.0 },
-  { id: 'c-2', index: 1, open: 4130.0, high: 4138.0, low: 4128.5, close: 4136.5 },
-  { id: 'c-3', index: 2, open: 4136.5, high: 4139.0, low: 4126.0, close: 4127.5 },
-  { id: 'c-4', index: 3, open: 4127.5, high: 4148.0, low: 4126.0, close: 4145.0 }, // Expansion
-  { id: 'c-5', index: 4, open: 4145.0, high: 4154.0, low: 4143.0, close: 4152.5 },
-  { id: 'c-6', index: 5, open: 4152.5, high: 4153.5, low: 4136.0, close: 4138.0 }, // FVG Retest
-  { id: 'c-7', index: 6, open: 4138.0, high: 4162.0, low: 4137.0, close: 4160.0 }, // Target rally
+  { id: 'c-1', index: 0, open: 4130.0, high: 4135.0, low: 4128.0, close: 4134.0 }, // Asian Range
+  { id: 'c-2', index: 1, open: 4134.0, high: 4138.0, low: 4132.0, close: 4137.5 }, // Approaching Asia High
+  { id: 'c-3', index: 2, open: 4137.5, high: 4146.0, low: 4135.0, close: 4136.0 }, // Bull Trap Wick (Liquidity Sweep)
+  { id: 'c-4', index: 3, open: 4136.0, high: 4137.0, low: 4122.0, close: 4123.5 }, // Displacement Dump & MSS
+  { id: 'c-5', index: 4, open: 4123.5, high: 4132.0, low: 4121.0, close: 4131.0 }, // Retest Bearish FVG [4126 - 4135]
+  { id: 'c-6', index: 5, open: 4131.0, high: 4131.5, low: 4115.0, close: 4116.0 }, // Selloff continuation
+  { id: 'c-7', index: 6, open: 4116.0, high: 4117.0, low: 4099.0, close: 4102.0 }, // TP Hit +240 pips
 ];
 
 export const useChartStore = create<ChartState>((set, get) => ({
   candles: INITIAL_CANDLES,
   overlays: [
     {
-      id: 'fvg-gold',
-      type: 'FVG',
-      startCandleIndex: 3,
-      endCandleIndex: 6,
-      priceStart: 4129.0,
-      priceEnd: 4143.0,
-      color: '#00F5A0',
-      opacity: 0.22,
-      label: 'XAUUSD Bullish FVG [4129.00 - 4143.00]',
-    },
-    {
-      id: 'asia-low',
+      id: 'asia-high-line',
       type: 'LIQUIDITY_LINE',
       startCandleIndex: 0,
       endCandleIndex: 3,
-      priceStart: 4123.0,
-      priceEnd: 4123.0,
+      priceStart: 4138.0,
+      priceEnd: 4138.0,
       color: '#F59E0B',
-      opacity: 0.85,
-      label: 'Asia Low Liquidity - 4,123.00',
+      opacity: 0.9,
+      label: 'Đỉnh Phiên Á (Asia High - 4,138.00)',
+    },
+    {
+      id: 'fvg-bear',
+      type: 'FVG',
+      startCandleIndex: 3,
+      endCandleIndex: 5,
+      priceStart: 4126.0,
+      priceEnd: 4135.0,
+      color: '#FF3366',
+      opacity: 0.25,
+      label: 'Bearish FVG M15 [4126 - 4135]',
+    },
+    {
+      id: 'rr-setup',
+      type: 'LONG_SHORT',
+      startCandleIndex: 4,
+      endCandleIndex: 6,
+      priceStart: 4131.0,
+      priceEnd: 4102.0,
+      color: '#00F5A0',
+      opacity: 0.25,
+      label: 'SELL XAUUSD +240 Pips (1:4 RR)',
     },
   ],
   settings: {
@@ -122,23 +189,132 @@ export const useChartStore = create<ChartState>((set, get) => ({
   revealAnimation: true,
   activeTool: 'templates',
   stageTheme: 'white',
-  headlineText: 'YOU STOP WATCHING THE SWEEP',
-  sublineText: 'You start watching what happens after it',
-  badges: ['1. LOSS $30', '2. ENTRY SL 20p', '3. SIZE $1.5'],
+  headlineText: 'TẠI SAO BẠN THUA LỖ KHI BUY GOLD TẠI ĐỈNH?',
+  sublineText: 'Bẫy Liquidity Sweep M15 & Điểm vào lệnh chuẩn SMC',
+  badges: ['1. LOSS $30', '2. SL 20 PIPS', '3. LOT 0.05'],
   isHermesChatOpen: false,
+  isAzzamOpsOpen: false,
   showSafeZones: false,
-  currentTime: 26.26,
-  duration: 52.26,
+
+  // TikTok / Reels Video Dynamics
+  showCalloutPin: true,
+  calloutPinText: '🎯 BẪY DỤ BUY QUÉT ĐỈNH',
+  calloutCandleIndex: 2,
+  showPipCounter: true,
+  targetPips: 240,
+  showExecutionBadge: true,
+  executionOrder: {
+    type: 'SELL',
+    entry: 4136.0,
+    sl: 4142.0,
+    tp: 4112.0,
+    lot: 0.05,
+    risk: 30,
+  },
+  scriptSubtitles: [
+    { timePercent: 0.0, text: 'Rất nhiều trader thấy cây nến xanh lớn liền vội vàng BUY đuổi...', stageName: 'Hook' },
+    { timePercent: 0.28, text: 'Nhưng đây là cái bẫy thanh khoản của Market Maker dụ Retail Trader!', stageName: 'Trap' },
+    { timePercent: 0.58, text: 'Nến rút râu để lại Bearish FVG M15 & MSS. Đây là dấu chân Big Boys!', stageName: 'Setup' },
+    { timePercent: 0.82, text: 'Đặt SL 20 pips ($30 Risk), chốt lời +240 pips tại đáy cũ (1:4 R:R).', stageName: 'Execution' },
+  ],
+  showPhoneFrame: true,
+  showTikTokUIOverlay: false,
+  beforeAfterMode: 'off',
+  setBeforeAfterMode: (mode) => set({ beforeAfterMode: mode }),
+  validationReport: null,
+  currentTime: 6.0,
+  duration: 6.0,
   isPlaying: false,
   revealMode: 'sequential',
+
+  // Voice & Audio State (Google AI Studio Gemini 3.8 Flash TTS + Web Speech Engine)
+  voiceAudioUrl: null,
+  voiceAudioBase64: null,
+  isVoiceGenerating: false,
+  selectedVoice: 'Charon',
+  isAudioMuted: false,
+  audioEngine: 'gemini',
+  hasTtsQuotaExceeded: false,
+
+  setAudioEngine: (engine) => set({ audioEngine: engine }),
+
+  setVoiceAudio: (audioBase64, mimeType = 'audio/wav') => {
+    if (!audioBase64) {
+      set({ voiceAudioUrl: null, voiceAudioBase64: null });
+      return;
+    }
+    const dataUrl = `data:${mimeType};base64,${audioBase64}`;
+    set({ voiceAudioUrl: dataUrl, voiceAudioBase64: audioBase64, audioEngine: 'gemini', hasTtsQuotaExceeded: false });
+  },
+
+  setSelectedVoice: (voice) => set({ selectedVoice: voice }),
+  setIsAudioMuted: (muted) => set({ isAudioMuted: muted }),
+
+  generateVoiceover: async () => {
+    const state = get();
+    if (state.isVoiceGenerating) return false;
+
+    set({ isVoiceGenerating: true });
+    try {
+      const res = await fetch('/api/tts/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subtitles: state.scriptSubtitles,
+          voice: state.selectedVoice,
+        }),
+      });
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          console.warn('Gemini 3.8 Flash TTS Free Tier quota exceeded (10/day). Falling back to Web Speech Engine.');
+          set({ hasTtsQuotaExceeded: true, audioEngine: 'webspeech' });
+          return false;
+        }
+        throw new Error(`TTS API failed: ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data.audioBase64) {
+        state.setVoiceAudio(data.audioBase64, data.mimeType || 'audio/wav');
+        set({ audioEngine: 'gemini', hasTtsQuotaExceeded: false });
+        return true;
+      }
+      if (data.rateLimited) {
+        set({ hasTtsQuotaExceeded: true, audioEngine: 'webspeech' });
+        return false;
+      }
+      return false;
+    } catch (e) {
+      console.error('Failed to generate voiceover with Gemini 3.8 Flash TTS:', e);
+      set({ hasTtsQuotaExceeded: true, audioEngine: 'webspeech' });
+      return false;
+    } finally {
+      set({ isVoiceGenerating: false });
+    }
+  },
 
   setActiveTool: (tool) => set({ activeTool: tool }),
   setStageTheme: (theme) => set({ stageTheme: theme }),
   setHeadlineText: (text) => set({ headlineText: text }),
   setSublineText: (text) => set({ sublineText: text }),
   setBadges: (badges) => set({ badges }),
+  setIsAzzamOpsOpen: (open) => set({ isAzzamOpsOpen: open }),
   setIsHermesChatOpen: (open) => set({ isHermesChatOpen: open }),
   setShowSafeZones: (show) => set({ showSafeZones: show }),
+  activeScriptMeta: null,
+  setActiveScriptMeta: (meta) => set({ activeScriptMeta: meta }),
+
+  setShowCalloutPin: (show) => set({ showCalloutPin: show }),
+  setCalloutPinText: (text) => set({ calloutPinText: text }),
+  setCalloutCandleIndex: (index) => set({ calloutCandleIndex: index }),
+  setShowPipCounter: (show) => set({ showPipCounter: show }),
+  setTargetPips: (pips) => set({ targetPips: pips }),
+  setShowExecutionBadge: (show) => set({ showExecutionBadge: show }),
+  setExecutionOrder: (order) => set({ executionOrder: order }),
+  setScriptSubtitles: (subtitles) => set({ scriptSubtitles: subtitles }),
+  setShowPhoneFrame: (show) => set({ showPhoneFrame: show }),
+  setShowTikTokUIOverlay: (show) => set({ showTikTokUIOverlay: show }),
 
   setBuilderMode: (mode) => set({ builderMode: mode }),
   setActiveWorkspaceTab: (tab) => set({ activeWorkspaceTab: tab }),
@@ -147,6 +323,9 @@ export const useChartStore = create<ChartState>((set, get) => ({
       revealAnimation: enabled,
       revealMode: enabled ? 'sequential' : 'instant',
     }),
+
+  setCandles: (candles) => set({ candles }),
+  setOverlays: (overlays) => set({ overlays }),
 
   addCandle: (c) =>
     set((state) => {
@@ -255,6 +434,22 @@ export const useChartStore = create<ChartState>((set, get) => ({
       currentTime: template.duration,
       isPlaying: false,
       revealMode: template.revealMode || 'sequential',
+      headlineText: template.headlineText || template.title,
+      sublineText: template.sublineText || template.description?.substring(0, 70) || '',
+      badges: template.badges || ['1. LOSS $30', '2. SL 20 PIPS', '3. LOT 0.05'],
+
+      // State Isolation: KHÔNG lấy trộm dữ liệu cũ từ state nếu template không có
+      showCalloutPin: template.showCalloutPin ?? (!!template.calloutPinText),
+      calloutPinText: template.calloutPinText || '',
+      calloutCandleIndex: template.calloutCandleIndex ?? 0,
+      showPipCounter: template.showPipCounter ?? (!!template.targetPips),
+      targetPips: template.targetPips ?? 0,
+      showExecutionBadge: template.showExecutionBadge ?? (!!template.executionOrder),
+      executionOrder: template.executionOrder || null,
+      scriptSubtitles: template.scriptSubtitles || [],
+      voiceAudioUrl: null,
+      voiceAudioBase64: null,
+
       settings: {
         ...state.settings,
         aspectRatio: template.aspectRatio || state.settings.aspectRatio,
@@ -268,4 +463,68 @@ export const useChartStore = create<ChartState>((set, get) => ({
       currentTime: 0,
       isPlaying: false,
     }),
+
+  validateCurrentSetup: () => {
+    const state = get();
+    const report = validateAndNormalizeSetup({
+      title: state.headlineText,
+      candles: state.candles,
+      overlays: state.overlays,
+      executionOrder: state.executionOrder,
+      calloutPinText: state.calloutPinText,
+      calloutCandleIndex: state.calloutCandleIndex,
+      scriptSubtitles: state.scriptSubtitles,
+      badges: state.badges,
+    });
+    set({ validationReport: report });
+    return report;
+  },
+
+  applyAutoNormalize: () => {
+    const state = get();
+    const report = state.validateCurrentSetup();
+    if (report.normalizedSetup) {
+      set({
+        executionOrder: report.normalizedSetup.executionOrder,
+        calloutPinText: report.normalizedSetup.calloutPinText,
+        calloutCandleIndex: report.normalizedSetup.calloutCandleIndex,
+        targetPips: report.normalizedSetup.targetPips,
+        scriptSubtitles: report.normalizedSetup.scriptSubtitles,
+        showPipCounter: true,
+        showExecutionBadge: true,
+        showCalloutPin: true,
+      });
+      // Re-run validation to get 100% score
+      state.validateCurrentSetup();
+    }
+  },
+
+  applyComprehensiveAutoFix: () => {
+    const state = get();
+    state.applyAutoNormalize();
+  },
+
+  applyEnglishVersion: () => {
+    const state = get();
+    const en = convertStateToEnglish({
+      headlineText: state.headlineText,
+      sublineText: state.sublineText,
+      calloutPinText: state.calloutPinText,
+      badges: state.badges,
+      scriptSubtitles: state.scriptSubtitles,
+      overlays: state.overlays,
+      executionOrder: state.executionOrder,
+    });
+
+    set({
+      headlineText: en.headlineText,
+      sublineText: en.sublineText,
+      calloutPinText: en.calloutPinText,
+      badges: en.badges,
+      scriptSubtitles: en.scriptSubtitles,
+      overlays: en.overlays,
+    });
+
+    state.validateCurrentSetup();
+  },
 }));
