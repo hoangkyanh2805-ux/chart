@@ -91,19 +91,24 @@ export default function Home() {
         {/* Leftmost Vertical Tool Rail (5 Tools) */}
         <ToolRail />
 
-        {/* Secondary Drawer: Template Library OR Text Studio OR Auditor Panel OR Hermes Copilot OR Script Inspector OR Controls */}
+        {/* Secondary Drawer: Persistent mounted panels so switching tabs never loses chat history or state */}
         <aside className="h-full flex-shrink-0">
-          {activeTool === 'templates' ? (
+          <div className={`h-full ${activeTool === 'templates' ? 'block' : 'hidden'}`}>
             <TemplateSidebar />
-          ) : activeTool === 'script' ? (
+          </div>
+          <div className={`h-full ${activeTool === 'script' ? 'block' : 'hidden'}`}>
             <ScriptSetupPanel onOpenExport={() => setIsExportModalOpen(true)} />
-          ) : activeTool === 'text' ? (
+          </div>
+          <div className={`h-full ${activeTool === 'text' ? 'block' : 'hidden'}`}>
             <TextTypographyPanel />
-          ) : activeTool === 'audit' ? (
+          </div>
+          <div className={`h-full ${activeTool === 'audit' ? 'block' : 'hidden'}`}>
             <AuditorPanel />
-          ) : activeTool === 'hermes' ? (
+          </div>
+          <div className={`h-full ${activeTool === 'hermes' ? 'block' : 'hidden'}`}>
             <HermesSidebarPanel />
-          ) : (
+          </div>
+          {!['templates', 'script', 'text', 'audit', 'hermes'].includes(activeTool) && (
             <ControlsPanel />
           )}
         </aside>

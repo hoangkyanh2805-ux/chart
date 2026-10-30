@@ -308,17 +308,51 @@ export const HermesChatModal: React.FC<HermesChatModalProps> = ({ isOpen, onClos
   const { setHeadlineText, setSublineText, setBadges, clearAllCandles, addCandle, addOverlay, setCurrentTime, setIsPlaying } =
     useChartStore();
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: `Chào Alan! Tôi là **Hermes Agent** — Tổng Đạo Diễn & Cố Vấn Trading của kênh @azzammastertradinggold.
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('chartanimator_hermes_chat_history');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
+    return [
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: `Chào Alan! Tôi là **Hermes Agent** — Tổng Đạo Diễn & Cố Vấn Trading của kênh @azzammastertradinggold.
 
 Tôi nắm toàn bộ dữ liệu 20 kịch bản thực chiến, master pain point của khán giả, và quy tắc **Risk-First** ($10 / $30 Budget, 20 pips SL, giờ vàng 00:00 VN).
 
 Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạo setup nến nào cho video tiếp theo?`,
-    },
-  ]);
+      },
+    ];
+  });
+
+  // Sync with localStorage on open and whenever messages change
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('chartanimator_hermes_chat_history');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMessages(parsed);
+          }
+        }
+      } catch {}
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && messages.length > 0) {
+        localStorage.setItem('chartanimator_hermes_chat_history', JSON.stringify(messages));
+      }
+    } catch {}
+  }, [messages]);
 
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);

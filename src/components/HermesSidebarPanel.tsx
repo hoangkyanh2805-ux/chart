@@ -17,6 +17,7 @@ import {
   Sparkles,
   Radio,
   Youtube,
+  RotateCcw,
 } from 'lucide-react';
 import { generateStrategySetup } from '../utils/hermesEngine';
 import { YouTubeAuditModal } from './YouTubeAuditModal';
@@ -139,17 +140,37 @@ export const HermesSidebarPanel: React.FC = () => {
     setIsPlaying,
   } = useChartStore();
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: `Chào Alan! Tôi là **Hermes Copilot** — Tổng Đạo Diễn & Cố Vấn Trading kênh @azzammastertradinggold.
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('chartanimator_hermes_chat_history');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
+    return [
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: `Chào Alan! Tôi là **Hermes Copilot** — Tổng Đạo Diễn & Cố Vấn Trading kênh @azzammastertradinggold.
 
 Tôi đã đồng bộ toàn bộ dữ liệu 20 kịch bản thực chiến, master pain point của khán giả, và quy tắc **Risk-First** ($10 / $30 Budget, 20 pips SL, giờ vàng 00:00 VN).
 
 Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạo setup nến nào cho video tiếp theo?`,
-    },
-  ]);
+      },
+    ];
+  });
+
+  // Persist messages to localStorage
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && messages.length > 0) {
+        localStorage.setItem('chartanimator_hermes_chat_history', JSON.stringify(messages));
+      }
+    } catch {}
+  }, [messages]);
 
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -467,6 +488,29 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
             className="p-1.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/20 transition flex items-center gap-1"
           >
             <Youtube className="w-3.5 h-3.5 fill-current" />
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Bắt đầu phiên trò chuyện mới với Hermes? Lịch sử cũ sẽ được làm mới.')) {
+                const freshWelcome: ChatMessage = {
+                  id: 'welcome',
+                  role: 'assistant',
+                  content: `Chào Alan! Tôi là **Hermes Copilot** — Tổng Đạo Diễn & Cố Vấn Trading kênh @azzammastertradinggold.
+
+Tôi đã đồng bộ toàn bộ dữ liệu 20 kịch bản thực chiến, master pain point của khán giả, và quy tắc **Risk-First** ($10 / $30 Budget, 20 pips SL, giờ vàng 00:00 VN).
+
+Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạo setup nến nào cho video tiếp theo?`,
+                };
+                setMessages([freshWelcome]);
+                try {
+                  localStorage.removeItem('chartanimator_hermes_chat_history');
+                } catch {}
+              }
+            }}
+            title="Làm mới cuộc trò chuyện (Bắt đầu phiên mới)"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-[#21262D] transition"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setIsHermesChatOpen(true)}
