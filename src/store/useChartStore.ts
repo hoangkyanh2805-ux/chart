@@ -25,6 +25,7 @@ interface ChartState {
   badges: [string, string, string] | string[];
   isHermesChatOpen: boolean;
   isAzzamOpsOpen: boolean;
+  isTicketModalOpen: boolean;
   showSafeZones: boolean;
   activeScriptMeta: { id: string; title: string; format?: string } | null;
   setActiveScriptMeta: (meta: { id: string; title: string; format?: string } | null) => void;
@@ -79,6 +80,8 @@ interface ChartState {
   setIsHermesChatOpen: (open: boolean) => void;
   isAzzamOpsOpen: boolean;
   setIsAzzamOpsOpen: (open: boolean) => void;
+  isTicketModalOpen: boolean;
+  setIsTicketModalOpen: (open: boolean) => void;
   setShowSafeZones: (show: boolean) => void;
 
   setShowCalloutPin: (show: boolean) => void;
@@ -194,6 +197,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
   badges: ['1. LOSS $30', '2. SL 20 PIPS', '3. LOT 0.05'],
   isHermesChatOpen: false,
   isAzzamOpsOpen: false,
+  isTicketModalOpen: false,
   showSafeZones: false,
 
   // TikTok / Reels Video Dynamics
@@ -300,6 +304,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
   setSublineText: (text) => set({ sublineText: text }),
   setBadges: (badges) => set({ badges }),
   setIsAzzamOpsOpen: (open) => set({ isAzzamOpsOpen: open }),
+  setIsTicketModalOpen: (open) => set({ isTicketModalOpen: open }),
   setIsHermesChatOpen: (open) => set({ isHermesChatOpen: open }),
   setShowSafeZones: (show) => set({ showSafeZones: show }),
   activeScriptMeta: null,

@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useChartStore } from '../store/useChartStore';
-import { LayoutGrid, Sliders, Type, Layers, Settings, Sun, Moon, Sparkles, ShieldCheck, Zap, Radio, FileText } from 'lucide-react';
+import { LayoutGrid, Sliders, Type, Layers, Settings, Sun, Moon, Sparkles, ShieldCheck, Zap, Radio, FileText, MessageSquarePlus } from 'lucide-react';
 
 export const ToolRail: React.FC = () => {
-  const { activeTool, setActiveTool, stageTheme, setStageTheme, validationReport, setIsAzzamOpsOpen, activeScriptMeta } = useChartStore();
+  const { activeTool, setActiveTool, stageTheme, setStageTheme, validationReport, setIsAzzamOpsOpen, activeScriptMeta, setIsTicketModalOpen } = useChartStore();
 
   const isAuditSafe = (validationReport?.isValid ?? true) && (validationReport?.score ?? 100) >= 80;
 
@@ -77,8 +77,17 @@ export const ToolRail: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom Controls: Light/Dark Theme Switcher */}
-      <div className="flex flex-col items-center gap-3">
+      {/* Bottom Controls: Ticket Feedback & Light/Dark Theme Switcher */}
+      <div className="flex flex-col items-center gap-2">
+        <button
+          onClick={() => setIsTicketModalOpen(true)}
+          title="Gửi Ticket Yêu Cầu / Feedback cho Team & Hermes"
+          className="w-9 h-9 rounded-xl flex items-center justify-center border transition-all bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25 relative group"
+        >
+          <MessageSquarePlus className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+        </button>
+
         <button
           onClick={() => setStageTheme(stageTheme === 'white' ? 'dark' : 'white')}
           title={stageTheme === 'white' ? 'Switch to Dark Canvas' : 'Switch to White Canvas'}

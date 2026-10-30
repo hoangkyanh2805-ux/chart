@@ -3,13 +3,14 @@
 import React, { useState } from 'react';
 import { useChartStore } from '../store/useChartStore';
 import { AspectRatio } from '../types/chart';
-import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio, Key, Zap, Youtube, Globe } from 'lucide-react';
+import { Download, Monitor, Smartphone, Square, Eye, Video, LayoutTemplate, Flame, Radio, Key, Zap, Youtube, Globe, MessageSquarePlus } from 'lucide-react';
 import { ExportModal } from './ExportModal';
 import { TemplateModal } from './TemplateModal';
 import { AzzamOpsModal } from './AzzamOpsModal';
 import { ApiKeyModal } from './ApiKeyModal';
 import { HermesChatModal } from './HermesChatModal';
 import { YouTubeAuditModal } from './YouTubeAuditModal';
+import { TicketFeedbackModal } from './TicketFeedbackModal';
 import { ChartTemplate } from '../data/templates';
 
 export const Header: React.FC = () => {
@@ -20,6 +21,8 @@ export const Header: React.FC = () => {
     setIsHermesChatOpen,
     isAzzamOpsOpen,
     setIsAzzamOpsOpen,
+    isTicketModalOpen,
+    setIsTicketModalOpen,
     applyEnglishVersion,
     activeTool,
     setActiveTool,
@@ -111,6 +114,19 @@ export const Header: React.FC = () => {
             <span>Khám Kênh @azzam</span>
             <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-red-500/20 text-red-300 font-extrabold border border-red-500/30">
               LIVE
+            </span>
+          </button>
+
+          {/* Team Ticket / Feedback Button */}
+          <button
+            onClick={() => setIsTicketModalOpen(true)}
+            title="Gửi Ticket yêu cầu chỉnh sửa kịch bản, nến, giọng đọc cho team"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1C160C] hover:bg-[#2A1F0E] border border-amber-500/60 hover:border-amber-400 text-amber-300 hover:text-white rounded-lg text-xs font-bold transition shadow-sm group"
+          >
+            <MessageSquarePlus className="w-3.5 h-3.5 text-amber-400" />
+            <span>Gửi Ticket / Feedback</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-extrabold border border-amber-500/30">
+              TEAM
             </span>
           </button>
 
@@ -252,6 +268,9 @@ export const Header: React.FC = () => {
 
       {/* YouTube Live Channel Audit Modal */}
       <YouTubeAuditModal isOpen={isYouTubeAuditOpen} onClose={() => setIsYouTubeAuditOpen(false)} />
+
+      {/* Team Ticket & Feedback Modal */}
+      <TicketFeedbackModal isOpen={isTicketModalOpen} onClose={() => setIsTicketModalOpen(false)} />
     </>
   );
 };
