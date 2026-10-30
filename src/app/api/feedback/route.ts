@@ -4,6 +4,91 @@ import path from 'path';
 
 export const runtime = 'nodejs';
 
+async function sendTelegramNotification({
+  ticketId,
+  category,
+  problem,
+  desired,
+  author,
+  image,
+}: {
+  ticketId: string;
+  category: string;
+  problem: string;
+  desired: string;
+  author: string;
+  image?: string | null;
+}) {
+  const token = process.env.TELEGRAM_BOT_TOKEN || '8850879280:AAFhUz9lOrfSfhSbZ8HYat82dKgiHQdXNZ0';
+  const chatId = process.env.TELEGRAM_CHAT_ID || '-1004458375752';
+  const threadId = process.env.TELEGRAM_FEEDBACK_THREAD_ID || '1550';
+
+  if (!token || !chatId) return;
+
+  const escapeHtml = (str: string) =>
+    str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+  const captionHtml = `🎯 <b>[TICKET FEEDBACK #${ticketId}]</b>
+━━━━━━━━━━━━━━━━━━━━
+📌 <b>Phần cần sửa:</b> ${escapeHtml(category)}
+👤 <b>Người gửi:</b> ${escapeHtml(author)}
+
+⚠️ <b>Vấn đề gặp phải:</b>
+<i>${escapeHtml(problem)}</i>
+
+✨ <b>Kết quả mong muốn:</b>
+<b>${escapeHtml(desired)}</b>
+━━━━━━━━━━━━━━━━━━━━
+🤖 <i>Tự động chuyển tiếp từ ChartAnimator Web App</i>`;
+
+  try {
+    if (image && typeof image === 'string' && image.startsWith('data:image/')) {
+      const parts = image.split(',');
+      const mimeMatch = parts[0]?.match(/data:(.*?);base64/);
+      const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+      const base64Data = parts[1] || '';
+      const buffer = Buffer.from(base64Data, 'base64');
+      const blob = new Blob([buffer], { type: mimeType });
+
+      const formData = new FormData();
+      formData.append('chat_id', chatId);
+      if (threadId) formData.append('message_thread_id', String(threadId));
+      formData.append('photo', blob, `ticket-${ticketId}.png`);
+      formData.append('caption', captionHtml);
+      formData.append('parse_mode', 'HTML');
+
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        console.warn('Telegram sendPhoto failed, falling back to text:', await res.text());
+        await sendTextMessage(token, chatId, threadId, captionHtml);
+      }
+    } else {
+      await sendTextMessage(token, chatId, threadId, captionHtml);
+    }
+  } catch (tgErr) {
+    console.warn('Telegram notification failed:', tgErr);
+  }
+}
+
+async function sendTextMessage(token: string, chatId: string, threadId: string, textHtml: string) {
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_thread_id: threadId ? Number(threadId) : undefined,
+      text: textHtml,
+      parse_mode: 'HTML',
+    }),
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -66,6 +151,16 @@ export async function POST(req: NextRequest) {
       // In serverless read-only filesystem environments, continue gracefully
       console.warn('Filesystem write skipped in serverless environment:', fsErr);
     }
+
+    // Forward directly to Telegram Topic
+    await sendTelegramNotification({
+      ticketId,
+      category,
+      problem,
+      desired,
+      author,
+      image,
+    });
 
     return NextResponse.json({
       success: true,
