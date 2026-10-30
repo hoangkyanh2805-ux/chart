@@ -14,7 +14,7 @@ export interface ChartTemplate {
   spotlightEnabled?: boolean;
   headlineText?: string;
   sublineText?: string;
-  badges?: [string, string, string];
+  badges?: [string, string, string] | string[];
   showCalloutPin?: boolean;
   calloutPinText?: string;
   calloutCandleIndex?: number;

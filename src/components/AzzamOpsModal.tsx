@@ -133,7 +133,12 @@ export const AzzamOpsModal: React.FC<AzzamOpsModalProps> = ({
 
     setHeadlineText(finalHook);
     setSublineText(finalSub);
-    setBadges(badges);
+    const safeBadges: [string, string, string] = [
+      badges?.[0] || '1. LOSS $30',
+      badges?.[1] || '2. ENTRY SL 20p',
+      badges?.[2] || '3. SIZE 0.15 LOT',
+    ];
+    setBadges(safeBadges);
 
     updateSettings({
       bannerHook: finalHook,

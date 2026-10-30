@@ -22,7 +22,7 @@ interface ChartState {
   stageTheme: 'white' | 'dark';
   headlineText: string;
   sublineText: string;
-  badges: [string, string, string];
+  badges: [string, string, string] | string[];
   isHermesChatOpen: boolean;
   isAzzamOpsOpen: boolean;
   showSafeZones: boolean;
@@ -75,7 +75,7 @@ interface ChartState {
   setStageTheme: (theme: 'white' | 'dark') => void;
   setHeadlineText: (text: string) => void;
   setSublineText: (text: string) => void;
-  setBadges: (badges: [string, string, string]) => void;
+  setBadges: (badges: [string, string, string] | string[]) => void;
   setIsHermesChatOpen: (open: boolean) => void;
   isAzzamOpsOpen: boolean;
   setIsAzzamOpsOpen: (open: boolean) => void;
