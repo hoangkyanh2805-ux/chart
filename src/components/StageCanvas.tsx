@@ -234,7 +234,7 @@ export const StageCanvas: React.FC = () => {
         const boxWidth = Math.max(cWidth * 2, endX - startX + cWidth);
 
         ctx.save();
-        if (overlay.type === 'LIQUIDITY_LINE') {
+        if (overlay.type === 'LIQUIDITY_LINE' || overlay.type === 'SUPPORT_RESISTANCE') {
           // Crisp dashed structural level line (Support / BSL / Retest)
           const yLine = toY(overlay.priceStart);
           ctx.strokeStyle = overlay.color || '#38BDF8';
