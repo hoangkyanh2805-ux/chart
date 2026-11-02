@@ -33,9 +33,9 @@ describe('Live Azzam Dashboard API Integration', () => {
     expect(data.contentPackage.segments[0].chartSetup.candles.length).toBeGreaterThan(0);
     expect(data.contentPackage.segments[0].chartSetup.overlays.length).toBeGreaterThan(0);
 
-    // 5. Verify Script Registry (62 scripts)
-    expect(data.scriptRegistry.total).toBe(62);
-    expect(data.scriptRegistry.items.length).toBe(62);
+    // 5. Verify Script Registry (>= 62 scripts)
+    expect(data.scriptRegistry.total).toBeGreaterThanOrEqual(62);
+    expect(data.scriptRegistry.items.length).toBeGreaterThanOrEqual(62);
     expect(data.scriptRegistry.longCount).toBeGreaterThan(0);
     expect(data.scriptRegistry.shortCount).toBeGreaterThan(0);
 

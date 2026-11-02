@@ -366,6 +366,7 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
         id: payload.title || 'HERMES-SETUP',
         title: finalHeadline,
       },
+      activeTool: 'script',
     });
 
     useChartStore.getState().validateCurrentSetup();
