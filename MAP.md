@@ -53,10 +53,15 @@ chart/
 │       └── 01_opt_11...md      # Chi tiết từng khóa học
 │
 ├── livrables/                  # [TẦNG 1] Sản phẩm bàn giao nghiệm thu
-│   ├── specs/                  # Các bản đặc tả kỹ thuật đã nghiệm thu
+│   ├── specs/                  # Đặc tả kỹ thuật, capability manifest và brief có trạng thái riêng trong từng file
 │   │   ├── SPEC-SETUP-SEMANTIC-ALIGNMENT-AND-STATE-HYGIENE-v1.md
 │   │   ├── SPEC-DYNAMIC-CONTENT-RUNTIME-VALIDATOR-AND-AUTO-NORMALIZER-v1.md
-│   │   └── CHARTANIMATOR-BRIDGE-CHART-CAPABILITY-MANIFEST-v1.md
+│   │   ├── CHARTANIMATOR-BRIDGE-CHART-CAPABILITY-MANIFEST-v1.md
+│   │   ├── SPEC-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md # P3 planning-only local renderer contract
+│   │   └── HERMES-CLI-BRIEF-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md # Read-only Hermes handoff
+│   ├── architecture/           # Kế hoạch và decision record kiến trúc
+│   │   ├── PLAN-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md
+│   │   └── DEBATE-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md
 │   └── test_reports/           # Báo cáo kiểm định & audit chất lượng
 │       ├── audit_report_strict_video_qa.md
 │       └── audit_report_trading_integrity.md

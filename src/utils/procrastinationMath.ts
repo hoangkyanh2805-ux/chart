@@ -94,3 +94,4 @@ export const DEFAULT_AZZAM_SUBGOALS: Record<string, SubGoal> = {
     description: 'Quảng bá trả phí và chạy phân phối bổ trợ',
   },
 };
+
