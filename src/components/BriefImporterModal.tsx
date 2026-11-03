@@ -37,7 +37,7 @@ interface BriefImporterModalProps {
   onClose: () => void;
 }
 
-export type SetupType = 'risk-first' | 'liquidity-sweep' | 'fvg' | 'break-retest' | 'bearish-supply';
+export type SetupType = 'risk-first' | 'liquidity-sweep' | 'fvg' | 'break-retest' | 'bearish-supply' | 'breakout-trap';
 
 interface ParsedBrief {
   headline: string;
@@ -73,6 +73,15 @@ interface HermesScript {
 }
 
 const SAMPLE_BRIEFS = [
+  {
+    id: 'breakout-trap',
+    label: '🚨 Bẫy Breakout (2W7MgNk3Wss)',
+    strategyName: 'Breakout Trap Sweep',
+    text: `# Kịch Bản: Bẫy Breakout & Quét Thanh Khoản D1 -> M15 (2W7MgNk3Wss)
+TITLE CUỐI: Breakout Trap: Why Your Stop-Loss Gets Hit
+Hook Short (10 từ): "Took entry on breakout and hit stop-loss next candle."
+Setup: Đánh dấu đáy ngày PDL $4,128.00. Nến M15 chọc thủng $4,126.00 rút râu quét thanh khoản, xuất hiện MSS phá đỉnh và tạo FVG. Đặt lệnh BUY tại 50% FVG $4,129.80, Stop Loss 20 pips, RR 1:3.5.`,
+  },
   {
     id: 'sweep',
     label: '⚡ Quét BSL ($4,154)',
@@ -131,13 +140,19 @@ function parseBriefText(text: string): ParsedBrief {
   let slPips = 20;
   let rrRatio = 3.5;
 
-  const isSweep = /sweep|liquidity|bsl|ssl|purge|stop watching|fakeout|trap|quét|thanh khoản|bẫy|quét đỉnh|quét đáy/i.test(text);
+  const isBreakoutTrap = /breakout trap|bẫy breakout|bẫy nến|hit stop loss|sweep low|quét đáy|trap/i.test(text);
+  const isSweep = /sweep|liquidity|bsl|ssl|purge|stop watching|fakeout|quét|thanh khoản|quét đỉnh/i.test(text);
   const isFVG = /fvg|imbalance|fair value gap|consequent encroachment|50%|mất cân bằng|khoảng trống/i.test(text);
   const isBreakRetest = /break (?:and|&) retest|retest|bos|break of structure|phá vỡ|test lại|cản/i.test(text);
   const isSupply = /bearish|short|dump|sell|supply|distribution|phân phối|bán tháo|cung|giảm mạnh/i.test(text);
   const isRisk = /risk-first|define the loss|stop loss first|loss budget|quản lý vốn|cắt lỗ|ngân sách rủi ro/i.test(text);
 
-  if (isSweep) {
+  if (isBreakoutTrap) {
+    setupType = 'breakout-trap';
+    headline = 'BREAKOUT TRAP: DONT BE LIQUIDITY';
+    subline = 'Wait for D1 Sweep + M15 MSS + 50% FVG Retest';
+    basePrice = 4128.0;
+  } else if (isSweep) {
     setupType = 'liquidity-sweep';
     headline = 'YOU STOP WATCHING THE SWEEP';
     subline = 'You start watching what happens after it';
@@ -354,6 +369,62 @@ function generateSetupData(type: SetupType, baseP: number) {
         priceEnd: supplyLevel + 2.0,
         color: '#EF4444',
         label: `H1 Supply Zone [${(supplyLevel - 2).toFixed(1)} - ${(supplyLevel + 2).toFixed(1)}]`,
+      },
+    ];
+  } else if (type === 'breakout-trap') {
+    const pdl = baseP;
+    candles = [
+      { id: 'c-1', index: 0, open: pdl + 4.0, high: pdl + 6.0, low: pdl, close: pdl + 1.0 },
+      { id: 'c-2', index: 1, open: pdl + 1.0, high: pdl + 2.0, low: pdl - 2.0, close: pdl + 0.5 },
+      { id: 'c-3', index: 2, open: pdl + 0.5, high: pdl + 5.0, low: pdl, close: pdl + 4.5 },
+      { id: 'c-4', index: 3, open: pdl + 4.5, high: pdl + 5.5, low: pdl + 1.8, close: pdl + 5.0 },
+      { id: 'c-5', index: 4, open: pdl + 5.0, high: pdl + 9.0, low: pdl + 4.5, close: pdl + 8.8 },
+    ];
+
+    overlays = [
+      {
+        id: 'pdl-level',
+        type: 'LIQUIDITY_LINE',
+        startCandleIndex: 0,
+        endCandleIndex: 4,
+        priceStart: pdl,
+        priceEnd: pdl,
+        color: '#F43F5E',
+        opacity: 0.9,
+        label: `Daily Low (PDL) $${pdl.toFixed(2)}`,
+      },
+      {
+        id: 'mss-level',
+        type: 'BREAK_OF_STRUCTURE',
+        startCandleIndex: 1,
+        endCandleIndex: 3,
+        priceStart: pdl + 2.0,
+        priceEnd: pdl + 2.0,
+        color: '#3B82F6',
+        opacity: 0.85,
+        label: 'Market Structure Shift (MSS)',
+      },
+      {
+        id: 'fvg-box',
+        type: 'FVG',
+        startCandleIndex: 2,
+        endCandleIndex: 4,
+        priceStart: pdl + 1.0,
+        priceEnd: pdl + 4.0,
+        color: '#F59E0B',
+        opacity: 0.35,
+        label: `Bullish FVG (50% C.E. $${(pdl + 1.8).toFixed(2)})`,
+      },
+      {
+        id: 'rr-execution',
+        type: 'LONG_SHORT',
+        startCandleIndex: 3,
+        endCandleIndex: 4,
+        priceStart: pdl + 1.8,
+        priceEnd: pdl + 8.8,
+        color: '#10B981',
+        opacity: 0.4,
+        label: `BUY 0.15 lot @ $${(pdl + 1.8).toFixed(2)} (1:3.5 RR)`,
       },
     ];
   } else {
