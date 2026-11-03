@@ -5,11 +5,11 @@ describe('REA + JEV Paper Theme Video Reproduction Suite (2W7MgNk3Wss)', () => {
   it('REA Step: Reconstructed 17 sequence candles must be mathematically valid OHLC', () => {
     expect(REA_ORIGINAL_CANDLES.length).toBe(17);
 
-    REA_ORIGINAL_CANDLES.forEach((c, idx) => {
+    REA_ORIGINAL_CANDLES.forEach((c) => {
       expect(c.high).toBeGreaterThanOrEqual(Math.max(c.open, c.close));
       expect(c.low).toBeLessThanOrEqual(Math.min(c.open, c.close));
-      expect(c.phase).toBeGreaterThanOrEqual(0.0);
-      expect(c.phase).toBeLessThanOrEqual(1.0);
+      expect(c.startSec).toBeGreaterThanOrEqual(0.0);
+      expect(c.startSec).toBeLessThanOrEqual(58.5);
     });
 
     // Check specific structural milestones from the video:
@@ -65,14 +65,14 @@ describe('REA + JEV Paper Theme Video Reproduction Suite (2W7MgNk3Wss)', () => {
       rotate: vi.fn(),
     } as unknown as CanvasRenderingContext2D;
 
-    // Render at progress = 1.0 (final state)
+    // Render at full duration = 58.5s
     renderPaperTheme({
       ctx: mockCtx,
       width: 360,
       height: 640,
       progress: 1.0,
-      currentTime: 15.0,
-      duration: 15.0,
+      currentTime: 58.5,
+      duration: 58.5,
     });
 
     // Verify key brand elements and annotations are drawn
@@ -88,8 +88,8 @@ describe('REA + JEV Paper Theme Video Reproduction Suite (2W7MgNk3Wss)', () => {
     expect(strokes).toContain('@marketanalysis-13');
   });
 
-  it('Kinetic Headline Progression: Correctly switches text through the 10 stages', () => {
-    const checkHeadlinesAtProgress = (prog: number) => {
+  it('Kinetic Headline Progression: Correctly switches text through the exact 58.5s timeline', () => {
+    const checkHeadlinesAtTime = (sec: number) => {
       const texts: string[] = [];
       const mockCtx = {
         fillStyle: '',
@@ -121,41 +121,49 @@ describe('REA + JEV Paper Theme Video Reproduction Suite (2W7MgNk3Wss)', () => {
         ctx: mockCtx,
         width: 360,
         height: 640,
-        progress: prog,
-        currentTime: prog * 15,
-        duration: 15.0,
+        progress: sec / 58.5,
+        currentTime: sec,
+        duration: 58.5,
       });
 
       return texts;
     };
 
-    // Stage 1 (0.05): BREAKOUT / ENTRY?
-    const s1 = checkHeadlinesAtProgress(0.05);
+    // Stage 1 (3s): BREAKOUT / ENTRY?
+    const s1 = checkHeadlinesAtTime(3.0);
     expect(s1).toContain('BREAKOUT');
     expect(s1).toContain('ENTRY?');
 
-    // Stage 2 (0.12): LIQUIDITY / SWEEP.
-    const s2 = checkHeadlinesAtProgress(0.12);
-    expect(s2).toContain('LIQUIDITY');
-    expect(s2).toContain('SWEEP.');
+    // Stage 2 (8s): SAVE THIS
+    const s2 = checkHeadlinesAtTime(8.0);
+    expect(s2).toContain('SAVE THIS');
 
-    // Stage 4 (0.30): DAILY / HIGH + LOW.
-    const s4 = checkHeadlinesAtProgress(0.30);
-    expect(s4).toContain('DAILY');
-    expect(s4).toContain('HIGH + LOW.');
+    // Stage 3 (15s): DAILY / HIGH + LOW.
+    const s3 = checkHeadlinesAtTime(15.0);
+    expect(s3).toContain('DAILY');
+    expect(s3).toContain('HIGH + LOW.');
 
-    // Stage 8 (0.72): FVG / ENTRY?
-    const s8 = checkHeadlinesAtProgress(0.72);
-    expect(s8).toContain('FVG');
+    // Stage 4 (24s): DON'T SELL / THE BREAKOUT.
+    const s4 = checkHeadlinesAtTime(24.0);
+    expect(s4).toContain("DON'T SELL");
 
-    // Stage 9 (0.82): RETEST. / BULLISH CLOSE.
-    const s9 = checkHeadlinesAtProgress(0.82);
-    expect(s9).toContain('RETEST.');
-    expect(s9).toContain('BULLISH CLOSE.');
+    // Stage 5 (30s): WAIT FOR / RECLAIM.
+    const s5 = checkHeadlinesAtTime(30.0);
+    expect(s5).toContain('WAIT FOR');
+    expect(s5).toContain('RECLAIM.');
 
-    // Stage 10 (0.95): COMMENT / MSS OR FVG?
-    const s10 = checkHeadlinesAtProgress(0.95);
-    expect(s10).toContain('COMMENT');
-    expect(s10).toContain('MSS OR FVG?');
+    // Stage 6 (40s): FVG
+    const s6 = checkHeadlinesAtTime(40.0);
+    expect(s6).toContain('FVG');
+
+    // Stage 7 (48s): RETEST. / BULLISH CLOSE.
+    const s7 = checkHeadlinesAtTime(48.0);
+    expect(s7).toContain('RETEST.');
+    expect(s7).toContain('BULLISH CLOSE.');
+
+    // Stage 8 (55s): COMMENT / MSS OR FVG?
+    const s8 = checkHeadlinesAtTime(55.0);
+    expect(s8).toContain('COMMENT');
+    expect(s8).toContain('MSS OR FVG?');
   });
 });

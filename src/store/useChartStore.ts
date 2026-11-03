@@ -216,23 +216,23 @@ export const useChartStore = create<ChartState>((set, get) => ({
   showExecutionBadge: false,
   executionOrder: null,
   scriptSubtitles: [
-    { timePercent: 0.0, text: 'BREAKOUT TRAP: DONT BE LIQUIDITY! Vừa vào lệnh breakout đã dính ngay Stop Loss?', stageName: 'Hook' },
-    { timePercent: 0.25, text: 'Đây không phải fakeout ngẫu nhiên, đây là bẫy quét thanh khoản (Liquidity Sweep) của Big Boys!', stageName: 'Trap' },
-    { timePercent: 0.55, text: 'Giá quét đáy ngày PDL, tạo Market Structure Shift (MSS) phá đỉnh và để lại hộp FVG tăng trưởng!', stageName: 'Setup' },
-    { timePercent: 0.8, text: 'Canh nến hồi về đúng 50% FVG tại $4,129.80 rồi BUY. Stop Loss 20 pips, chốt lời đỉnh ngày, R:R 1:3.5!', stageName: 'Execution' },
+    { timePercent: 0.0, text: 'BREAKOUT ENTRY? Stop Loss Hit! This is not a fakeout, this is a LIQUIDITY SWEEP! Save this 1D to 15M strategy.', stageName: 'Hook' },
+    { timePercent: 0.20, text: 'Step 1: Mark Daily High & Low. Step 2: On M15, when price breaks Daily Low, DONT SELL! It is a trap.', stageName: 'Trap' },
+    { timePercent: 0.48, text: 'Step 3: Wait for reclaim & Recent High break = Market Structure Shift (MSS). Step 4: Mark Fair Value Gap (FVG 1-2-3).', stageName: 'Setup' },
+    { timePercent: 0.75, text: 'Retest into FVG + Bullish Close = Sniper Entry! Stop Loss below Sweep, Target Daily High (1:2 R:R). Comment MSS or FVG?', stageName: 'Execution' },
   ],
   showPhoneFrame: false,
   showTikTokUIOverlay: false,
   beforeAfterMode: 'off',
   setBeforeAfterMode: (mode) => set({ beforeAfterMode: mode }),
   validationReport: null,
-  currentTime: 15.0,
-  duration: 15.0,
+  currentTime: 0.0,
+  duration: 58.5,
   isPlaying: false,
   revealMode: 'sequential',
 
-  // Voice & Audio State (Google AI Studio Gemini 3.8 Flash TTS + Web Speech Engine)
-  voiceAudioUrl: null,
+  // Voice & Audio State (Original Hindi/English Voiceover from 2W7MgNk3Wss)
+  voiceAudioUrl: '/audio/breakout-trap-2w7mgnk3wss.mp3',
   voiceAudioBase64: null,
   isVoiceGenerating: false,
   selectedVoice: 'Charon',
@@ -454,7 +454,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
       showExecutionBadge: template.showExecutionBadge ?? (!!template.executionOrder),
       executionOrder: template.executionOrder || null,
       scriptSubtitles: template.scriptSubtitles || [],
-      voiceAudioUrl: null,
+      voiceAudioUrl: template.voiceAudioUrl !== undefined ? template.voiceAudioUrl : null,
       voiceAudioBase64: null,
 
       settings: {

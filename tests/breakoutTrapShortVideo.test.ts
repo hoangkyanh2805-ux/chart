@@ -14,11 +14,11 @@ export const BREAKOUT_TRAP_SHORT_TEMPLATE: ChartTemplate = {
   strategy: 'SMC',
   tier: 'Creator',
   aspectRatio: '9:16',
-  duration: 15.0, // Scaled for fast-paced viral loop (or 56s full cadence)
+  duration: 58.5, // Exact 58.5s duration from 2W7MgNk3Wss
   revealMode: 'sequential',
   description: 'Dịch ngược từ video Shorts 2W7MgNk3Wss: Bắt bài bẫy quét đáy ngày PDL, Market Structure Shift (MSS) và Sniper Entry tại 50% FVG.',
-  headlineText: 'BREAKOUT TRAP: DONT BE LIQUIDITY',
-  sublineText: 'Wait for D1 Sweep + M15 MSS + 50% FVG Retest',
+  headlineText: 'BREAKOUT',
+  sublineText: 'ENTRY?',
   badges: ['1. RISK $30', '2. SL 20 PIPS', '3. R:R 1:3.5'],
   showCalloutPin: true,
   calloutPinText: '🎯 50% FVG C.E. RETEST ($4,129.80)',
@@ -35,10 +35,10 @@ export const BREAKOUT_TRAP_SHORT_TEMPLATE: ChartTemplate = {
     risk: 30, // $30 Risk Budget
   },
   scriptSubtitles: [
-    { timePercent: 0.0, text: 'BREAKOUT TRAP: DONT BE LIQUIDITY! Vừa vào lệnh breakout đã dính ngay Stop Loss?', stageName: 'Hook' },
-    { timePercent: 0.25, text: 'Đây không phải fakeout ngẫu nhiên, đây là bẫy quét thanh khoản (Liquidity Sweep) của Big Boys!', stageName: 'Trap' },
-    { timePercent: 0.55, text: 'Giá quét đáy ngày PDL, tạo Market Structure Shift (MSS) phá đỉnh và để lại hộp FVG tăng trưởng!', stageName: 'Setup' },
-    { timePercent: 0.8, text: 'Canh nến hồi về đúng 50% FVG tại $4,129.80 rồi BUY. Stop Loss 20 pips, chốt lời đỉnh ngày, R:R 1:3.5!', stageName: 'Execution' },
+    { timePercent: 0.0, text: 'BREAKOUT ENTRY? Stop Loss Hit! This is not a fakeout, this is a LIQUIDITY SWEEP! Save this 1D to 15M strategy.', stageName: 'Hook' },
+    { timePercent: 0.20, text: 'Step 1: Mark Daily High & Low. Step 2: On M15, when price breaks Daily Low, DONT SELL! It is a trap.', stageName: 'Trap' },
+    { timePercent: 0.48, text: 'Step 3: Wait for reclaim & Recent High break = Market Structure Shift (MSS). Step 4: Mark Fair Value Gap (FVG 1-2-3).', stageName: 'Setup' },
+    { timePercent: 0.75, text: 'Retest into FVG + Bullish Close = Sniper Entry! Stop Loss below Sweep, Target Daily High (1:2 R:R). Comment MSS or FVG?', stageName: 'Execution' },
   ],
   spotlightEnabled: true,
   candles: [

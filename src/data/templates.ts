@@ -23,6 +23,7 @@ export interface ChartTemplate {
   showExecutionBadge?: boolean;
   stageTheme?: 'white' | 'dark' | 'paper';
   showPhoneFrame?: boolean;
+  voiceAudioUrl?: string;
   executionOrder?: ExecutionOrder;
   scriptSubtitles?: ScriptSubtitle[];
 }
@@ -30,24 +31,25 @@ export interface ChartTemplate {
 export const TEMPLATES: ChartTemplate[] = [
   {
     id: 'breakout-trap-liquidity-sweep-2w7mgnk3wss',
-    title: '[Shorts 9:16] Mẫu Gốc 2W7MgNk3Wss: Bẫy Breakout & Quét D1 -> M15',
+    title: '[Shorts 9:16] Mẫu Gốc 2W7MgNk3Wss: Bẫy Breakout & Quét D1 -> M15 (58.5s)',
     strategy: 'SMC',
     tier: 'Creator',
     aspectRatio: '9:16',
-    duration: 15.0,
+    duration: 58.5,
     revealMode: 'sequential',
     stageTheme: 'paper',
     showPhoneFrame: false,
+    voiceAudioUrl: '/audio/breakout-trap-2w7mgnk3wss.mp3',
     description: 'Dịch ngược từ video Shorts 2W7MgNk3Wss: Bắt bài bẫy quét đáy ngày PDL, Market Structure Shift (MSS) và Sniper Entry tại 50% FVG.',
     headlineText: 'BREAKOUT',
     sublineText: 'ENTRY?',
-    badges: ['1. RISK $30', '2. SL 20 PIPS', '3. R:R 1:3.5'],
-    showCalloutPin: true,
-    calloutPinText: '🎯 50% FVG C.E. RETEST ($4,129.80)',
+    badges: [],
+    showCalloutPin: false,
+    calloutPinText: '',
     calloutCandleIndex: 3,
-    showPipCounter: true,
+    showPipCounter: false,
     targetPips: 70,
-    showExecutionBadge: true,
+    showExecutionBadge: false,
     executionOrder: {
       type: 'BUY',
       entry: 4129.8,
@@ -57,10 +59,10 @@ export const TEMPLATES: ChartTemplate[] = [
       risk: 30,
     },
     scriptSubtitles: [
-      { timePercent: 0.0, text: 'BREAKOUT TRAP: DONT BE LIQUIDITY! Vừa vào lệnh breakout đã dính ngay Stop Loss?', stageName: 'Hook' },
-      { timePercent: 0.25, text: 'Đây không phải fakeout ngẫu nhiên, đây là bẫy quét thanh khoản (Liquidity Sweep) của Big Boys!', stageName: 'Trap' },
-      { timePercent: 0.55, text: 'Giá quét đáy ngày PDL, tạo Market Structure Shift (MSS) phá đỉnh và để lại hộp FVG tăng trưởng!', stageName: 'Setup' },
-      { timePercent: 0.8, text: 'Canh nến hồi về đúng 50% FVG tại $4,129.80 rồi BUY. Stop Loss 20 pips, chốt lời đỉnh ngày, R:R 1:3.5!', stageName: 'Execution' },
+      { timePercent: 0.0, text: 'BREAKOUT ENTRY? Stop Loss Hit! This is not a fakeout, this is a LIQUIDITY SWEEP! Save this 1D to 15M strategy.', stageName: 'Hook' },
+      { timePercent: 0.20, text: 'Step 1: Mark Daily High & Low. Step 2: On M15, when price breaks Daily Low, DONT SELL! It is a trap.', stageName: 'Trap' },
+      { timePercent: 0.48, text: 'Step 3: Wait for reclaim & Recent High break = Market Structure Shift (MSS). Step 4: Mark Fair Value Gap (FVG 1-2-3).', stageName: 'Setup' },
+      { timePercent: 0.75, text: 'Retest into FVG + Bullish Close = Sniper Entry! Stop Loss below Sweep, Target Daily High (1:2 R:R). Comment MSS or FVG?', stageName: 'Execution' },
     ],
     spotlightEnabled: true,
     candles: [
