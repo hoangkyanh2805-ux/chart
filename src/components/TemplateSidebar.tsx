@@ -25,6 +25,16 @@ interface TemplateItem {
 }
 
 const REAL_TEMPLATES: TemplateItem[] = [
+  {
+    id: 'breakout-trap-liquidity-sweep-2w7mgnk3wss',
+    title: '🚨 [Shorts 9:16] Bẫy Breakout D1->M15 (2W7MgNk3Wss)',
+    category: 'Top',
+    access: 'CREATOR',
+    duration: 15,
+    headline: 'BREAKOUT TRAP: DONT BE LIQUIDITY',
+    subline: 'Wait for D1 Sweep + M15 MSS + 50% FVG Retest',
+    courseTag: '2W7MgNk3Wss Viral',
+  },
   // 3 Dedicated Hexagold TikTok Viral Setups
   {
     id: 'hexagold-asia-sweep',
