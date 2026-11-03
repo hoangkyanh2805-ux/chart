@@ -19,7 +19,7 @@ interface ChartState {
 
   // Full NLE Editor State
   activeTool: 'templates' | 'ohlc' | 'text' | 'elements' | 'settings' | 'audit' | 'hermes' | 'script';
-  stageTheme: 'white' | 'dark';
+  stageTheme: 'white' | 'dark' | 'paper';
   headlineText: string;
   sublineText: string;
   badges: [string, string, string] | string[];
@@ -73,14 +73,12 @@ interface ChartState {
 
   // Actions
   setActiveTool: (tool: 'templates' | 'ohlc' | 'text' | 'elements' | 'settings' | 'audit' | 'hermes' | 'script') => void;
-  setStageTheme: (theme: 'white' | 'dark') => void;
+  setStageTheme: (theme: 'white' | 'dark' | 'paper') => void;
   setHeadlineText: (text: string) => void;
   setSublineText: (text: string) => void;
   setBadges: (badges: [string, string, string] | string[]) => void;
   setIsHermesChatOpen: (open: boolean) => void;
-  isAzzamOpsOpen: boolean;
   setIsAzzamOpsOpen: (open: boolean) => void;
-  isTicketModalOpen: boolean;
   setIsTicketModalOpen: (open: boolean) => void;
   setShowSafeZones: (show: boolean) => void;
 
@@ -200,30 +198,23 @@ export const useChartStore = create<ChartState>((set, get) => ({
   activeWorkspaceTab: 'canvas',
   revealAnimation: true,
   activeTool: 'templates',
-  stageTheme: 'dark',
-  headlineText: 'BREAKOUT TRAP: DONT BE LIQUIDITY',
-  sublineText: 'Wait for D1 Sweep + M15 MSS + 50% FVG Retest',
-  badges: ['1. RISK $30', '2. SL 20 PIPS', '3. R:R 1:3.5'],
+  stageTheme: 'paper',
+  headlineText: 'BREAKOUT',
+  sublineText: 'ENTRY?',
+  badges: [],
   isHermesChatOpen: false,
   isAzzamOpsOpen: false,
   isTicketModalOpen: false,
   showSafeZones: false,
 
   // TikTok / Reels Video Dynamics
-  showCalloutPin: true,
-  calloutPinText: '🎯 50% FVG C.E. RETEST ($4,129.80)',
-  calloutCandleIndex: 3,
-  showPipCounter: true,
-  targetPips: 70,
-  showExecutionBadge: true,
-  executionOrder: {
-    type: 'BUY',
-    entry: 4129.8,
-    sl: 4127.8,
-    tp: 4136.8,
-    lot: 0.15,
-    risk: 30,
-  },
+  showCalloutPin: false,
+  calloutPinText: '',
+  calloutCandleIndex: 0,
+  showPipCounter: false,
+  targetPips: 0,
+  showExecutionBadge: false,
+  executionOrder: null,
   scriptSubtitles: [
     { timePercent: 0.0, text: 'BREAKOUT TRAP: DONT BE LIQUIDITY! Vừa vào lệnh breakout đã dính ngay Stop Loss?', stageName: 'Hook' },
     { timePercent: 0.25, text: 'Đây không phải fakeout ngẫu nhiên, đây là bẫy quét thanh khoản (Liquidity Sweep) của Big Boys!', stageName: 'Trap' },
@@ -417,9 +408,9 @@ export const useChartStore = create<ChartState>((set, get) => ({
       return { candles: [...state.candles, ...result] };
     }),
 
-  addOverlay: (overlay) =>
+  addOverlay: (overlay: any) =>
     set((state) => ({
-      overlays: [...state.overlays, { ...overlay, id: `overlay-${Date.now()}` }],
+      overlays: [...state.overlays, { ...overlay, id: `overlay-${Date.now()}` } as Overlay],
     })),
 
   removeOverlay: (id) =>
@@ -448,9 +439,11 @@ export const useChartStore = create<ChartState>((set, get) => ({
       currentTime: template.duration,
       isPlaying: false,
       revealMode: template.revealMode || 'sequential',
+      stageTheme: template.stageTheme || state.stageTheme,
+      showPhoneFrame: template.showPhoneFrame ?? false,
       headlineText: template.headlineText || template.title,
       sublineText: template.sublineText || template.description?.substring(0, 70) || '',
-      badges: template.badges || ['1. LOSS $30', '2. SL 20 PIPS', '3. LOT 0.05'],
+      badges: template.badges !== undefined ? template.badges : ['1. LOSS $30', '2. SL 20 PIPS', '3. LOT 0.05'],
 
       // State Isolation: KHÔNG lấy trộm dữ liệu cũ từ state nếu template không có
       showCalloutPin: template.showCalloutPin ?? (!!template.calloutPinText),
@@ -488,7 +481,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
       calloutPinText: state.calloutPinText,
       calloutCandleIndex: state.calloutCandleIndex,
       scriptSubtitles: state.scriptSubtitles,
-      badges: state.badges,
+      badges: state.badges as any,
     });
     set({ validationReport: report });
     return report;
@@ -524,7 +517,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
       headlineText: state.headlineText,
       sublineText: state.sublineText,
       calloutPinText: state.calloutPinText,
-      badges: state.badges,
+      badges: state.badges as any,
       scriptSubtitles: state.scriptSubtitles,
       overlays: state.overlays,
       executionOrder: state.executionOrder,

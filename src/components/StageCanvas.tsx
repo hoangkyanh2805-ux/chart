@@ -2,7 +2,8 @@
 
 import React, { useRef, useEffect } from 'react';
 import { useChartStore } from '../store/useChartStore';
-import { ShieldCheck, Smartphone, Edit3, Check, Type, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Smartphone, Edit3, Check, Type, CheckCircle, AlertTriangle, RefreshCw, FileText } from 'lucide-react';
+import { renderPaperTheme } from './canvas/renderPaperTheme';
 
 // Clean text auto-wrapping utility
 function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -28,6 +29,7 @@ export const StageCanvas: React.FC = () => {
 
   const {
     stageTheme,
+    setStageTheme,
     headlineText,
     sublineText,
     setHeadlineText,
@@ -81,6 +83,23 @@ export const StageCanvas: React.FC = () => {
 
     // Animation progress 0.0 -> 1.0
     const progress = duration > 0 ? Math.min(1, Math.max(0, currentTime / duration)) : 1;
+
+    // REA + JEV Clean-Room Reproduction: Exact replica of YouTube Short 2W7MgNk3Wss
+    if (stageTheme === 'paper') {
+      renderPaperTheme({
+        ctx,
+        width,
+        height,
+        progress,
+        currentTime,
+        duration,
+        candles,
+        overlays,
+        headlineText,
+        sublineText,
+      });
+      return;
+    }
 
     // 1. Draw Background
     if (isWhite) {
@@ -869,10 +888,12 @@ export const StageCanvas: React.FC = () => {
       <div
         onDoubleClick={() => setIsEditingInline(true)}
         className={`relative transition-all duration-300 shadow-2xl flex items-center justify-center ${
-          settings.aspectRatio === '9:16' && showPhoneFrame
+          settings.aspectRatio === '9:16' && showPhoneFrame && stageTheme !== 'paper'
             ? 'w-[368px] h-[648px] rounded-[36px] border-[6px] border-[#242E42] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] ring-1 ring-white/10 p-1 bg-[#05080E]'
             : `rounded-2xl overflow-hidden border ${
-                isWhite
+                stageTheme === 'paper'
+                  ? 'bg-[#E6C191] border-[#C89F6B] shadow-[0_20px_50px_rgba(180,120,60,0.3)]'
+                  : isWhite
                   ? 'bg-white border-slate-200 shadow-slate-300/40'
                   : 'bg-[#080C16] border-[#1E293B] shadow-indigo-950/30'
               } ${
@@ -885,7 +906,7 @@ export const StageCanvas: React.FC = () => {
         }`}
       >
         {/* Dynamic Island on Phone Bezel */}
-        {settings.aspectRatio === '9:16' && showPhoneFrame && (
+        {settings.aspectRatio === '9:16' && showPhoneFrame && stageTheme !== 'paper' && (
           <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-4 bg-black/90 rounded-full z-40 flex items-center justify-center gap-2 pointer-events-none border border-white/10">
             <div className="w-1.5 h-1.5 rounded-full bg-[#1E293B]" />
             <div className="w-1 h-1 rounded-full bg-emerald-500/70" />
@@ -895,7 +916,7 @@ export const StageCanvas: React.FC = () => {
         <canvas
           ref={canvasRef}
           className={`w-full h-full block cursor-pointer ${
-            settings.aspectRatio === '9:16' && showPhoneFrame ? 'rounded-[28px]' : ''
+            settings.aspectRatio === '9:16' && showPhoneFrame && stageTheme !== 'paper' ? 'rounded-[28px]' : ''
           }`}
         />
 
@@ -1001,6 +1022,25 @@ export const StageCanvas: React.FC = () => {
 
         {settings.aspectRatio === '9:16' && (
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                const nextTheme = stageTheme === 'paper' ? 'dark' : stageTheme === 'dark' ? 'white' : 'paper';
+                setStageTheme(nextTheme);
+              }}
+              title="Đổi phong cách giao diện: Giấy mẫu gốc (2W7MgNk3Wss) / Dark / White"
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-mono transition border select-none ${
+                stageTheme === 'paper'
+                  ? 'bg-amber-600/30 text-amber-200 border-amber-500/50'
+                  : stageTheme === 'white'
+                  ? 'bg-white/20 text-slate-100 border-white/40'
+                  : 'bg-black/30 text-slate-400 border-white/10 hover:text-white'
+              }`}
+            >
+              <FileText className="w-3 h-3 text-amber-400" />
+              <span>{stageTheme === 'paper' ? '📜 Giấy Mẫu' : stageTheme === 'white' ? '☀️ Sáng' : '🌙 Tối'}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowPhoneFrame(!showPhoneFrame)}

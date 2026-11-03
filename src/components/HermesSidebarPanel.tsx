@@ -23,6 +23,7 @@ import { generateStrategySetup } from '../utils/hermesEngine';
 import { YouTubeAuditModal } from './YouTubeAuditModal';
 import { generateDynamicScriptSubtitles } from '../utils/dynamicScriptNarrator';
 import { jevFastReflexVerify } from '../utils/jevReflexGate';
+import { ScriptSubtitle } from '../types/chart';
 
 interface ChatMessage {
   id: string;

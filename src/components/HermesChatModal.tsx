@@ -24,7 +24,7 @@ import {
   Check,
   ClipboardPaste,
 } from 'lucide-react';
-import { Candle, Overlay } from '../types/chart';
+import { Candle, Overlay, ScriptSubtitle } from '../types/chart';
 import { generateStrategySetup } from '../utils/hermesEngine';
 import { generateDynamicScriptSubtitles } from '../utils/dynamicScriptNarrator';
 

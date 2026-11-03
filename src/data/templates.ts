@@ -21,6 +21,8 @@ export interface ChartTemplate {
   showPipCounter?: boolean;
   targetPips?: number;
   showExecutionBadge?: boolean;
+  stageTheme?: 'white' | 'dark' | 'paper';
+  showPhoneFrame?: boolean;
   executionOrder?: ExecutionOrder;
   scriptSubtitles?: ScriptSubtitle[];
 }
@@ -28,15 +30,17 @@ export interface ChartTemplate {
 export const TEMPLATES: ChartTemplate[] = [
   {
     id: 'breakout-trap-liquidity-sweep-2w7mgnk3wss',
-    title: '[Shorts 9:16] Bẫy Breakout & Quét Thanh Khoản D1 -> M15 (2W7MgNk3Wss)',
+    title: '[Shorts 9:16] Mẫu Gốc 2W7MgNk3Wss: Bẫy Breakout & Quét D1 -> M15',
     strategy: 'SMC',
     tier: 'Creator',
     aspectRatio: '9:16',
     duration: 15.0,
     revealMode: 'sequential',
+    stageTheme: 'paper',
+    showPhoneFrame: false,
     description: 'Dịch ngược từ video Shorts 2W7MgNk3Wss: Bắt bài bẫy quét đáy ngày PDL, Market Structure Shift (MSS) và Sniper Entry tại 50% FVG.',
-    headlineText: 'BREAKOUT TRAP: DONT BE LIQUIDITY',
-    sublineText: 'Wait for D1 Sweep + M15 MSS + 50% FVG Retest',
+    headlineText: 'BREAKOUT',
+    sublineText: 'ENTRY?',
     badges: ['1. RISK $30', '2. SL 20 PIPS', '3. R:R 1:3.5'],
     showCalloutPin: true,
     calloutPinText: '🎯 50% FVG C.E. RETEST ($4,129.80)',

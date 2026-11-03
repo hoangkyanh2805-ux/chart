@@ -144,6 +144,7 @@ export function validateAndNormalizeSetup(input: {
   executionOrder?: ExecutionOrder | null;
   calloutPinText?: string;
   calloutCandleIndex?: number;
+  targetPips?: number;
   scriptSubtitles?: ScriptSubtitle[];
   briefText?: string;
   badges?: [string, string, string];

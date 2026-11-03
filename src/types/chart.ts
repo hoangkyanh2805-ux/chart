@@ -12,7 +12,7 @@ export type RevealAnimationType = 'instant' | 'sequential' | 'wick-then-body' | 
 
 export type AspectRatio = '16:9' | '9:16' | '1:1';
 
-export type OverlayType = 'FVG' | 'ORDER_BLOCK' | 'LIQUIDITY_LINE' | 'LONG_SHORT' | 'SPOTLIGHT' | 'SUPPORT_RESISTANCE';
+export type OverlayType = 'FVG' | 'ORDER_BLOCK' | 'LIQUIDITY_LINE' | 'LONG_SHORT' | 'SPOTLIGHT' | 'SUPPORT_RESISTANCE' | 'BREAK_OF_STRUCTURE' | 'ZONE';
 
 export interface Overlay {
   id: string;

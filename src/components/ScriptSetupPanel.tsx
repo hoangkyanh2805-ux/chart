@@ -93,7 +93,6 @@ export const ScriptSetupPanel: React.FC<ScriptSetupPanelProps> = ({ onOpenExport
 
     const isPP0023 = /pp0023|3-cay-nen|dong-tien|3 cây nến|tiết lộ dòng tiền/i.test(`${sc.id} ${sc.title}`);
     if (isPP0023) {
-      clearAllCandles();
       setCandles([
         { id: 'pp1', index: 0, open: 4130.0, high: 4138.0, low: 4129.0, close: 4134.0 },
         { id: 'pp2', index: 1, open: 4134.0, high: 4134.5, low: 4127.0, close: 4128.0 },
@@ -171,18 +170,18 @@ export const ScriptSetupPanel: React.FC<ScriptSetupPanelProps> = ({ onOpenExport
       setCandles(
         isScSell
           ? [
-              { open: 4125.0, high: 4130.0, low: 4123.0, close: 4129.0 },
-              { open: 4129.0, high: 4134.0, low: 4127.5, close: 4133.0 },
-              { open: 4133.0, high: 4145.0, low: 4131.0, close: 4142.0 },
-              { open: 4142.0, high: 4147.0, low: 4135.0, close: 4136.0 },
-              { open: 4136.0, high: 4138.0, low: 4120.0, close: 4122.0 },
+              { id: 'sc-1', index: 0, open: 4125.0, high: 4130.0, low: 4123.0, close: 4129.0 },
+              { id: 'sc-2', index: 1, open: 4129.0, high: 4134.0, low: 4127.5, close: 4133.0 },
+              { id: 'sc-3', index: 2, open: 4133.0, high: 4145.0, low: 4131.0, close: 4142.0 },
+              { id: 'sc-4', index: 3, open: 4142.0, high: 4147.0, low: 4135.0, close: 4136.0 },
+              { id: 'sc-5', index: 4, open: 4136.0, high: 4138.0, low: 4120.0, close: 4122.0 },
             ]
           : [
-              { open: 4135.0, high: 4136.0, low: 4128.0, close: 4130.0 },
-              { open: 4130.0, high: 4131.0, low: 4122.0, close: 4124.0 },
-              { open: 4124.0, high: 4125.0, low: 4114.0, close: 4116.0 },
-              { open: 4116.0, high: 4128.0, low: 4115.0, close: 4126.5 },
-              { open: 4126.5, high: 4142.0, low: 4125.0, close: 4140.0 },
+              { id: 'sc-1', index: 0, open: 4135.0, high: 4136.0, low: 4128.0, close: 4130.0 },
+              { id: 'sc-2', index: 1, open: 4130.0, high: 4131.0, low: 4122.0, close: 4124.0 },
+              { id: 'sc-3', index: 2, open: 4124.0, high: 4125.0, low: 4114.0, close: 4116.0 },
+              { id: 'sc-4', index: 3, open: 4116.0, high: 4128.0, low: 4115.0, close: 4126.5 },
+              { id: 'sc-5', index: 4, open: 4126.5, high: 4142.0, low: 4125.0, close: 4140.0 },
             ]
       );
     }
@@ -190,6 +189,7 @@ export const ScriptSetupPanel: React.FC<ScriptSetupPanelProps> = ({ onOpenExport
     // 2. Overlays
     setOverlays([
       {
+        id: 'sc-zone',
         type: 'ZONE',
         startCandleIndex: 1,
         endCandleIndex: 4,
@@ -199,6 +199,7 @@ export const ScriptSetupPanel: React.FC<ScriptSetupPanelProps> = ({ onOpenExport
         label: isScSell ? 'BSL Sweep Level ($4,142.00)' : 'FVG 50% C.E. Demand Zone ($4,120.00)',
       },
       {
+        id: 'sc-rr',
         type: 'LONG_SHORT',
         startCandleIndex: 3,
         endCandleIndex: 5,

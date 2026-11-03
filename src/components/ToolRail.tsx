@@ -89,15 +89,32 @@ export const ToolRail: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setStageTheme(stageTheme === 'white' ? 'dark' : 'white')}
-          title={stageTheme === 'white' ? 'Switch to Dark Canvas' : 'Switch to White Canvas'}
+          onClick={() => {
+            const nextTheme = stageTheme === 'paper' ? 'dark' : stageTheme === 'dark' ? 'white' : 'paper';
+            setStageTheme(nextTheme);
+          }}
+          title={
+            stageTheme === 'paper'
+              ? 'Đang dùng Mẫu Giấy Gốc 2W7MgNk3Wss (Bấm để đổi sang Tối)'
+              : stageTheme === 'dark'
+              ? 'Đang dùng Nền Tối (Bấm để đổi sang Trắng)'
+              : 'Đang dùng Nền Trắng (Bấm để đổi sang Giấy Gốc)'
+          }
           className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all ${
-            stageTheme === 'white'
+            stageTheme === 'paper'
+              ? 'bg-amber-600/30 border-amber-500/60 text-amber-300'
+              : stageTheme === 'white'
               ? 'bg-amber-400/10 border-amber-400/40 text-amber-300'
               : 'bg-indigo-950/40 border-indigo-500/40 text-indigo-300'
           }`}
         >
-          {stageTheme === 'white' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {stageTheme === 'paper' ? (
+            <span className="text-xs font-bold font-serif">📜</span>
+          ) : stageTheme === 'white' ? (
+            <Sun className="w-4 h-4" />
+          ) : (
+            <Moon className="w-4 h-4" />
+          )}
         </button>
       </div>
     </div>
