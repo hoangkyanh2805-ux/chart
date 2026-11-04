@@ -13,7 +13,7 @@ import { ScriptSetupPanel } from '../components/ScriptSetupPanel';
 import { StageCanvas } from '../components/StageCanvas';
 import { ChartCanvas } from '../components/ChartCanvas';
 import { SceneReviewPanel } from '../components/SceneReviewPanel';
-import pilotDraftJson from '../../tests/fixtures/s2v/pilot.draft.json';
+import pilotDraftJson from '../data/pilotDraft.json';
 import { SceneDraft } from '../video/contracts';
 import { NleTimeline } from '../components/NleTimeline';
 import { ExportModal } from '../components/ExportModal';

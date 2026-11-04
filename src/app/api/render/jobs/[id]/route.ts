@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isLoopbackRequest } from '../../../../../server/video/localAccess';
 import { globalJobRegistry } from '../../../../../server/video/jobRegistry';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }

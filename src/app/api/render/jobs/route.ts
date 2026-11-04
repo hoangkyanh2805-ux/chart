@@ -3,6 +3,9 @@ import { isLoopbackRequest } from '../../../../server/video/localAccess';
 import { globalJobRegistry } from '../../../../server/video/jobRegistry';
 import { FrozenScene } from '../../../../video/contracts';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
   if (!isLoopbackRequest(req.headers)) {
     return NextResponse.json(

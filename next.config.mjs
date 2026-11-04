@@ -9,8 +9,10 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   webpack: (config) => {
-    // Disable filesystem pack caching on virtual/mounted drives to avoid EINVAL file locks
-    config.cache = false;
+    // Only disable cache on local mounted/virtual drives if not on Vercel
+    if (!process.env.VERCEL) {
+      config.cache = false;
+    }
     return config;
   },
 };
