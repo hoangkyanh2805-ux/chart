@@ -1,0 +1,103 @@
+﻿{
+    "schema":  "script-video-pilot/1",
+    "status":  "DESIGN_FIXTURE_AUDIO_NOT_ATTACHED",
+    "id":  "risk-first-loss-example",
+    "sourcePath":  "C:\\Users\\Admin\\youtube\\video_scripts\\script_2026-10-19_xauusd-risk-first-define-loss-before-entry.md",
+    "sourceSha256":  "1c760aa109ce721119ab2ac0636669420689b13c41061d022251185eb0f90016",
+    "sourceSelection":  "PHẦN 5 — EXAMPLE, exact contiguous excerpt ending Thirty dollars. Done.",
+    "selectionMode":  "EXCERPT_NOT_FULL_SCRIPT",
+    "excerptSha256":  "885309ad8e4b64d90e594d48db39bee2dee444ff44982098828293faf495edac",
+    "excerpt":  "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. Picture XAUUSD. You have been watching the higher timeframe. Price has been making higher highs and higher lows. Your bias is long. You have one level you are watching — a previous high that you expect to act as support. That is the plan. Now, before you do anything else, you define the loss. You say: I am willing to lose thirty dollars on this trade. That is written down. Now you look for the entry. You drop to the lower timeframe. Price pulls back to your level. It shows a rejection candle. That is your entry signal. You place the stop loss below the swing low — twenty pips away. Your size: thirty dollars divided by twenty pips, so one dollar and fifty cents per pip. Total risk: thirty dollars. Exactly as budgeted. Now the hard part. Price enters. Moves against you. Hits the stop. You lose thirty dollars. That is it. That is the whole loss. Not thirty dollars plus revenge trading. Not thirty dollars plus \"I will just hold it.\" Thirty dollars. Done.",
+    "segments":  [
+                     {
+                         "id":  "disclosure",
+                         "startUtf16":  0,
+                         "endUtf16":  153,
+                         "text":  "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. ",
+                         "audioAssetId":  null,
+                         "intentId":  "disclosure"
+                     },
+                     {
+                         "id":  "context",
+                         "startUtf16":  153,
+                         "endUtf16":  392,
+                         "text":  "Picture XAUUSD. You have been watching the higher timeframe. Price has been making higher highs and higher lows. Your bias is long. You have one level you are watching — a previous high that you expect to act as support. That is the plan. ",
+                         "audioAssetId":  null,
+                         "intentId":  "context"
+                     },
+                     {
+                         "id":  "budget",
+                         "startUtf16":  392,
+                         "endUtf16":  529,
+                         "text":  "Now, before you do anything else, you define the loss. You say: I am willing to lose thirty dollars on this trade. That is written down. ",
+                         "audioAssetId":  null,
+                         "intentId":  "budget"
+                     },
+                     {
+                         "id":  "pullback",
+                         "startUtf16":  529,
+                         "endUtf16":  678,
+                         "text":  "Now you look for the entry. You drop to the lower timeframe. Price pulls back to your level. It shows a rejection candle. That is your entry signal. ",
+                         "audioAssetId":  null,
+                         "intentId":  "pullback"
+                     },
+                     {
+                         "id":  "sizing",
+                         "startUtf16":  678,
+                         "endUtf16":  880,
+                         "text":  "You place the stop loss below the swing low — twenty pips away. Your size: thirty dollars divided by twenty pips, so one dollar and fifty cents per pip. Total risk: thirty dollars. Exactly as budgeted. ",
+                         "audioAssetId":  null,
+                         "intentId":  "sizing"
+                     },
+                     {
+                         "id":  "stop-hit",
+                         "startUtf16":  880,
+                         "endUtf16":  972,
+                         "text":  "Now the hard part. Price enters. Moves against you. Hits the stop. You lose thirty dollars. ",
+                         "audioAssetId":  null,
+                         "intentId":  "stop-hit"
+                     },
+                     {
+                         "id":  "lesson",
+                         "startUtf16":  972,
+                         "endUtf16":  1117,
+                         "text":  "That is it. That is the whole loss. Not thirty dollars plus revenge trading. Not thirty dollars plus \"I will just hold it.\" Thirty dollars. Done.",
+                         "audioAssetId":  null,
+                         "intentId":  "lesson"
+                     }
+                 ],
+    "intent":  {
+                   "truthClass":  "EDUCATIONAL_ILLUSTRATION",
+                   "direction":  "BUY",
+                   "outcome":  "STOP_LOSS",
+                   "riskBudgetUsd":  30,
+                   "slPips":  20,
+                   "usdPerPip":  1.5,
+                   "lot":  null,
+                   "target":  null,
+                   "orderDisplay":  "LESSON_ONLY_NO_SIGNAL",
+                   "priceOrigin":  "SYNTHETIC_NO_LIVE_PRICE_CLAIM"
+               },
+    "profile":  {
+                    "width":  1080,
+                    "height":  1920,
+                    "fps":  30,
+                    "audioSampleRate":  48000,
+                    "maxDurationSec":  120
+                },
+    "acceptance":  {
+                       "duration":  "derive from measured segment audio; never force 12s",
+                       "narration":  "exact excerpt in original English, no translation or canned replacement",
+                       "cueOrder":  [
+                                        "disclosure",
+                                        "context",
+                                        "budget",
+                                        "pullback",
+                                        "sizing",
+                                        "stop-hit",
+                                        "lesson"
+                                    ],
+                       "paperMustConsumeSameScene":  true,
+                       "audioRequired":  true
+                   }
+}

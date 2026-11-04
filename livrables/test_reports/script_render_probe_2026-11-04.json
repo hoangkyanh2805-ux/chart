@@ -1,0 +1,146 @@
+{
+  "auditedAt": "2026-11-04",
+  "networkCalls": 0,
+  "jevWrongLot": {
+    "passed": true,
+    "lot": "999 lot",
+    "gates": {
+      "financialGate": true,
+      "acousticSyncGate": true,
+      "ohlcIntegrityGate": true,
+      "collisionSafeGate": true
+    }
+  },
+  "jevNoMedia": {
+    "passed": true,
+    "gates": {
+      "financialGate": true,
+      "acousticSyncGate": true,
+      "ohlcIntegrityGate": true,
+      "collisionSafeGate": true
+    }
+  },
+  "reversedOrder": {
+    "isValid": true,
+    "score": 80,
+    "checks": {
+      "titleDirectionMatch": true,
+      "candleDriftMatch": true,
+      "triggerWickValid": true,
+      "riskRewardValid": false,
+      "subtitlesAligned": true
+    }
+  },
+  "unsortedUnrelatedSubtitles": {
+    "isValid": true,
+    "score": 100,
+    "checks": {
+      "titleDirectionMatch": true,
+      "candleDriftMatch": true,
+      "triggerWickValid": true,
+      "riskRewardValid": true,
+      "subtitlesAligned": true
+    }
+  },
+  "invalidNonTriggerOHLC": {
+    "isValid": true,
+    "score": 100,
+    "checks": {
+      "titleDirectionMatch": true,
+      "candleDriftMatch": true,
+      "triggerWickValid": true,
+      "riskRewardValid": true,
+      "subtitlesAligned": true
+    }
+  },
+  "diagnostics": [
+    {
+      "file": "src/components/canvas/renderPaperTheme.ts",
+      "errors": [
+        {
+          "line": 289,
+          "code": 1109,
+          "message": "Expression expected."
+        },
+        {
+          "line": 784,
+          "code": 1005,
+          "message": "'}' expected."
+        }
+      ]
+    },
+    {
+      "file": "tests/paperThemeRenderer.test.ts",
+      "errors": [
+        {
+          "line": 201,
+          "code": 1005,
+          "message": "',' expected."
+        },
+        {
+          "line": 202,
+          "code": 1005,
+          "message": "'}' expected."
+        }
+      ]
+    }
+  ],
+  "scriptContract": {
+    "sweep": {
+      "chatDirection": "BUY",
+      "generatedTrade": {
+        "id": "sweep-rr-box",
+        "type": "LONG_SHORT",
+        "startCandleIndex": 3,
+        "endCandleIndex": 5,
+        "priceStart": 4135,
+        "priceEnd": 4118,
+        "color": "#EF4444",
+        "label": "Short Entry | TP: +1:3.5 RR"
+      }
+    },
+    "fvg": {
+      "gap": [
+        4128,
+        4137
+      ],
+      "ce": 4132.5,
+      "overlayEntry": 4135.5,
+      "chatEntry": 4128
+    },
+    "rrGeometry": [
+      {
+        "requestedRR": 2,
+        "overlay": {
+          "id": "hermes-risk-rr",
+          "type": "LONG_SHORT",
+          "startCandleIndex": 4,
+          "endCandleIndex": 5,
+          "priceStart": 4128,
+          "priceEnd": 4135,
+          "color": "#00F5A0",
+          "label": "Budget $10 (1R) | Size: 0.05 lot | 1:2 RR"
+        }
+      },
+      {
+        "requestedRR": 7,
+        "overlay": {
+          "id": "hermes-risk-rr",
+          "type": "LONG_SHORT",
+          "startCandleIndex": 4,
+          "endCandleIndex": 5,
+          "priceStart": 4128,
+          "priceEnd": 4135,
+          "color": "#00F5A0",
+          "label": "Budget $10 (1R) | Size: 0.05 lot | 1:7 RR"
+        }
+      }
+    ],
+    "parsedOrdinaryBrief": {
+      "basePrice": 4128,
+      "riskBudget": 30,
+      "lotSize": "$1.50/pip",
+      "lotNumericUsedByImporter": 1.5
+    }
+  }
+}

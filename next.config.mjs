@@ -8,6 +8,11 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  webpack: (config) => {
+    // Disable filesystem pack caching on virtual/mounted drives to avoid EINVAL file locks
+    config.cache = false;
+    return config;
+  },
 };
 
 export default nextConfig;

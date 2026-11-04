@@ -1,0 +1,46 @@
+﻿{
+    "date":  "2026-11-04",
+    "scope":  "Documentation structural/source consistency only, not implementation or independent design review",
+    "files":  [
+                  "livrables/specs/SPEC-SCRIPT-TO-VIDEO-RECOVERY-v1.md",
+                  "livrables/architecture/PLAN-SCRIPT-TO-VIDEO-RECOVERY-v1.md",
+                  "livrables/architecture/DEBATE-SCRIPT-TO-VIDEO-RECOVERY-v1.md",
+                  "livrables/specs/BUILD-BRIEF-SCRIPT-TO-VIDEO-RECOVERY-v1.md",
+                  "livrables/specs/script-to-video-pilot-v1.json"
+              ],
+    "fileHashes":  [
+                       {
+                           "path":  "livrables/specs/SPEC-SCRIPT-TO-VIDEO-RECOVERY-v1.md",
+                           "sha256":  "c0be9484cad792aeb525311f803761884f13c656369cb5791be6f5764bd5aa94"
+                       },
+                       {
+                           "path":  "livrables/architecture/PLAN-SCRIPT-TO-VIDEO-RECOVERY-v1.md",
+                           "sha256":  "e773343294d9b4abe5bf8e5aadae8c1290fbdd15ebe22c9857cbc6018f82ad7f"
+                       },
+                       {
+                           "path":  "livrables/architecture/DEBATE-SCRIPT-TO-VIDEO-RECOVERY-v1.md",
+                           "sha256":  "b346c922314b3cf5dd5726047e1656bb34da098444af8b717f065c4e9e2579c7"
+                       },
+                       {
+                           "path":  "livrables/specs/BUILD-BRIEF-SCRIPT-TO-VIDEO-RECOVERY-v1.md",
+                           "sha256":  "74aa0029ea6f3c1caab84f6e48f9dafecc5a5ac8398b4337c15efcaca6053a14"
+                       },
+                       {
+                           "path":  "livrables/specs/script-to-video-pilot-v1.json",
+                           "sha256":  "836c7c50def594efa18e16da15f3af8353a97e62a019cc4fe6d8ea5ec3dca82b"
+                       }
+                   ],
+    "sourceHashMatches":  true,
+    "exactExcerptMatches":  true,
+    "segments":  7,
+    "acceptanceIds":  16,
+    "ledgerEntries":  30,
+    "ledgerMismatches":  0,
+    "independentDesignReview":  "PENDING_USAGE_LIMIT",
+    "audioArtifact":  "NOT_CREATED",
+    "videoArtifact":  "NOT_CREATED",
+    "errors":  [
+
+               ],
+    "pass":  true
+}

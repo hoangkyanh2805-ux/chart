@@ -61,7 +61,11 @@ chart/
 │   │   └── HERMES-CLI-BRIEF-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md # Read-only Hermes handoff
 │   ├── architecture/           # Kế hoạch và decision record kiến trúc
 │   │   ├── PLAN-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md
-│   │   └── DEBATE-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md
+│   │   ├── DEBATE-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md
+│   │   ├── PLAN-SCRIPT-TO-VIDEO-RECOVERY-v1.md # Kế hoạch 9 task phục hồi S2V-R1
+│   │   └── DEBATE-SCRIPT-TO-VIDEO-RECOVERY-v1.md
+│   ├── s2v_runs/               # Bằng chứng thực thi & media runs của S2V-R1
+│   │   └── s2v-r1-run-01/      # Run baseline, artifacts, acceptance-map
 │   └── test_reports/           # Báo cáo kiểm định & audit chất lượng
 │       ├── audit_report_strict_video_qa.md
 │       └── audit_report_trading_integrity.md
@@ -98,6 +102,24 @@ chart/
 │   │   ├── gbm.ts              # Động cơ mô phỏng giá Geometric Brownian Motion
 │   │   ├── zigzag.ts           # Động cơ sinh sóng đỉnh đáy
 │   │   └── groupCandles.ts     # Động cơ tạo cụm nến mô hình
+│   ├── video/                  # [S2V-R1] Kiến trúc Video Scene thuần khiết
+│   │   ├── contracts.ts        # SceneDraft, FrozenScene, FrameReceipt
+│   │   ├── canonicalHash.ts    # Băm JSON chuẩn hóa SHA-256
+│   │   ├── semantics.ts        # Toán học nến & deepFreeze bất biến
+│   │   ├── validateDraft.ts    # Bộ kiểm định ngữ nghĩa chặn đứng lỗi sai
+│   │   ├── compileScene.ts     # Bộ biên dịch thuần khiết compileScene
+│   │   ├── layout.ts           # Tọa độ an toàn 1080x1920 & priceToY
+│   │   ├── themes.ts           # Bảng màu token (paper, dark, white)
+│   │   ├── renderFrame.ts      # Hàm render đồng bộ renderFrame
+│   │   ├── audioTimeline.ts    # Lượng tử hóa audio 48kHz (1600 smp/frame)
+│   │   ├── audioIdentity.ts    # Cô lập phản hồi âm thanh cũ (Anti-stale)
+│   │   └── importAdapters.ts   # Cổng chuyển đổi kịch bản đa nguồn toDraft
+│   └── server/video/           # Giám sát viên render & lưu trữ local
+│       ├── runRenderJob.ts     # Trình stream PNG sang FFmpeg image2pipe
+│       ├── verifyMedia.ts      # Thẩm định media bằng ffprobe & decode
+│       ├── jobRegistry.ts      # Quản lý tiến trình render loopback
+│       ├── localAccess.ts      # Bảo mật chỉ cho phép loopback 127.0.0.1
+│       └── assetStore.ts       # Lưu trữ WAV cục bộ theo hash SHA-256
 │   ├── store/                  # Trạng thái toàn cục (Zustand)
 │   │   └── useChartStore.ts    # Core store với nguyên tắc State Isolation
 │   ├── data/                   # Dữ liệu kịch bản & Templates
@@ -125,3 +147,13 @@ chart/
     └── workflows/
         └── ci.yml              # Pipeline tự động chạy test khi push/PR
 ```
+
+## Script-to-video recovery packet — 2026-11-04
+
+Documentation only; proposed local implementation, not a completed renderer or approved external workflow.
+- `livrables/specs/SPEC-SCRIPT-TO-VIDEO-RECOVERY-v1.md` — canonical recovery behavior/data/media contract.
+- `livrables/architecture/PLAN-SCRIPT-TO-VIDEO-RECOVERY-v1.md` — task dependencies, files, tests and build handoff.
+- `livrables/architecture/DEBATE-SCRIPT-TO-VIDEO-RECOVERY-v1.md` — alternatives, objections, decisions and review limitations.
+- `livrables/specs/BUILD-BRIEF-SCRIPT-TO-VIDEO-RECOVERY-v1.md` — agent roles, permissions and execution entrypoint.
+- `livrables/specs/script-to-video-pilot-v1.json` — exact source excerpt and ordered narrative cues; not a rendered scene or audio artifact.
+- `livrables/test_reports/script-to-video-spec-validation.json` — documentation links/source/ledger consistency verification.

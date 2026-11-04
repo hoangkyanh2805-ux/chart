@@ -12,10 +12,13 @@ import { HermesSidebarPanel } from '../components/HermesSidebarPanel';
 import { ScriptSetupPanel } from '../components/ScriptSetupPanel';
 import { StageCanvas } from '../components/StageCanvas';
 import { ChartCanvas } from '../components/ChartCanvas';
+import { SceneReviewPanel } from '../components/SceneReviewPanel';
+import pilotDraftJson from '../../tests/fixtures/s2v/pilot.draft.json';
+import { SceneDraft } from '../video/contracts';
 import { NleTimeline } from '../components/NleTimeline';
 import { ExportModal } from '../components/ExportModal';
 import { useAudioPlaybackSync } from '../utils/audioSync';
-import { Sparkles, BarChart2, Layout, Zap, Radio } from 'lucide-react';
+import { Sparkles, BarChart2, Layout, Zap, Radio, Film } from 'lucide-react';
 
 export default function Home() {
   useAudioPlaybackSync();
@@ -28,7 +31,8 @@ export default function Home() {
     loadTemplate,
     activeScriptMeta,
   } = useChartStore();
-  const [viewMode, setViewMode] = useState<'stage' | 'chart'>('stage');
+  const [viewMode, setViewMode] = useState<'stage' | 'chart' | 'pilot'>('stage');
+  const pilotDraft = pilotDraftJson as unknown as SceneDraft;
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isLoadingMarket, setIsLoadingMarket] = useState<boolean>(false);
 
@@ -144,6 +148,17 @@ export default function Home() {
                   <BarChart2 className="w-3.5 h-3.5" />
                   <span>📊 Wide OHLC Chart</span>
                 </button>
+                <button
+                  onClick={() => setViewMode('pilot')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition ${
+                    viewMode === 'pilot'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Film className="w-3.5 h-3.5" />
+                  <span>🎬 S2V Pilot Review</span>
+                </button>
               </div>
 
               {/* 1-Click Load Hexagold TikTok Setup */}
@@ -192,7 +207,15 @@ export default function Home() {
 
           {/* Central Workspace Content */}
           <div className="flex-1 w-full h-full flex items-center justify-center p-4 overflow-hidden">
-            {viewMode === 'stage' ? <StageCanvas /> : <ChartCanvas />}
+            {viewMode === 'stage' ? (
+              <StageCanvas />
+            ) : viewMode === 'chart' ? (
+              <ChartCanvas />
+            ) : (
+              <div className="w-full h-full overflow-y-auto p-4 flex items-center justify-center">
+                <SceneReviewPanel draft={pilotDraft} />
+              </div>
+            )}
           </div>
         </section>
       </div>

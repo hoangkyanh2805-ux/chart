@@ -15,5 +15,6 @@ export default defineConfig({
   test: {
     environment: 'node',
     pool: 'forks',
+    exclude: ['**/node_modules/**', '**/.worktrees/**', '**/dist/**'],
   },
 });

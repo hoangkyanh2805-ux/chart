@@ -1,0 +1,23 @@
+﻿{
+  "scope": "Historical committed source only; mock Canvas command trace, not browser raster or working-tree runtime",
+  "revision": "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+  "parseDiagnostics": 0,
+  "empty": {
+    "commands": 358,
+    "sha256": "3a982a803e4a4f2edf0f71a99500be0a949a783355576d381fa9f0921ccad069"
+  },
+  "low": {
+    "commands": 358,
+    "sha256": "3a982a803e4a4f2edf0f71a99500be0a949a783355576d381fa9f0921ccad069"
+  },
+  "high": {
+    "commands": 358,
+    "sha256": "3a982a803e4a4f2edf0f71a99500be0a949a783355576d381fa9f0921ccad069"
+  },
+  "control": {
+    "commands": 358,
+    "sha256": "428d8fefd9783c476f8d35ed788474d50b111a2a5f10ea5216f50069e0d626c2"
+  },
+  "identicalGeometryInputs": true,
+  "headlineControlChangesOutput": true
+}

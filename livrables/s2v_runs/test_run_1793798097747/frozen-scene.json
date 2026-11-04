@@ -1,0 +1,215 @@
+{
+  "schema": "frozen-scene/1",
+  "draftSha256": "3ce03d3c5a709f64e5116dd905d503312f95400a5a26f09c6d5dae4c1a123414",
+  "draft": {
+    "schema": "scene-draft/1",
+    "source": {
+      "id": "risk-first-loss-example",
+      "revision": 1,
+      "sourceSha256": "1c760aa109ce721119ab2ac0636669420689b13c41061d022251185eb0f90016",
+      "selection": "EXCERPT",
+      "selectedText": "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. Picture XAUUSD. You have been watching the higher timeframe. Price has been making higher highs and higher lows. Your bias is long. You have one level you are watching — a previous high that you expect to act as support. That is the plan. ",
+      "selectedTextSha256": "0cc151ed91e586f44e582ab4fecc618ea5cffdb8ad1d4dac42e1d841f99aaa3a",
+      "language": "en"
+    },
+    "truthClass": "EDUCATIONAL_ILLUSTRATION",
+    "language": "en",
+    "direction": "BUY",
+    "outcome": "STOP_LOSS",
+    "candles": [
+      {
+        "id": "c1",
+        "index": 0,
+        "open": 4120,
+        "high": 4132,
+        "low": 4119,
+        "close": 4130
+      },
+      {
+        "id": "c2",
+        "index": 1,
+        "open": 4130,
+        "high": 4131,
+        "low": 4123,
+        "close": 4124.5
+      },
+      {
+        "id": "c3",
+        "index": 2,
+        "open": 4124.5,
+        "high": 4142,
+        "low": 4124,
+        "close": 4140
+      },
+      {
+        "id": "c4",
+        "index": 3,
+        "open": 4140,
+        "high": 4141,
+        "low": 4128,
+        "close": 4129
+      },
+      {
+        "id": "c5",
+        "index": 4,
+        "open": 4129,
+        "high": 4136,
+        "low": 4126,
+        "close": 4134.5
+      },
+      {
+        "id": "c6",
+        "index": 5,
+        "open": 4134.5,
+        "high": 4135,
+        "low": 4124,
+        "close": 4125
+      }
+    ],
+    "overlays": [
+      {
+        "id": "lvl-support",
+        "kind": "LEVEL",
+        "price": 4128,
+        "label": "Previous High Support ($4,128.00)"
+      }
+    ],
+    "budget": {
+      "riskUsd": 30,
+      "slPips": 20,
+      "usdPerPip": 1.5
+    },
+    "order": null,
+    "chartPriceOrigin": "SYNTHETIC",
+    "entryBasis": "NONE",
+    "entryOverlayId": null,
+    "narration": [
+      {
+        "id": "disclosure",
+        "intentId": "disclosure",
+        "span": {
+          "startUtf16": 0,
+          "endUtf16": 153
+        },
+        "text": "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. ",
+        "audio": {
+          "assetId": "asset-disclosure",
+          "sha256": "c5249c7efd5e45bf7769f217afae096b13b4354f414d8255b3eb10eea3893728",
+          "transcriptSha256": "73f72578c1c78d57b0e3bbf992f71865033d95dfe052131a1b5256cfc23889ff",
+          "sampleRate": 48000,
+          "channels": 1,
+          "sampleCount": 48000,
+          "origin": "USER_UPLOAD",
+          "review": "MATCHED"
+        }
+      },
+      {
+        "id": "context",
+        "intentId": "context",
+        "span": {
+          "startUtf16": 153,
+          "endUtf16": 392
+        },
+        "text": "Picture XAUUSD. You have been watching the higher timeframe. Price has been making higher highs and higher lows. Your bias is long. You have one level you are watching — a previous high that you expect to act as support. That is the plan. ",
+        "audio": {
+          "assetId": "asset-context",
+          "sha256": "b6def1182b2dd7585f87ba04770fc62db7b19f91a4da91ab79939ac178c1f922",
+          "transcriptSha256": "783e30446a20a974a541103d7923ef41e584fbabd7afb873e91df72bdf29d660",
+          "sampleRate": 48000,
+          "channels": 1,
+          "sampleCount": 48000,
+          "origin": "USER_UPLOAD",
+          "review": "MATCHED"
+        }
+      }
+    ],
+    "storyboard": [
+      {
+        "intentId": "disclosure",
+        "actions": [
+          {
+            "kind": "SHOW_TEXT",
+            "id": "txt-disclosure",
+            "text": "EDUCATIONAL MECHANICS"
+          }
+        ]
+      },
+      {
+        "intentId": "context",
+        "actions": [
+          {
+            "kind": "REVEAL_CANDLES",
+            "candleIds": [
+              "c1",
+              "c2",
+              "c3"
+            ]
+          },
+          {
+            "kind": "SHOW_OVERLAY",
+            "overlayId": "lvl-support"
+          }
+        ]
+      }
+    ],
+    "profile": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "maxDurationSec": 120
+    },
+    "theme": "paper"
+  },
+  "cues": [
+    {
+      "id": "disclosure",
+      "text": "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. ",
+      "startSample": 0,
+      "endSample": 48000,
+      "startFrame": 0,
+      "endFrame": 30,
+      "audioAssetId": "asset-disclosure"
+    },
+    {
+      "id": "context",
+      "text": "Picture XAUUSD. You have been watching the higher timeframe. Price has been making higher highs and higher lows. Your bias is long. You have one level you are watching — a previous high that you expect to act as support. That is the plan. ",
+      "startSample": 48000,
+      "endSample": 96000,
+      "startFrame": 30,
+      "endFrame": 60,
+      "audioAssetId": "asset-context"
+    }
+  ],
+  "events": [
+    {
+      "frame": 0,
+      "action": {
+        "kind": "SHOW_TEXT",
+        "id": "txt-disclosure",
+        "text": "EDUCATIONAL MECHANICS"
+      }
+    },
+    {
+      "frame": 30,
+      "action": {
+        "kind": "REVEAL_CANDLES",
+        "candleIds": [
+          "c1",
+          "c2",
+          "c3"
+        ]
+      }
+    },
+    {
+      "frame": 30,
+      "action": {
+        "kind": "SHOW_OVERLAY",
+        "overlayId": "lvl-support"
+      }
+    }
+  ],
+  "frameCount": 60,
+  "audioSampleCount": 96000,
+  "watermark": "EDUCATIONAL ILLUSTRATION — NOT FINANCIAL ADVICE",
+  "sceneSha256": "255044b56b8c91ba9222377668816e6cf3ac6ba25cc0e4812f801627b7b28052"
+}

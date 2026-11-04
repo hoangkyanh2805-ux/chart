@@ -28,3 +28,7 @@ yarn-error.log*
 *.log
 *.tsbuildinfo
 livrables/test_reports/temp/
+scratch/
+.worktrees/
+livrables/s2v_runs/**/*.mp4
+livrables/s2v_runs/**/*.wav

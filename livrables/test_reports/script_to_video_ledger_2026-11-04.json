@@ -1,0 +1,272 @@
+﻿[
+    {
+        "id":  1,
+        "path":  "src/store/useChartStore.ts",
+        "start":  199,
+        "end":  202,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "099B303B20B5B36994B575216DD945EE8006F02EB5228D66BAF9B4692A1053C7",
+        "quote":  "  revealAnimation: true,\n  activeTool: \u0027templates\u0027,\n  stageTheme: \u0027paper\u0027,\n  headlineText: \u0027BREAKOUT\u0027,"
+    },
+    {
+        "id":  2,
+        "path":  "src/components/StageCanvas.tsx",
+        "start":  87,
+        "end":  102,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "17E8D1237E727D45E7C8E2DA43191523B8332C6CB4262233C38115AE6EA8250D",
+        "quote":  "    // REA + JEV Clean-Room Reproduction: Exact replica of YouTube Short 2W7MgNk3Wss\n    if (stageTheme === \u0027paper\u0027) {\n      renderPaperTheme({\n        ctx,\n        width,\n        height,\n        progress,\n        currentTime,\n        duration,\n        candles,\n        overlays,\n        headlineText,\n        sublineText,\n      });\n      return;\n    }"
+    },
+    {
+        "id":  3,
+        "path":  "src/components/canvas/renderPaperTheme.ts",
+        "start":  175,
+        "end":  185,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "36188A5B7DC7BEC24882DB44570F23F8B242F3747BBFEE07FC0D450DDB98564A",
+        "quote":  "export function renderPaperTheme(opts: PaperThemeOptions) {\n  const {\n    ctx,\n    width,\n    height,\n    progress,\n    currentTime,\n    duration,\n    headlineText,\n    sublineText,\n  } = opts;"
+    },
+    {
+        "id":  4,
+        "path":  "src/components/canvas/renderPaperTheme.ts",
+        "start":  719,
+        "end":  723,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "36188A5B7DC7BEC24882DB44570F23F8B242F3747BBFEE07FC0D450DDB98564A",
+        "quote":  "  REA_ORIGINAL_CANDLES.forEach((c, idx) =\u003e {\n    if (progress \u003c c.phase) return;\n    if (timeSec \u003c c.startSec) return;\n\n    const cx = chartLeft + (idx + 1) * candleSpacing;"
+    },
+    {
+        "id":  5,
+        "path":  "src/components/BriefImporterModal.tsx",
+        "start":  638,
+        "end":  650,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "B900DF89FCF7893F02DDB54DA5784F230B26A14411315391196F8A380F794059",
+        "quote":  "      useChartStore.getState().setBadges(hermesDirective.badges);\n    }\n    useChartStore.setState({ duration: 12 });\n\n    clearAllCandles();\n\n    // 2. Priority: Hermes Directive -\u003e AI Result -\u003e Generator\n    let dir: \u0027BUY\u0027 | \u0027SELL\u0027 = \u0027BUY\u0027;\n    let riskB = 10;\n    let slP = 20;\n    let rr = 3.5;\n    let lotStr = \u00270.05 lot\u0027;\n"
+    },
+    {
+        "id":  6,
+        "path":  "src/components/BriefImporterModal.tsx",
+        "start":  700,
+        "end":  705,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "B900DF89FCF7893F02DDB54DA5784F230B26A14411315391196F8A380F794059",
+        "quote":  "      scriptSubtitles: [\n        { timePercent: 0.0, text: `Khóa rủi ro 1R ($${riskB}) trước khi nhìn chart!`, stageName: \u0027Hook\u0027 },\n        { timePercent: 0.28, text: `Thị trường test lại cản kỹ thuật, dụ đám đông vào lệnh cảm xúc.`, stageName: \u0027Trap\u0027 },\n        { timePercent: 0.58, text: `Nến xác nhận đảo chiều. Chuẩn bị vào lệnh ${dir} ${lotNum} lot.`, stageName: \u0027Setup\u0027 },\n        { timePercent: 0.82, text: `Khóa SL ${slP} pips ($${riskB}), chốt lời +${targetPips} pips (1:${rr} R:R).`, stageName: \u0027Execution\u0027 },\n      ],"
+    },
+    {
+        "id":  7,
+        "path":  "src/components/canvas/renderPaperTheme.ts",
+        "start":  648,
+        "end":  655,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "36188A5B7DC7BEC24882DB44570F23F8B242F3747BBFEE07FC0D450DDB98564A",
+        "quote":  "  // 4i. Long Position Tool (Profit Target \u0026 Entry Pill from 45s onwards)\n  if (timeSec \u003e= 45.0) {\n    const posStartX = chartLeft + 12 * ((chartRight - chartLeft) / 18);\n    const posWidth = chartRight - posStartX;\n\n    // Green Profit Box\n    ctx.fillStyle = \u0027rgba(22, 163, 74, 0.25)\u0027;\n    ctx.fillRect(posStartX, yDailyHigh, posWidth, yEntry - yDailyHigh);"
+    },
+    {
+        "id":  8,
+        "path":  "src/components/BriefImporterModal.tsx",
+        "start":  525,
+        "end":  531,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "B900DF89FCF7893F02DDB54DA5784F230B26A14411315391196F8A380F794059",
+        "quote":  "  const applyTextParse = (text: string) =\u003e {\n    const res = parseBriefText(text);\n    setParsedHeadline(res.headline);\n    setParsedSubline(res.subline);\n    setSelectedSetup(res.setupType);\n    setBasePrice(res.basePrice);\n  };"
+    },
+    {
+        "id":  9,
+        "path":  "src/utils/hermesEngine.ts",
+        "start":  296,
+        "end":  303,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "E85ACC02AD2E5F02DEB4DFDD86A190749A4EB5C7112892883AB02A8B51950C0A",
+        "quote":  "  let basePrice = 4128.0;\n  let riskBudget = 30;\n  let slPips = 20;\n  let lotSize = \u0027$1.50/pip\u0027;\n  let rrRatio = 3.5;\n\n  const budgetDirectMatch = content.match(/(?:LOSS\\s*=\\s*\\$|define\\s*\\$|\\$)\\s*(\\d+)\\s*(?:=|đúng)?\\s*(?:1R|budget|risk|loss|trước)/i)\n    || content.match(/\\$(\\d+)\\s*(?:=|đúng)?\\s*(?:1R|budget|risk|loss)/i);"
+    },
+    {
+        "id":  10,
+        "path":  "src/components/BriefImporterModal.tsx",
+        "start":  681,
+        "end":  687,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "B900DF89FCF7893F02DDB54DA5784F230B26A14411315391196F8A380F794059",
+        "quote":  "    const lotNum = parseFloat(lotStr.replace(/[^0-9.]/g, \u0027\u0027)) || 0.05;\n\n    useChartStore.setState({\n      executionOrder: {\n        type: dir,\n        lot: lotNum,\n        entry: parseFloat(baseP.toFixed(1)),"
+    },
+    {
+        "id":  11,
+        "path":  "src/components/HermesSidebarPanel.tsx",
+        "start":  282,
+        "end":  288,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "D722B0F788E02A3E45B85F4FCE3E1CEC826331311E602C18EABAB32B30AEB701",
+        "quote":  "    const dir: \u0027BUY\u0027 | \u0027SELL\u0027 = /sell|supply|bearish/i.test(payload.strategy) ? \u0027SELL\u0027 : \u0027BUY\u0027;\n    const baseP = payload.basePrice || 4128.0;\n    const slPips = payload.slPips || 20;\n    const rrRatio = payload.rrRatio || 3.5;\n    const riskBudget = payload.riskBudget || 10;\n    const targetPips = Math.round(slPips * rrRatio);\n    const lotNum = parseFloat((payload.lotSize || \u00270.05 lot\u0027).replace(/[^0-9.]/g, \u0027\u0027)) || 0.05;"
+    },
+    {
+        "id":  12,
+        "path":  "src/utils/hermesEngine.ts",
+        "start":  80,
+        "end":  97,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "E85ACC02AD2E5F02DEB4DFDD86A190749A4EB5C7112892883AB02A8B51950C0A",
+        "quote":  "        type: \u0027FVG\u0027,\n        startCandleIndex: 1,\n        endCandleIndex: 4,\n        priceStart: basePrice,\n        priceEnd: basePrice + 9.0,\n        color: \u0027#00F5A0\u0027,\n        label: `M15 Bullish FVG [${basePrice.toFixed(1)} - ${(basePrice + 9.0).toFixed(1)}]`,\n      },\n      {\n        id: \u0027fvg-rr\u0027,\n        type: \u0027LONG_SHORT\u0027,\n        startCandleIndex: 4,\n        endCandleIndex: 5,\n        priceStart: basePrice + 7.5,\n        priceEnd: basePrice + 23.0,\n        color: \u0027#00F5A0\u0027,\n        label: `Buy FVG 50% CE | 1:${rrRatio} RR`,\n      },"
+    },
+    {
+        "id":  13,
+        "path":  "src/utils/hermesEngine.ts",
+        "start":  213,
+        "end":  216,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "E85ACC02AD2E5F02DEB4DFDD86A190749A4EB5C7112892883AB02A8B51950C0A",
+        "quote":  "        priceStart: basePrice,\n        priceEnd: basePrice + 7.0,\n        color: \u0027#00F5A0\u0027,\n        label: `Budget $${riskBudget} (1R) | Size: ${lotSize} | 1:${rrRatio} RR`,"
+    },
+    {
+        "id":  14,
+        "path":  "src/components/HermesSidebarPanel.tsx",
+        "start":  293,
+        "end":  302,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "D722B0F788E02A3E45B85F4FCE3E1CEC826331311E602C18EABAB32B30AEB701",
+        "quote":  "    const { candles, overlays } = generateStrategySetup(\n      payload.strategy,\n      baseP,\n      riskBudget,\n      slPips,\n      payload.lotSize || `${lotNum} lot`,\n      rrRatio\n    );\n    candles.forEach((c) =\u003e addCandle(c));\n    overlays.forEach((o) =\u003e addOverlay(o));"
+    },
+    {
+        "id":  15,
+        "path":  "src/components/HermesSidebarPanel.tsx",
+        "start":  320,
+        "end":  350,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "D722B0F788E02A3E45B85F4FCE3E1CEC826331311E602C18EABAB32B30AEB701",
+        "quote":  "    const jevAudit = jevFastReflexVerify({\n      headline: finalHeadline,\n      subline: finalSubline,\n      strategy: payload.strategy,\n      direction: dir,\n      basePrice: baseP,\n      slPips,\n      targetPips,\n      riskBudget,\n      lotSize: payload.lotSize || `${lotNum} lot`,\n      rrRatio,\n      scriptSubtitles: subtitlesToUse,\n    });\n\n    const finalSubtitles = jevAudit.calibratedPayload.scriptSubtitles || subtitlesToUse;\n    const finalSlPips = jevAudit.calibratedPayload.slPips || slPips;\n    const finalRisk = jevAudit.calibratedPayload.riskBudget || riskBudget;\n    const finalRr = jevAudit.calibratedPayload.rrRatio || rrRatio;\n    const finalTarget = jevAudit.calibratedPayload.targetPips || targetPips;\n\n    useChartStore.setState({\n      voiceAudioUrl: null, // Clear old audio so new voice is generated fresh\n      voiceAudioBase64: null,\n      duration: 12,\n      executionOrder: {\n        type: dir,\n        lot: lotNum,\n        entry: parseFloat(baseP.toFixed(1)),\n        sl: parseFloat((dir === \u0027BUY\u0027 ? baseP - finalSlPips * 0.1 : baseP + finalSlPips * 0.1).toFixed(1)),\n        tp: parseFloat((dir === \u0027BUY\u0027 ? baseP + finalSlPips * finalRr * 0.1 : baseP - finalSlPips * finalRr * 0.1).toFixed(1)),\n        risk: finalRisk,"
+    },
+    {
+        "id":  16,
+        "path":  "src/utils/jevReflexGate.ts",
+        "start":  81,
+        "end":  86,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "4A96A1EB77ABD1519772CFC47DD3032C4CE67EFF9CDD8C5CD0A586389CF5A80F",
+        "quote":  "  // Rule 5: Lot size calibration\n  const expectedLot = calibrated.riskBudget === 10 ? \u00270.05 lot\u0027 : \u00270.15 lot\u0027;\n  if (!calibrated.lotSize || !calibrated.lotSize.includes(\u0027lot\u0027)) {\n    calibrated.lotSize = expectedLot;\n    interventions.push(`Jev Auto-Calibrated Lot Size -\u003e ${expectedLot}`);\n  }"
+    },
+    {
+        "id":  17,
+        "path":  "src/utils/jevReflexGate.ts",
+        "start":  127,
+        "end":  132,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "4A96A1EB77ABD1519772CFC47DD3032C4CE67EFF9CDD8C5CD0A586389CF5A80F",
+        "quote":  "  // --- GATE 4: Visual Anti-Collision Gate (Zero Overlap Guarantee) ---\n  // Guarantees vertical safe bounds between Execution Pill and Teleprompter Subtitle\n  const collisionSafeGate = true;\n\n  const reflexTimeMs = Math.round((performance.now() - start) * 100) / 100;\n  const passed = financialGate \u0026\u0026 acousticSyncGate \u0026\u0026 ohlcIntegrityGate \u0026\u0026 collisionSafeGate;"
+    },
+    {
+        "id":  18,
+        "path":  "src/utils/dynamicValidator.ts",
+        "start":  226,
+        "end":  237,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "62C9CFD8427FA0A194FBBC9813D9150BA49D68864C5F70C7F925447317C5B4A3",
+        "quote":  "  if (input.executionOrder) {\n    const o = input.executionOrder;\n    if (o.type === \u0027BUY\u0027) {\n      if (o.tp \u003c= o.entry || o.entry \u003c= o.sl) {\n        riskRewardValid = false;\n        warnings.push(\u0027Cấu trúc giá lệnh BUY không hợp lệ (cần TP \u003e Entry \u003e SL).\u0027);\n        score -= 20;\n      } else {\n        const rr = (o.tp - o.entry) / (o.entry - o.sl);\n        if (rr \u003c 2.8) {\n          riskRewardValid = false;\n          warnings.push(`Tỷ lệ R:R quá thấp (${rr.toFixed(1)} \u003c 1:3.0).`);"
+    },
+    {
+        "id":  19,
+        "path":  "src/utils/dynamicValidator.ts",
+        "start":  256,
+        "end":  267,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "62C9CFD8427FA0A194FBBC9813D9150BA49D68864C5F70C7F925447317C5B4A3",
+        "quote":  "\n  // 5. Validate Subtitles\n  let subtitlesAligned = true;\n  if (!input.scriptSubtitles || input.scriptSubtitles.length \u003c 3) {\n    subtitlesAligned = false;\n    warnings.push(\u0027Thiếu phụ đề 4 bước khớp với dòng thời gian video.\u0027);\n    score -= 10;\n  }\n\n  // Bound score 0 -\u003e 100\n  score = Math.max(0, Math.min(100, score));\n  const isValid = score \u003e= 80;"
+    },
+    {
+        "id":  20,
+        "path":  "src/components/AuditorPanel.tsx",
+        "start":  35,
+        "end":  37,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "07E15F7FBD7F51AAAB6097746C814591A799678AA56A5DC5A442CBCD7E2F34C3",
+        "quote":  "  const isSafe = (report?.isValid ?? true) \u0026\u0026 score \u003e= 80;\n\n  const checks = report?.checks || {"
+    },
+    {
+        "id":  21,
+        "path":  "src/components/BriefImporterModal.tsx",
+        "start":  709,
+        "end":  714,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "B900DF89FCF7893F02DDB54DA5784F230B26A14411315391196F8A380F794059",
+        "quote":  "    useChartStore.getState().validateCurrentSetup();\n\n    // 3. Play video immediately\n    setCurrentTime(0);\n    setIsPlaying(true);\n    onClose();"
+    },
+    {
+        "id":  22,
+        "path":  "src/components/ScriptSetupPanel.tsx",
+        "start":  227,
+        "end":  234,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "E02AEDAEA1ADD9B329C2184D6E8CA0DB595ED78F2AC6BB038C82E39DA612AF06",
+        "quote":  "    setExecutionOrder({\n      type: setupDir,\n      lot: 0.05,\n      entry: 4128.0,\n      sl: isScSell ? 4130.0 : 4126.0,\n      tp: isScSell ? 4121.0 : 4135.0,\n      risk: 10,\n    });"
+    },
+    {
+        "id":  23,
+        "path":  "src/utils/dynamicValidator.ts",
+        "start":  269,
+        "end":  308,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "62C9CFD8427FA0A194FBBC9813D9150BA49D68864C5F70C7F925447317C5B4A3",
+        "quote":  "  // 6. Generate Auto-Normalized Setup if needed\n  const basePrice = input.candles \u0026\u0026 input.candles.length \u003e 0 ? input.candles[triggerIdx]?.close || input.candles[0].open : 4130.0;\n  const normalizedOrder = enforceRiskFirstMath(basePrice, expectedDirection, {\n    riskBudget: customRisk,\n    slPips: customSlPips,\n    rrRatio: 3.5,\n  });\n  normalizedOrder.lot = customLot;\n\n  const targetPips = Math.round(customSlPips * 3.5);\n\n  const normalizedSetup = {\n    executionOrder: normalizedOrder,\n    calloutPinText:\n      expectedDirection === \u0027BUY\u0027\n        ? `🎯 RÚT CHÂN QUÉT ĐÁY HỖ TRỢ ($${basePrice.toFixed(0)})`\n        : `🎯 BẪY DỤ BUY QUÉT ĐỈNH ($${basePrice.toFixed(0)})`,\n    calloutCandleIndex: triggerIdx,\n    targetPips,\n    scriptSubtitles:\n      expectedDirection === \u0027BUY\u0027\n        ? [\n            { timePercent: 0.0, text: `Khóa rủi ro 1R ($${customRisk}) trước khi nhìn chart!`, stageName: \u0027Hook\u0027 as const },\n            { timePercent: 0.28, text: \u0027Cú rút chân quét đáy thanh khoản chạm vùng Hỗ trợ then chốt!\u0027, stageName: \u0027Trap\u0027 as const },\n            { timePercent: 0.58, text: `Nến đảo chiều xác nhận. Chuẩn bị vào BUY ${customLot} lot.`, stageName: \u0027Setup\u0027 as const },\n            { timePercent: 0.82, text: `Đặt lệnh BUY, SL ${customSlPips} pips ($${customRisk}), chốt lời +${targetPips} pips (1:3.5 RR).`, stageName: \u0027Execution\u0027 as const },\n          ]\n        : [\n            { timePercent: 0.0, text: `Khóa rủi ro 1R ($${customRisk}) trước khi nhìn chart!`, stageName: \u0027Hook\u0027 as const },\n            { timePercent: 0.28, text: \u0027Đây là cái bẫy quét thanh khoản đỉnh của Market Maker dụ Retail!\u0027, stageName: \u0027Trap\u0027 as const },\n            { timePercent: 0.58, text: `Nến rút râu để lại Bearish FVG. Chuẩn bị vào SELL ${customLot} lot.`, stageName: \u0027Setup\u0027 as const },\n            { timePercent: 0.82, text: `Đặt lệnh SELL, SL ${customSlPips} pips ($${customRisk}), chốt lời +${targetPips} pips (1:3.5 RR).`, stageName: \u0027Execution\u0027 as const },\n          ],\n  };\n\n  return {\n    isValid,\n    score,\n    expectedDirection,\n    checks: {"
+    },
+    {
+        "id":  24,
+        "path":  "src/store/useChartStore.ts",
+        "start":  265,
+        "end":  292,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "099B303B20B5B36994B575216DD945EE8006F02EB5228D66BAF9B4692A1053C7",
+        "quote":  "  generateVoiceover: async () =\u003e {\n    const state = get();\n    if (state.isVoiceGenerating) return false;\n\n    set({ isVoiceGenerating: true });\n    try {\n      const res = await fetch(\u0027/api/tts/generate\u0027, {\n        method: \u0027POST\u0027,\n        headers: { \u0027Content-Type\u0027: \u0027application/json\u0027 },\n        body: JSON.stringify({\n          subtitles: state.scriptSubtitles,\n          voice: state.selectedVoice,\n        }),\n      });\n\n      if (!res.ok) {\n        if (res.status === 429) {\n          console.warn(\u0027Gemini 3.8 Flash TTS Free Tier quota exceeded (10/day). Falling back to Web Speech Engine.\u0027);\n          set({ hasTtsQuotaExceeded: true, audioEngine: \u0027webspeech\u0027 });\n          return false;\n        }\n        throw new Error(`TTS API failed: ${res.status}`);\n      }\n\n      const data = await res.json();\n      if (data.audioBase64) {\n        state.setVoiceAudio(data.audioBase64, data.mimeType || \u0027audio/wav\u0027);\n        set({ audioEngine: \u0027gemini\u0027, hasTtsQuotaExceeded: false });"
+    },
+    {
+        "id":  25,
+        "path":  "src/components/NleTimeline.tsx",
+        "start":  308,
+        "end":  314,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "3550F277A1D31DA41BB31895302F6210074EF96B37F8C6E3589AD4FF576F404B",
+        "quote":  "                  const widthPercent = (100 / scriptSubtitles.length).toFixed(1);\n\n                  return (\n                    \u003cdiv\n                      key={idx}\n                      style={{ width: `${widthPercent}%` }}\n                      className={`h-full border-r border-[#090D16] bg-gradient-to-r ${colorClass} flex items-center px-2 text-[10px] font-bold text-white shadow-sm truncate`}"
+    },
+    {
+        "id":  26,
+        "path":  "src/utils/recorder.ts",
+        "start":  44,
+        "end":  53,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "7A549ADE8F6BF3B3DF79633A1BF94DBA85CB5FE0544188FAD2794B536F211BDE",
+        "quote":  "  // Capture canvas video stream\n  const stream = canvas.captureStream(fps);\n  const chunks: Blob[] = [];\n\n  let recorder: MediaRecorder;\n  try {\n    recorder = new MediaRecorder(stream, {\n      mimeType,\n      videoBitsPerSecond: 8000000, // 8 Mbps high quality\n    });"
+    },
+    {
+        "id":  27,
+        "path":  "src/components/ExportModal.tsx",
+        "start":  53,
+        "end":  63,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "3F17D9740D8AC59AF06928415377B5A32DCF7566D0E3337D219F9B0BA80E65BE",
+        "quote":  "    setIsPlaying(false);\n    setIsExporting(true);\n    setProgress(0);\n    setDownloadUrl(null);\n\n    exportCanvasVideo(\n      canvas,\n      (timeSec) =\u003e {\n        // Drive timeline frame-by-frame\n        setCurrentTime(timeSec);\n      },"
+    },
+    {
+        "id":  28,
+        "path":  "src/components/ChartCanvas.tsx",
+        "start":  244,
+        "end":  250,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "A2E85E76D440B33B7B7F996EE69F380B0E7ED7DDC4A17F1278E6656958A75AEA",
+        "quote":  "    // Determine how many candles to reveal based on currentTime and revealMode\n    let visibleCount = candles.length;\n    if (duration \u003e 0) {\n      const progress = Math.min(1, Math.max(0, currentTime / duration));\n      visibleCount = Math.max(1, Math.ceil(progress * candles.length));\n    }\n    const visibleCandles = candles.slice(0, visibleCount);"
+    },
+    {
+        "id":  29,
+        "path":  "src/components/StageCanvas.tsx",
+        "start":  77,
+        "end":  81,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "17E8D1237E727D45E7C8E2DA43191523B8332C6CB4262233C38115AE6EA8250D",
+        "quote":  "    canvas.width = rect.width * dpr;\n    canvas.height = rect.height * dpr;\n    ctx.scale(dpr, dpr);\n\n    const width = rect.width;"
+    },
+    {
+        "id":  30,
+        "path":  "livrables/specs/SPEC-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md",
+        "start":  75,
+        "end":  84,
+        "gitSha":  "a7a63e5af22c32daddd31238aa34dac8ea567b59",
+        "fileSha256":  "932CD8180F6B90A3355AD2B4813961651BEABEFE8ED344EF48604B50B1A8374F",
+        "quote":  "- FFmpeg/ffprobe are available through the installed FFmpeg toolchain.\n\nNot implemented:\n\n- `/render` route;\n- exact directive validator;\n- atomic directive-to-store adapter;\n- stable render Canvas identity;\n- `window.chartAnimatorBridge` status API;\n- supervised Playwright process;"
+    }
+]

@@ -1,0 +1,246 @@
+{
+  "schema": "scene-draft/1",
+  "source": {
+    "id": "risk-first-loss-example",
+    "revision": 1,
+    "sourceSha256": "1c760aa109ce721119ab2ac0636669420689b13c41061d022251185eb0f90016",
+    "selection": "EXCERPT",
+    "selectedText": "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. Picture XAUUSD. You have been watching the higher timeframe. Price has been making higher highs and higher lows. Your bias is long. You have one level you are watching — a previous high that you expect to act as support. That is the plan. Now, before you do anything else, you define the loss. You say: I am willing to lose thirty dollars on this trade. That is written down. Now you look for the entry. You drop to the lower timeframe. Price pulls back to your level. It shows a rejection candle. That is your entry signal. You place the stop loss below the swing low — twenty pips away. Your size: thirty dollars divided by twenty pips, so one dollar and fifty cents per pip. Total risk: thirty dollars. Exactly as budgeted. Now the hard part. Price enters. Moves against you. Hits the stop. You lose thirty dollars. That is it. That is the whole loss. Not thirty dollars plus revenge trading. Not thirty dollars plus \"I will just hold it.\" Thirty dollars. Done.",
+    "selectedTextSha256": "885309ad8e4b64d90e594d48db39bee2dee444ff44982098828293faf495edac",
+    "language": "en"
+  },
+  "truthClass": "EDUCATIONAL_ILLUSTRATION",
+  "language": "en",
+  "direction": "BUY",
+  "outcome": "STOP_LOSS",
+  "candles": [
+    {
+      "id": "c1",
+      "index": 0,
+      "open": 4120,
+      "high": 4132,
+      "low": 4119,
+      "close": 4130
+    },
+    {
+      "id": "c2",
+      "index": 1,
+      "open": 4130,
+      "high": 4131,
+      "low": 4123,
+      "close": 4124.5
+    },
+    {
+      "id": "c3",
+      "index": 2,
+      "open": 4124.5,
+      "high": 4142,
+      "low": 4124,
+      "close": 4140
+    },
+    {
+      "id": "c4",
+      "index": 3,
+      "open": 4140,
+      "high": 4141,
+      "low": 4128,
+      "close": 4129
+    },
+    {
+      "id": "c5",
+      "index": 4,
+      "open": 4129,
+      "high": 4136,
+      "low": 4126,
+      "close": 4134.5
+    },
+    {
+      "id": "c6",
+      "index": 5,
+      "open": 4134.5,
+      "high": 4135,
+      "low": 4124,
+      "close": 4125
+    }
+  ],
+  "overlays": [
+    {
+      "id": "lvl-support",
+      "kind": "LEVEL",
+      "price": 4128,
+      "label": "Previous High Support ($4,128.00)"
+    }
+  ],
+  "budget": {
+    "riskUsd": 30,
+    "slPips": 20,
+    "usdPerPip": 1.5
+  },
+  "order": null,
+  "chartPriceOrigin": "SYNTHETIC",
+  "entryBasis": "NONE",
+  "entryOverlayId": null,
+  "narration": [
+    {
+      "id": "disclosure",
+      "intentId": "disclosure",
+      "span": {
+        "startUtf16": 0,
+        "endUtf16": 153
+      },
+      "text": "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. ",
+      "audio": null
+    },
+    {
+      "id": "context",
+      "intentId": "context",
+      "span": {
+        "startUtf16": 153,
+        "endUtf16": 392
+      },
+      "text": "Picture XAUUSD. You have been watching the higher timeframe. Price has been making higher highs and higher lows. Your bias is long. You have one level you are watching — a previous high that you expect to act as support. That is the plan. ",
+      "audio": null
+    },
+    {
+      "id": "budget",
+      "intentId": "budget",
+      "span": {
+        "startUtf16": 392,
+        "endUtf16": 529
+      },
+      "text": "Now, before you do anything else, you define the loss. You say: I am willing to lose thirty dollars on this trade. That is written down. ",
+      "audio": null
+    },
+    {
+      "id": "pullback",
+      "intentId": "pullback",
+      "span": {
+        "startUtf16": 529,
+        "endUtf16": 678
+      },
+      "text": "Now you look for the entry. You drop to the lower timeframe. Price pulls back to your level. It shows a rejection candle. That is your entry signal. ",
+      "audio": null
+    },
+    {
+      "id": "sizing",
+      "intentId": "sizing",
+      "span": {
+        "startUtf16": 678,
+        "endUtf16": 880
+      },
+      "text": "You place the stop loss below the swing low — twenty pips away. Your size: thirty dollars divided by twenty pips, so one dollar and fifty cents per pip. Total risk: thirty dollars. Exactly as budgeted. ",
+      "audio": null
+    },
+    {
+      "id": "stop-hit",
+      "intentId": "stop-hit",
+      "span": {
+        "startUtf16": 880,
+        "endUtf16": 972
+      },
+      "text": "Now the hard part. Price enters. Moves against you. Hits the stop. You lose thirty dollars. ",
+      "audio": null
+    },
+    {
+      "id": "lesson",
+      "intentId": "lesson",
+      "span": {
+        "startUtf16": 972,
+        "endUtf16": 1117
+      },
+      "text": "That is it. That is the whole loss. Not thirty dollars plus revenge trading. Not thirty dollars plus \"I will just hold it.\" Thirty dollars. Done.",
+      "audio": null
+    }
+  ],
+  "storyboard": [
+    {
+      "intentId": "disclosure",
+      "actions": [
+        {
+          "kind": "SHOW_TEXT",
+          "id": "txt-disclosure",
+          "text": "EDUCATIONAL MECHANICS"
+        }
+      ]
+    },
+    {
+      "intentId": "context",
+      "actions": [
+        {
+          "kind": "REVEAL_CANDLES",
+          "candleIds": [
+            "c1",
+            "c2",
+            "c3"
+          ]
+        },
+        {
+          "kind": "SHOW_OVERLAY",
+          "overlayId": "lvl-support"
+        }
+      ]
+    },
+    {
+      "intentId": "budget",
+      "actions": [
+        {
+          "kind": "SHOW_BUDGET"
+        }
+      ]
+    },
+    {
+      "intentId": "pullback",
+      "actions": [
+        {
+          "kind": "REVEAL_CANDLES",
+          "candleIds": [
+            "c4",
+            "c5"
+          ]
+        }
+      ]
+    },
+    {
+      "intentId": "sizing",
+      "actions": [
+        {
+          "kind": "SHOW_TEXT",
+          "id": "txt-sizing",
+          "text": "SIZE: $1.50 / PIP"
+        }
+      ]
+    },
+    {
+      "intentId": "stop-hit",
+      "actions": [
+        {
+          "kind": "REVEAL_CANDLES",
+          "candleIds": [
+            "c6"
+          ]
+        },
+        {
+          "kind": "MARK_OUTCOME",
+          "outcome": "STOP_LOSS"
+        }
+      ]
+    },
+    {
+      "intentId": "lesson",
+      "actions": [
+        {
+          "kind": "SHOW_TEXT",
+          "id": "txt-lesson",
+          "text": "TOTAL LOSS: $30. DONE."
+        }
+      ]
+    }
+  ],
+  "profile": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "maxDurationSec": 120
+  },
+  "theme": "paper"
+}

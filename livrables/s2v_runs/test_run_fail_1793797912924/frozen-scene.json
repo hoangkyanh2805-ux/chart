@@ -1,0 +1,152 @@
+{
+  "schema": "frozen-scene/1",
+  "draftSha256": "92f56f6dd6579ca49b5fac0b13fe98086cf7b936200ac6be33217c4f68f00275",
+  "draft": {
+    "schema": "scene-draft/1",
+    "source": {
+      "id": "risk-first-loss-example",
+      "revision": 1,
+      "sourceSha256": "1c760aa109ce721119ab2ac0636669420689b13c41061d022251185eb0f90016",
+      "selection": "EXCERPT",
+      "selectedText": "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. ",
+      "selectedTextSha256": "73f72578c1c78d57b0e3bbf992f71865033d95dfe052131a1b5256cfc23889ff",
+      "language": "en"
+    },
+    "truthClass": "EDUCATIONAL_ILLUSTRATION",
+    "language": "en",
+    "direction": "BUY",
+    "outcome": "STOP_LOSS",
+    "candles": [
+      {
+        "id": "c1",
+        "index": 0,
+        "open": 4120,
+        "high": 4132,
+        "low": 4119,
+        "close": 4130
+      },
+      {
+        "id": "c2",
+        "index": 1,
+        "open": 4130,
+        "high": 4131,
+        "low": 4123,
+        "close": 4124.5
+      },
+      {
+        "id": "c3",
+        "index": 2,
+        "open": 4124.5,
+        "high": 4142,
+        "low": 4124,
+        "close": 4140
+      },
+      {
+        "id": "c4",
+        "index": 3,
+        "open": 4140,
+        "high": 4141,
+        "low": 4128,
+        "close": 4129
+      },
+      {
+        "id": "c5",
+        "index": 4,
+        "open": 4129,
+        "high": 4136,
+        "low": 4126,
+        "close": 4134.5
+      },
+      {
+        "id": "c6",
+        "index": 5,
+        "open": 4134.5,
+        "high": 4135,
+        "low": 4124,
+        "close": 4125
+      }
+    ],
+    "overlays": [
+      {
+        "id": "lvl-support",
+        "kind": "LEVEL",
+        "price": 4128,
+        "label": "Previous High Support ($4,128.00)"
+      }
+    ],
+    "budget": {
+      "riskUsd": 30,
+      "slPips": 20,
+      "usdPerPip": 1.5
+    },
+    "order": null,
+    "chartPriceOrigin": "SYNTHETIC",
+    "entryBasis": "NONE",
+    "entryOverlayId": null,
+    "narration": [
+      {
+        "id": "disclosure",
+        "intentId": "disclosure",
+        "span": {
+          "startUtf16": 0,
+          "endUtf16": 153
+        },
+        "text": "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. ",
+        "audio": {
+          "assetId": "asset-disclosure",
+          "sha256": "c5249c7efd5e45bf7769f217afae096b13b4354f414d8255b3eb10eea3893728",
+          "transcriptSha256": "73f72578c1c78d57b0e3bbf992f71865033d95dfe052131a1b5256cfc23889ff",
+          "sampleRate": 48000,
+          "channels": 1,
+          "sampleCount": 48000,
+          "origin": "USER_UPLOAD",
+          "review": "MATCHED"
+        }
+      }
+    ],
+    "storyboard": [
+      {
+        "intentId": "disclosure",
+        "actions": [
+          {
+            "kind": "SHOW_TEXT",
+            "id": "txt-disclosure",
+            "text": "EDUCATIONAL MECHANICS"
+          }
+        ]
+      }
+    ],
+    "profile": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "maxDurationSec": 120
+    },
+    "theme": "paper"
+  },
+  "cues": [
+    {
+      "id": "disclosure",
+      "text": "Let me make this concrete. And I will label it clearly: this is an educational illustration of the mechanics — not a trade recommendation, not a signal. ",
+      "startSample": 0,
+      "endSample": 48000,
+      "startFrame": 0,
+      "endFrame": 30,
+      "audioAssetId": "asset-disclosure"
+    }
+  ],
+  "events": [
+    {
+      "frame": 0,
+      "action": {
+        "kind": "SHOW_TEXT",
+        "id": "txt-disclosure",
+        "text": "EDUCATIONAL MECHANICS"
+      }
+    }
+  ],
+  "frameCount": 35,
+  "audioSampleCount": 48000,
+  "watermark": "EDUCATIONAL ILLUSTRATION — NOT FINANCIAL ADVICE",
+  "sceneSha256": "857020abe2bce4c5565cbc570208aae5157ea863db11b9d1b6a808d6d0762d0b"
+}
