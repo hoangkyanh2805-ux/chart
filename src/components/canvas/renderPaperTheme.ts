@@ -591,14 +591,14 @@ function renderReaReplica(opts: PaperThemeOptions) {
   });
   ctx.restore();
 
-  // 6. Bottom Watermark: YouTube Icon + @marketanalysis-13
+  // 6. Bottom Watermark: YouTube Icon + @azzammastertradinggold
   ctx.save();
   const wmY = height - 42;
   const wmCenterX = width / 2;
 
   const ytW = 32;
   const ytH = 22;
-  const ytX = wmCenterX - 78;
+  const ytX = wmCenterX - 95;
   const ytY = wmY - 15;
 
   ctx.fillStyle = '#FF0000';
@@ -614,13 +614,13 @@ function renderReaReplica(opts: PaperThemeOptions) {
   ctx.closePath();
   ctx.fill();
 
-  ctx.font = '700 13px Montserrat, sans-serif';
+  ctx.font = '700 12px Montserrat, sans-serif';
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 2.5;
-  ctx.strokeText('@marketanalysis-13', wmCenterX - 36, wmY);
+  ctx.strokeText('@azzammastertradinggold', wmCenterX - 55, wmY);
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillText('@marketanalysis-13', wmCenterX - 36, wmY);
+  ctx.fillText('@azzammastertradinggold', wmCenterX - 55, wmY);
   ctx.restore();
 }
 

@@ -262,9 +262,43 @@ export const TemplateSidebar: React.FC = () => {
       setHeadlineText(preset.hookHeadline);
       setSublineText(preset.hookSubline);
       setBadges(preset.badges);
-      useChartStore.setState({ duration: preset.duration || 10 });
-      setCurrentTime(0);
-      setIsPlaying(true);
+
+      // Derive execution & pip metrics from LONG_SHORT or candles
+      const rrOverlay = preset.overlays.find((o) => o.type === 'LONG_SHORT');
+      const isLong = rrOverlay ? rrOverlay.priceEnd > rrOverlay.priceStart : true;
+      const entryPrice = rrOverlay ? rrOverlay.priceStart : 4128.0;
+      const targetPrice = rrOverlay ? rrOverlay.priceEnd : 4150.0;
+      const slDist = Math.abs(targetPrice - entryPrice) / 3.5;
+      const slPrice = isLong ? entryPrice - slDist : entryPrice + slDist;
+      const pips = Math.round(Math.abs(targetPrice - entryPrice) * 10);
+
+      const targetDuration = Math.max(30, preset.duration || 30);
+
+      useChartStore.setState({
+        duration: targetDuration,
+        currentTime: 0,
+        isPlaying: true,
+        showCalloutPin: true,
+        calloutPinText: preset.lessonFocus ? `🎯 ${preset.lessonFocus.toUpperCase()}` : '🎯 ENTRY POINT',
+        calloutCandleIndex: Math.min(preset.candles.length - 1, 3),
+        showPipCounter: true,
+        targetPips: pips || 75,
+        showExecutionBadge: true,
+        executionOrder: {
+          type: isLong ? 'BUY' : 'SELL',
+          lot: 0.05,
+          entry: Number(entryPrice.toFixed(1)),
+          sl: Number(slPrice.toFixed(1)),
+          tp: Number(targetPrice.toFixed(1)),
+          risk: 30,
+        },
+        scriptSubtitles: [
+          { timePercent: 0.0, text: preset.script.hook, stageName: 'Hook' },
+          { timePercent: 0.25, text: preset.script.tension, stageName: 'Trap' },
+          { timePercent: 0.55, text: preset.script.payoff, stageName: 'Setup' },
+          { timePercent: 0.80, text: preset.script.cta, stageName: 'Execution' },
+        ],
+      });
       return;
     }
 

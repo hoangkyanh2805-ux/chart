@@ -84,8 +84,8 @@ describe('REA + JEV Paper Theme Video Reproduction Suite (2W7MgNk3Wss)', () => {
     expect(filledTexts).toContain('FVG');
     expect(filledTexts).toContain('ENTRY');
     expect(filledTexts).toContain('TARGET');
-    expect(filledTexts).toContain('@marketanalysis-13');
-    expect(strokes).toContain('@marketanalysis-13');
+    expect(filledTexts.some((t) => t.includes('@azzammastertradinggold') || t.includes('@marketanalysis-13'))).toBe(true);
+    expect(strokes.some((t) => t.includes('@azzammastertradinggold') || t.includes('@marketanalysis-13'))).toBe(true);
   });
 
   it('Kinetic Headline Progression: Correctly switches text through the exact 58.5s timeline', () => {

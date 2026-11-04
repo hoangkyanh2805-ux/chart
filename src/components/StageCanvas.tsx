@@ -64,6 +64,7 @@ export const StageCanvas: React.FC = () => {
   const [isEditingInline, setIsEditingInline] = React.useState<boolean>(false);
 
   const isWhite = stageTheme === 'white';
+  const isPaper = stageTheme === 'paper';
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -85,7 +86,13 @@ export const StageCanvas: React.FC = () => {
     const progress = duration > 0 ? Math.min(1, Math.max(0, currentTime / duration)) : 1;
 
     // REA + JEV Clean-Room Reproduction: Exact replica of YouTube Short 2W7MgNk3Wss
-    if (stageTheme === 'paper') {
+    // Only route to the static 58.5s short replica if duration is 58.5s and not a custom script
+    const isReaShortReplica =
+      stageTheme === 'paper' &&
+      duration === 58.5 &&
+      (!headlineText || headlineText === 'BREAKOUT' || headlineText === 'BREAKOUT TRAP: DONT BE LIQUIDITY');
+
+    if (isReaShortReplica) {
       renderPaperTheme({
         ctx,
         width,
@@ -102,7 +109,17 @@ export const StageCanvas: React.FC = () => {
     }
 
     // 1. Draw Background
-    if (isWhite) {
+    if (isPaper) {
+      ctx.fillStyle = '#E6C191';
+      ctx.fillRect(0, 0, width, height);
+
+      // Subtle seal watermark in center
+      const rad = ctx.createRadialGradient(width / 2, height * 0.45, 10, width / 2, height * 0.45, width * 0.45);
+      rad.addColorStop(0, 'rgba(210, 168, 115, 0.4)');
+      rad.addColorStop(1, 'rgba(230, 193, 145, 0)');
+      ctx.fillStyle = rad;
+      ctx.fillRect(0, 0, width, height);
+    } else if (isWhite) {
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, width, height);
     } else {
@@ -217,8 +234,8 @@ export const StageCanvas: React.FC = () => {
 
     if (hasStoreCandles) {
       // DYNAMIC MULTI-CANDLE WALK (Risk-First setup from Brief)
-      const chartTop = sublineStartY + sublineLines.length * 15 + 18;
-      const chartBottom = height - 52;
+      const chartTop = sublineStartY + sublineLines.length * 15 + 16;
+      const chartBottom = height - 98; // Completely clear of bottom teleprompter HUD
       const chartHeight = chartBottom - chartTop;
       const chartLeft = 32;
       const chartRight = width - 32;
@@ -518,6 +535,7 @@ export const StageCanvas: React.FC = () => {
         ctx.restore();
       }
 
+      // 4b. Viral TikTok Callout Pin on Key Candle (Zero Overlap with Wicks/Candles)
       if (showCalloutPin && candles.length > calloutCandleIndex && calloutCandleIndex < revealedCount && !isBeforeState) {
         const pinCandle = candles[calloutCandleIndex];
         const pinX = chartLeft + (calloutCandleIndex + 1) * candleSpacing;
@@ -526,7 +544,7 @@ export const StageCanvas: React.FC = () => {
         ctx.save();
         // Pulsing radar ripple
         const pulse = (Math.sin(currentTime * 5) + 1) / 2; // 0..1
-        const ringRadius = 7 + pulse * 8;
+        const ringRadius = 5 + pulse * 6;
         ctx.strokeStyle = '#F59E0B';
         ctx.lineWidth = 1.5;
         ctx.globalAlpha = 0.85 - pulse * 0.45;
@@ -538,177 +556,194 @@ export const StageCanvas: React.FC = () => {
         ctx.fillStyle = '#F59E0B';
         ctx.globalAlpha = 1;
         ctx.beginPath();
-        ctx.arc(pinX, pinY, 3.5, 0, Math.PI * 2);
+        ctx.arc(pinX, pinY, 3, 0, Math.PI * 2);
         ctx.fill();
 
-        // Pointer line up & badge pill (Elevated by 40px to prevent colliding with Entry / Risk-Reward labels)
+        // Elevated callout badge: If candle is near top, badge goes above chartTop, never covering candle bodies
         const pillText = calloutPinText || '🎯 BẪY DỤ BUY QUÉT ĐỈNH';
         ctx.font = 'bold 8.5px monospace';
         const pillMetrics = ctx.measureText(pillText);
-        const cpWidth = pillMetrics.width + 16;
-        const cpHeight = 20;
+        const cpWidth = pillMetrics.width + 14;
+        const cpHeight = 18;
         const cpX = Math.max(14, Math.min(width - cpWidth - 14, pinX - cpWidth / 2));
-        const cpY = Math.max(68, pinY - 40);
+        const cpY = pinY < chartTop + 32 ? chartTop - 14 : pinY - 24;
 
-        // Connecting line
+        // Subtle connecting dashed line
         ctx.strokeStyle = '#F59E0B';
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 2]);
         ctx.beginPath();
-        ctx.moveTo(pinX, pinY - 4);
+        ctx.moveTo(pinX, pinY - 3);
         ctx.lineTo(cpX + cpWidth / 2, cpY + cpHeight);
         ctx.stroke();
+        ctx.setLineDash([]);
 
         // Badge container
-        ctx.fillStyle = isWhite ? '#FEF3C7' : 'rgba(15, 23, 42, 0.95)';
+        ctx.fillStyle = isWhite || isPaper ? '#FEF3C7' : 'rgba(15, 23, 42, 0.95)';
         ctx.strokeStyle = '#F59E0B';
         ctx.lineWidth = 1.2;
-        ctx.shadowColor = 'rgba(245, 158, 11, 0.4)';
-        ctx.shadowBlur = 6;
         ctx.beginPath();
-        ctx.roundRect(cpX, cpY, cpWidth, cpHeight, 5);
+        ctx.roundRect(cpX, cpY, cpWidth, cpHeight, 4);
         ctx.fill();
         ctx.stroke();
-        ctx.shadowBlur = 0;
 
-        ctx.fillStyle = isWhite ? '#92400E' : '#FDE047';
+        ctx.fillStyle = isWhite || isPaper ? '#92400E' : '#FDE047';
         ctx.textAlign = 'center';
-        ctx.fillText(pillText, cpX + cpWidth / 2, cpY + 13.5);
+        ctx.fillText(pillText, cpX + cpWidth / 2, cpY + 12.5);
         ctx.restore();
       }
 
-      // 4c. Live Pip Counter Badge (Floating top-right inside chart)
+      // 4c. Live Pip Counter Badge (Floating top-right inside chart header)
       if (showPipCounter && progress > 0.3 && !isBeforeState) {
         ctx.save();
         const pipRatio = Math.min(1, Math.max(0, (progress - 0.3) / 0.7));
         const currentPips = progress >= 0.95 ? (targetPips || 70) : Math.round((targetPips || 70) * pipRatio);
 
-        const badgeW = 92;
-        const badgeH = 24;
-        const badgeX = width - badgeW - 24;
-        const badgeY = chartTop + 6;
+        const badgeW = 90;
+        const badgeH = 22;
+        const badgeX = width - badgeW - 20;
+        const badgeY = chartTop + 4;
 
-        ctx.fillStyle = isWhite ? '#ECFDF5' : 'rgba(15, 23, 42, 0.94)';
+        ctx.fillStyle = isWhite || isPaper ? '#ECFDF5' : 'rgba(15, 23, 42, 0.94)';
         ctx.strokeStyle = '#00F5A0';
-        ctx.lineWidth = 1.5;
-        ctx.shadowColor = 'rgba(0, 245, 160, 0.4)';
-        ctx.shadowBlur = 6;
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = 'rgba(0, 245, 160, 0.35)';
+        ctx.shadowBlur = 5;
         ctx.beginPath();
-        ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 6);
+        ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 5);
         ctx.fill();
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        ctx.font = '900 11px monospace';
-        ctx.fillStyle = isWhite ? '#065F46' : '#00F5A0';
+        ctx.font = '900 10px monospace';
+        ctx.fillStyle = isWhite || isPaper ? '#065F46' : '#00F5A0';
         ctx.textAlign = 'center';
-        ctx.fillText(`+${currentPips} PIPS 🚀`, badgeX + badgeW / 2, badgeY + 16);
+        ctx.fillText(`+${currentPips} PIPS 🚀`, badgeX + badgeW / 2, badgeY + 14.5);
         ctx.restore();
       }
 
-      // 4d. Trade Execution Order Pill (Positioned cleanly right above Subtitle Box - Zero Overlap)
-      if (showExecutionBadge && executionOrder && progress > 0.45 && !isBeforeState) {
-        ctx.save();
-        const isSell = executionOrder.type === 'SELL';
-        const badgeW = 155;
-        const badgeH = 30;
-        const bx = 20;
-        const by = height - 78 - badgeH - 4; // Exactly 4px above the subtitle teleprompter box!
+      // 4d. UNIFIED CINEMATIC TELEPROMPTER & TRADE EXECUTION HUD (Bottom Safe Zone - ZERO Overlap)
+      const teleW = width - 32;
+      const teleH = 68;
+      const teleX = 16;
+      const teleY = height - teleH - 12;
 
-        ctx.fillStyle = isWhite ? 'rgba(248, 250, 252, 0.96)' : 'rgba(15, 23, 42, 0.96)';
-        ctx.strokeStyle = isSell ? '#FF3366' : '#00F5A0';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.roundRect(bx, by, badgeW, badgeH, 5);
-        ctx.fill();
-        ctx.stroke();
+      ctx.save();
+      // Outer Card
+      ctx.fillStyle = isWhite
+        ? 'rgba(255, 255, 255, 0.96)'
+        : isPaper
+        ? 'rgba(254, 243, 199, 0.96)'
+        : 'rgba(11, 15, 25, 0.94)';
+      ctx.strokeStyle = isWhite
+        ? '#CBD5E1'
+        : isPaper
+        ? '#D97706'
+        : 'rgba(99, 102, 241, 0.35)';
+      ctx.lineWidth = 1.2;
+      ctx.shadowColor = isWhite ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.45)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetY = 2;
+      ctx.beginPath();
+      ctx.roundRect(teleX, teleY, teleW, teleH, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
 
-        ctx.font = 'bold 8.5px monospace';
-        ctx.fillStyle = isSell ? (isWhite ? '#991B1B' : '#FF3366') : (isWhite ? '#065F46' : '#00F5A0');
-        ctx.textAlign = 'left';
-        ctx.fillText(`${executionOrder.type} ${executionOrder.lot} LOT @ ${executionOrder.entry.toFixed(1)}`, bx + 7, by + 11.5);
-
-        ctx.font = '7.5px monospace';
-        ctx.fillStyle = isWhite ? '#475569' : '#94A3B8';
-        ctx.fillText(`SL: $${executionOrder.sl.toFixed(1)} ($${executionOrder.risk}) · TP: $${executionOrder.tp.toFixed(1)}`, bx + 7, by + 23);
-        ctx.restore();
-      }
-
-      // 4e. Dynamic Kinetic Teleprompter Subtitles (Bottom Third Safe Zone)
+      // Header Row (inside card)
+      let activeSub = scriptSubtitles && scriptSubtitles.length > 0 ? scriptSubtitles[0] : null;
       if (scriptSubtitles && scriptSubtitles.length > 0) {
-        let activeSub = scriptSubtitles[0];
         for (const sub of scriptSubtitles) {
-          if (progress >= sub.timePercent) {
-            activeSub = sub;
-          }
+          if (progress >= sub.timePercent) activeSub = sub;
         }
+      }
 
-        if (activeSub) {
-          ctx.save();
-          const subW = width - 40;
-          const subH = 34;
-          const subX = 20;
-          const subY = height - 78;
+      const stageName = activeSub?.stageName || 'SMC LESSON';
+      ctx.font = '900 7.5px monospace';
+      const stageW = ctx.measureText(`[${stageName.toUpperCase()}]`).width + 10;
+      ctx.fillStyle = isWhite ? '#0284C7' : isPaper ? '#B45309' : '#38BDF8';
+      ctx.beginPath();
+      ctx.roundRect(teleX + 8, teleY + 7, stageW, 14, 3);
+      ctx.fill();
 
-          ctx.fillStyle = isWhite ? 'rgba(255, 255, 255, 0.95)' : 'rgba(11, 15, 25, 0.92)';
-          ctx.strokeStyle = isWhite ? '#CBD5E1' : 'rgba(99, 102, 241, 0.35)';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.fillText(`[${stageName.toUpperCase()}]`, teleX + 8 + stageW / 2, teleY + 17);
+
+      // Stepper Badges
+      const currentBadges = badges || ['1. LOSS $30', '2. SL 20P', '3. LOT 0.05'];
+      const badgeSteps = [
+        { label: currentBadges[0] || '1. LOSS $30', active: progress >= 0.08, col: '#EF4444' },
+        { label: currentBadges[1] || '2. SL 20P', active: progress >= 0.38, col: '#0284C7' },
+        { label: currentBadges[2] || '3. LOT 0.05', active: progress >= 0.68, col: '#10B981' },
+      ];
+
+      let chipX = teleX + 8 + stageW + 6;
+      badgeSteps.forEach((step) => {
+        ctx.font = 'bold 7.5px monospace';
+        const chipW = ctx.measureText(step.label).width + 8;
+        if (chipX + chipW < teleX + teleW - 130) {
+          ctx.fillStyle = step.active
+            ? (isWhite ? '#F1F5F9' : isPaper ? '#FEF3C7' : '#1E293B')
+            : (isWhite ? '#F8FAFC' : '#0B0F19');
+          ctx.strokeStyle = step.active ? step.col : (isWhite ? '#E2E8F0' : '#334155');
           ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.roundRect(subX, subY, subW, subH, 6);
+          ctx.roundRect(chipX, teleY + 7, chipW, 14, 3);
           ctx.fill();
           ctx.stroke();
 
-          // Stage tag
-          if (activeSub.stageName) {
-            ctx.font = 'bold 7px monospace';
-            ctx.fillStyle = '#F59E0B';
-            ctx.textAlign = 'left';
-            ctx.fillText(`[${activeSub.stageName.toUpperCase()}]`, subX + 7, subY + 11);
-          }
-
-          // Subtitle text (auto-wrapped)
-          ctx.font = `600 9px "${activeFont}", sans-serif`;
-          ctx.fillStyle = isWhite ? '#0F172A' : '#F8FAFC';
-          ctx.textAlign = 'left';
-          const maxTextW = subW - 14;
-          const subLines = wrapTextLines(ctx, activeSub.text, maxTextW).slice(0, 2);
-          subLines.forEach((l, idx) => {
-            ctx.fillText(l, subX + 7, subY + (activeSub.stageName ? 22 : 15) + idx * 10);
-          });
-          ctx.restore();
+          ctx.fillStyle = step.active
+            ? (isWhite ? '#0F172A' : isPaper ? '#92400E' : '#FFFFFF')
+            : '#64748B';
+          ctx.textAlign = 'center';
+          ctx.fillText(step.label, chipX + chipW / 2, teleY + 17);
+          chipX += chipW + 4;
         }
-      }
+      });
 
-      // Bottom 3-Step Stepper Badges (COMPACT, NO SMASHING, NO OVERLAP)
-      ctx.save();
-      const badgeY = height - 38;
-      const availWidth = width - 40;
-      const badgeW = Math.floor(availWidth / 3);
-
-      const currentBadges = badges || ['1. LOSS $30', '2. ENTRY SL 20p', '3. SIZE $1.5'];
-      const steps = [
-        { label: currentBadges[0] || '1. LOSS $30', col: '#EF4444', active: progress >= 0.1 },
-        { label: currentBadges[1] || '2. ENTRY SL', col: '#0284C7', active: progress >= 0.4 },
-        { label: currentBadges[2] || '3. SIZE $1.5', col: '#10B981', active: progress >= 0.7 },
-      ];
-
-      steps.forEach((s, idx) => {
-        const bx = 20 + idx * badgeW;
-        const bw = badgeW - 6;
-
-        ctx.fillStyle = s.active ? (isWhite ? '#F1F5F9' : '#131B2A') : (isWhite ? '#F8FAFC' : '#0A0E17');
-        ctx.strokeStyle = s.active ? s.col : '#334155';
-        ctx.lineWidth = s.active ? 1.5 : 1;
-
+      // Right: Order Execution Tag
+      if (showExecutionBadge && executionOrder && progress > 0.45 && !isBeforeState) {
+        const isSell = executionOrder.type === 'SELL';
+        const ordText = `${executionOrder.type} ${executionOrder.lot}L @ ${executionOrder.entry.toFixed(1)} | SL: $${executionOrder.sl.toFixed(1)}`;
+        ctx.font = 'bold 7.5px monospace';
+        const ordW = ctx.measureText(ordText).width + 10;
+        const ordX = teleX + teleW - ordW - 8;
+        ctx.fillStyle = isSell
+          ? (isWhite || isPaper ? '#FEE2E2' : 'rgba(239, 68, 68, 0.25)')
+          : (isWhite || isPaper ? '#DCFCE7' : 'rgba(16, 185, 129, 0.25)');
+        ctx.strokeStyle = isSell ? '#EF4444' : '#10B981';
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.roundRect(bx, badgeY, bw, 22, 5);
+        ctx.roundRect(ordX, teleY + 7, ordW, 14, 3);
         ctx.fill();
         ctx.stroke();
 
-        ctx.font = 'bold 8.5px monospace';
-        ctx.fillStyle = s.active ? (isWhite ? '#0F172A' : '#FFFFFF') : '#64748B';
+        ctx.fillStyle = isSell
+          ? (isWhite || isPaper ? '#991B1B' : '#F87171')
+          : (isWhite || isPaper ? '#065F46' : '#34D399');
         ctx.textAlign = 'center';
-        ctx.fillText(s.label, bx + bw / 2, badgeY + 14);
+        ctx.fillText(ordText, ordX + ordW / 2, teleY + 17);
+      }
+
+      // Subtitle Body (Auto-wrapped, crisp typography)
+      const subText = activeSub?.text || headlineText || 'Khóa rủi ro $30 trước khi vào lệnh.';
+      ctx.font = `600 10px "${activeFont}", sans-serif`;
+      ctx.fillStyle = isWhite ? '#0F172A' : isPaper ? '#1E1B4B' : '#F8FAFC';
+      ctx.textAlign = 'left';
+      const maxSubW = teleW - 16;
+      const subLines = wrapTextLines(ctx, subText, maxSubW).slice(0, 2);
+      subLines.forEach((line, lIdx) => {
+        ctx.fillText(line, teleX + 8, teleY + 36 + lIdx * 13);
       });
+
+      // Progress Tracker Bar at bottom of card
+      ctx.fillStyle = isWhite ? '#E2E8F0' : '#1E293B';
+      ctx.fillRect(teleX + 4, teleY + teleH - 3, teleW - 8, 2);
+      ctx.fillStyle = '#10B981';
+      ctx.fillRect(teleX + 4, teleY + teleH - 3, (teleW - 8) * progress, 2);
+
       ctx.restore();
 
     } else {

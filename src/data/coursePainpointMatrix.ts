@@ -38,7 +38,7 @@ export const COURSE_PAINPOINT_PRESETS: CoursePainPointPreset[] = [
     title: 'A PDF WON\'T KEEP YOU ALIVE: The 50% FVG Secret',
     hookHeadline: 'A PDF WON\'T KEEP YOU ALIVE',
     hookSubline: 'A predefined 50% FVG tap will. Here is why.',
-    duration: 12,
+    duration: 30,
     badges: ['1. LOSS BUDGET $30', '2. FVG 50% C.E. TAP', '3. SL 20 PIPS'],
     strategy: 'SMC',
     script: {
@@ -107,7 +107,7 @@ export const COURSE_PAINPOINT_PRESETS: CoursePainPointPreset[] = [
     title: 'THE STOP LOSS CAME FIRST: Stop Holding Bleeding Trades',
     hookHeadline: 'THE STOP LOSS CAME FIRST',
     hookSubline: 'The entry came second. That order is everything.',
-    duration: 10,
+    duration: 30,
     badges: ['1. BUDGET $30', '2. SL 20 PIPS', '3. SIZE 0.05 LOT'],
     strategy: 'Risk-First',
     script: {
@@ -174,7 +174,7 @@ export const COURSE_PAINPOINT_PRESETS: CoursePainPointPreset[] = [
     title: 'STOP GUESSING CANDLES: The 3 Swing Rules',
     hookHeadline: 'STOP GUESSING CANDLES',
     hookSubline: 'Market structure is not random. It is an auction.',
-    duration: 12,
+    duration: 30,
     badges: ['1. HIGHER HIGH (HH)', '2. BREAK OF STRUCTURE (BOS)', '3. RETEST ENTRY'],
     strategy: 'Market Structure',
     script: {
@@ -242,7 +242,7 @@ export const COURSE_PAINPOINT_PRESETS: CoursePainPointPreset[] = [
     title: 'THE LIQUIDITY SWEEP TRAP: Why Breakouts Fail',
     hookHeadline: 'YOU STOP WATCHING THE SWEEP',
     hookSubline: 'You start watching what happens right after it.',
-    duration: 11,
+    duration: 30,
     badges: ['1. BSL LIQUIDITY POOL', '2. SWEEP REJECTION WICK', '3. SHORT AT KEY LEVEL'],
     strategy: 'Key Level',
     script: {
@@ -309,7 +309,7 @@ export const COURSE_PAINPOINT_PRESETS: CoursePainPointPreset[] = [
     title: 'THE TOP-DOWN FILTER: Kill The Hindsight Illusion',
     hookHeadline: 'IT\'S EASY ON RECORDED CHARTS',
     hookSubline: 'Until you step into live market without an H4 anchor.',
-    duration: 10,
+    duration: 30,
     badges: ['1. H4 HTF TREND BIAS', '2. M15 ZONE PULLBACK', '3. ZERO HINDSIGHT ENTRY'],
     strategy: 'Price Action',
     script: {

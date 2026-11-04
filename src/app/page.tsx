@@ -153,17 +153,6 @@ export default function Home() {
                   <BarChart2 className="w-3.5 h-3.5" />
                   <span>📊 Wide OHLC Chart</span>
                 </button>
-                <button
-                  onClick={() => setViewMode('pilot')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition ${
-                    viewMode === 'pilot'
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Film className="w-3.5 h-3.5" />
-                  <span>🎬 S2V Pilot Review</span>
-                </button>
               </div>
 
               {/* 1-Click Load Hexagold TikTok Setup */}
