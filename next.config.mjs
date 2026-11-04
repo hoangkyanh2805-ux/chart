@@ -8,10 +8,16 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  webpack: (config) => {
-    // Only disable cache on local mounted/virtual drives if not on Vercel
-    if (!process.env.VERCEL) {
-      config.cache = false;
+  webpack: (config, { isServer }) => {
+    // Fallback for browser client bundles
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: false,
+        fs: false,
+        path: false,
+        child_process: false,
+      };
     }
     return config;
   },

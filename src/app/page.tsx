@@ -7,18 +7,23 @@ import { ToolRail } from '../components/ToolRail';
 import { TemplateSidebar } from '../components/TemplateSidebar';
 import { ControlsPanel } from '../components/ControlsPanel';
 import { TextTypographyPanel } from '../components/TextTypographyPanel';
+import dynamic from 'next/dynamic';
 import { AuditorPanel } from '../components/AuditorPanel';
 import { HermesSidebarPanel } from '../components/HermesSidebarPanel';
 import { ScriptSetupPanel } from '../components/ScriptSetupPanel';
 import { StageCanvas } from '../components/StageCanvas';
 import { ChartCanvas } from '../components/ChartCanvas';
-import { SceneReviewPanel } from '../components/SceneReviewPanel';
 import pilotDraftJson from '../data/pilotDraft.json';
 import { SceneDraft } from '../video/contracts';
 import { NleTimeline } from '../components/NleTimeline';
 import { ExportModal } from '../components/ExportModal';
 import { useAudioPlaybackSync } from '../utils/audioSync';
 import { Sparkles, BarChart2, Layout, Zap, Radio, Film } from 'lucide-react';
+
+const SceneReviewPanel = dynamic(
+  () => import('../components/SceneReviewPanel').then((mod) => mod.SceneReviewPanel),
+  { ssr: false }
+);
 
 export default function Home() {
   useAudioPlaybackSync();
