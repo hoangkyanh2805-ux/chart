@@ -24,6 +24,7 @@ import {
   Volume2,
   VolumeX,
   Loader2,
+  Clock,
 } from 'lucide-react';
 
 interface ScriptSetupPanelProps {
@@ -41,6 +42,7 @@ export const ScriptSetupPanel: React.FC<ScriptSetupPanelProps> = ({ onOpenExport
     scriptSubtitles,
     currentTime,
     duration,
+    setDuration,
     isPlaying,
     setCurrentTime,
     setIsPlaying,
@@ -154,6 +156,7 @@ export const ScriptSetupPanel: React.FC<ScriptSetupPanelProps> = ({ onOpenExport
         { timePercent: 0.82, text: 'Khóa rủi ro đúng 10 đô! Đặt Stop Loss 20 pips tại $4,134.50, size 0.05 lot, target $4,125.00.', stageName: 'Execution' },
       ]);
       setActiveScriptMeta({ id: sc.id, title: '3 Cây Nến Tiết Lộ Dòng Tiền Lớn', format: sc.format });
+      setDuration(30);
       validateCurrentSetup();
       setCurrentTime(0);
       setIsPlaying(true);
@@ -250,6 +253,18 @@ export const ScriptSetupPanel: React.FC<ScriptSetupPanelProps> = ({ onOpenExport
     setVoiceAudio(null); // Clear previous audio so user can generate voice for the new script
 
     setActiveScriptMeta({ id: sc.id, title: sc.title, format: sc.format });
+    
+    // Parse duration dynamically from script (e.g. '60s' -> 60, default 30s)
+    let parsedDuration = 30;
+    const anySc = sc as any;
+    if (anySc.duration && typeof anySc.duration === 'number') {
+      parsedDuration = anySc.duration;
+    } else if (sc.targetDuration) {
+      const match = String(sc.targetDuration).match(/(\d+)/);
+      if (match) parsedDuration = parseInt(match[1], 10);
+    }
+    setDuration(parsedDuration);
+
     validateCurrentSetup();
     setCurrentTime(0);
     setIsPlaying(true);
@@ -381,6 +396,30 @@ export const ScriptSetupPanel: React.FC<ScriptSetupPanelProps> = ({ onOpenExport
           <div className="p-2 rounded-lg bg-[#090D16] border border-[#1A2333] text-[10px] text-slate-300 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>Mô hình: <b>{isSell ? 'Liquidity Sweep đỉnh M15 & Rejection' : 'FVG 50% C.E. Retest'}</b></span>
+          </div>
+        </div>
+
+        {/* Quick Video Duration Presets */}
+        <div className="p-2.5 rounded-xl bg-[#0E1422] border border-[#1E293B] flex items-center justify-between">
+          <span className="text-[10px] font-mono font-bold text-slate-300 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Thời Lượng:</span>
+          </span>
+          <div className="flex items-center gap-1">
+            {[15, 30, 45, 60].map((d) => (
+              <button
+                key={d}
+                onClick={() => setDuration(d)}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono transition ${
+                  duration === d
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-[#151D2E] text-slate-400 hover:text-white border border-[#222F46]'
+                }`}
+                title={`Đặt thời lượng video ${d} giây`}
+              >
+                {d}s
+              </button>
+            ))}
           </div>
         </div>
 

@@ -26,6 +26,7 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({ onOpenExport }) => {
   const {
     currentTime,
     duration,
+    setDuration,
     isPlaying,
     setCurrentTime,
     setIsPlaying,
@@ -169,6 +170,24 @@ export const NleTimeline: React.FC<NleTimelineProps> = ({ onOpenExport }) => {
           <div className="text-xs font-mono font-bold tracking-wider text-slate-300 ml-2">
             <span className="text-white">{formatTime(currentTime)}</span>
             <span className="text-slate-500"> / {formatTime(duration)}</span>
+          </div>
+
+          {/* Quick Duration Preset Switcher */}
+          <div className="hidden sm:flex items-center gap-1 bg-[#121927] p-0.5 rounded-lg border border-[#1E293B] ml-2">
+            {[15, 30, 45, 60].map((d) => (
+              <button
+                key={d}
+                onClick={() => setDuration(d)}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-bold font-mono transition ${
+                  duration === d
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title={`Đặt thời lượng video ${d}s`}
+              >
+                {d}s
+              </button>
+            ))}
           </div>
 
           {/* Dual-Engine Audio Status & Controls */}

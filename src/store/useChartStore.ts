@@ -112,6 +112,7 @@ interface ChartState {
   updateOverlayLabel: (id: string, label: string) => void;
   
   setCurrentTime: (time: number) => void;
+  setDuration: (duration: number) => void;
   setIsPlaying: (playing: boolean) => void;
   setRevealMode: (mode: RevealAnimationType) => void;
   updateSettings: (updates: Partial<ChartSettings>) => void;
@@ -424,6 +425,7 @@ export const useChartStore = create<ChartState>((set, get) => ({
     })),
 
   setCurrentTime: (time) => set({ currentTime: time }),
+  setDuration: (duration) => set({ duration }),
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   setRevealMode: (mode) => set({ revealMode: mode }),
   updateSettings: (updates) =>

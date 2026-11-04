@@ -166,4 +166,71 @@ describe('REA + JEV Paper Theme Video Reproduction Suite (2W7MgNk3Wss)', () => {
     expect(s8).toContain('COMMENT');
     expect(s8).toContain('MSS OR FVG?');
   });
+
+  it('Dynamic Script Mode: Renders custom candles, overlays, auto-wrapped headlines, and official branding', () => {
+    const filledTexts: string[] = [];
+    const mockCtx = {
+      fillStyle: '',
+      strokeStyle: '',
+      lineWidth: 1,
+      font: '',
+      textAlign: '',
+      setLineDash: vi.fn(),
+      fillRect: vi.fn(),
+      strokeRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      arc: vi.fn(),
+      closePath: vi.fn(),
+      fill: vi.fn(),
+      stroke: vi.fn(),
+      roundRect: vi.fn(),
+      fillText: vi.fn((txt: string) => filledTexts.push(txt)),
+      strokeText: vi.fn(),
+      measureText: vi.fn((str: string) => ({ width: str.length * 8 })),
+      save: vi.fn(),
+      restore: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+    } as unknown as CanvasRenderingContext2D;
+
+    renderPaperTheme({
+      ctx: mockCtx,
+      width: 360,
+      height: 640,
+      progress: 0.8,
+      currentTime: 24.0,
+      duration: 30.0,
+      headlineText: 'THE 30-DAY XAUUSD ROADMAP: LEARN IN THE RIGHT ORDER',
+      sublineText: 'Chiến Lược Chuẩn Hóa: LONG-20261013-30DAY-XAUUSD-ROADMAP',
+      candles: [
+        { id: 'sc-1', index: 0, open: 4125.0, high: 4130.0, low: 4123.0, close: 4129.0 },
+        { id: 'sc-2', index: 1, open: 4129.0, high: 4134.0, low: 4127.5, close: 4133.0 },
+        { id: 'sc-3', index: 2, open: 4133.0, high: 4145.0, low: 4131.0, close: 4142.0 },
+      ],
+      overlays: [
+        {
+          id: 'ov-fvg',
+          type: 'FVG',
+          startCandleIndex: 1,
+          endCandleIndex: 2,
+          priceStart: 4129.0,
+          priceEnd: 4134.0,
+          label: 'FVG 50% C.E.',
+        },
+      ],
+    });
+
+    // Verify official channel branding & disclaimer
+    expect(filledTexts).toContain('@azzammastertradinggold');
+    expect(filledTexts).toContain('EDUCATIONAL ILLUSTRATION — NOT FINANCIAL ADVICE');
+
+    // Verify FVG overlay rendered
+    expect(filledTexts).toContain('FVG 50% C.E.');
+
+    // Verify headline auto-wrap lines were rendered
+    const hasRoadmapHeadline = filledTexts.some((t) => t.includes('30-DAY') || t.includes('ROADMAP'));
+    expect(hasRoadmapHeadline).toBe(true);
+  });
 });

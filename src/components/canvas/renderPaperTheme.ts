@@ -1,16 +1,8 @@
 /**
- * REA + JEV Clean-Room Reproduction of YouTube Short:
- * URL: https://youtube.com/shorts/2W7MgNk3Wss
- * Channel: @marketanalysis-13
- * 
- * Full 58.5-second reproduction:
- * - Exact video duration (58.5s)
- * - 10-stage kinetic typography with typewriter animation
- * - Left D1 Daily Reference Candle
- * - Numbers 1, 2, 3 FVG candle indexing
- * - "BULLISH CLOSE ✓" and "1:2 R:R" annotations
- * - Dynamic Stylus Marker Pen tracking active setup action
- * - Auto-fit typography preventing any clipping or overflow
+ * Paper Theme Canvas Renderer:
+ * Supports both:
+ * 1. REA + JEV Clean-Room Reproduction of YouTube Short (2W7MgNk3Wss) at 58.5s
+ * 2. Dynamic Hand-Drawn Paper Theme for ANY script, pain point, and institutional SMC setup.
  */
 
 import { Candle, Overlay } from '../../types/chart';
@@ -20,8 +12,8 @@ export interface PaperThemeOptions {
   width: number;
   height: number;
   progress: number; // 0.0 to 1.0
-  currentTime: number; // in seconds (0.0 to 58.5)
-  duration: number; // in seconds (58.5)
+  currentTime: number; // in seconds
+  duration: number; // in seconds
   candles?: Candle[];
   overlays?: Overlay[];
   headlineText?: string;
@@ -65,7 +57,7 @@ export const REA_ORIGINAL_CANDLES: Array<{
 /**
  * Draws the realistic floating Stylus Marker Pen
  */
-function drawStylusPen(
+export function drawStylusPen(
   ctx: CanvasRenderingContext2D,
   tipX: number,
   tipY: number,
@@ -110,6 +102,27 @@ function drawStylusPen(
 }
 
 /**
+ * Helper to auto-wrap text lines ensuring no clipping or overflow
+ */
+export function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let currentLine = '';
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+/**
  * Helper to render responsive non-overflowing text
  */
 function renderSafeText(
@@ -125,7 +138,7 @@ function renderSafeText(
   let size = baseSize;
   ctx.textAlign = align;
   ctx.font = `900 ${size}px Montserrat, sans-serif`;
-  while (ctx.measureText(text).width > maxWidth && size > 11) {
+  while (ctx.measureText(text).width > maxWidth && size > 10) {
     size -= 1;
     ctx.font = `900 ${size}px Montserrat, sans-serif`;
   }
@@ -134,24 +147,13 @@ function renderSafeText(
 }
 
 /**
- * Main Paper Theme Canvas Renderer for 2W7MgNk3Wss
+ * 1. REA Clean-Room Replica of YouTube Short 2W7MgNk3Wss (58.5s exact reproduction)
  */
-export function renderPaperTheme(opts: PaperThemeOptions) {
-  const {
-    ctx,
-    width,
-    height,
-    progress,
-    currentTime,
-    duration,
-    headlineText,
-    sublineText,
-  } = opts;
-
-  // Actual time in seconds (0.0 to 58.5)
+function renderReaReplica(opts: PaperThemeOptions) {
+  const { ctx, width, height, progress, currentTime, duration, headlineText, sublineText } = opts;
   const timeSec = currentTime > 0 ? currentTime : progress * (duration || 58.5);
 
-  // 1. Parchment Background (#E5C293 / #E6C191)
+  // 1. Parchment Background (#E6C191)
   ctx.fillStyle = '#E6C191';
   ctx.fillRect(0, 0, width, height);
 
@@ -187,14 +189,13 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   const logoCenterX = width / 2;
   const logoY = 22;
 
-  // 6 Candlestick bars: Red, Green, Center Tall Green, Red, Green, Red
   const logoBars = [
-    { x: logoCenterX - 30, y: logoY + 12, w: 7, h: 30, col: '#DC2626' }, // 1: Red
-    { x: logoCenterX - 18, y: logoY + 4, w: 7, h: 28, col: '#16A34A' }, // 2: Green
-    { x: logoCenterX - 6, y: logoY - 10, w: 7, h: 68, col: '#10B981' }, // 3: Center tall green
-    { x: logoCenterX + 6, y: logoY + 10, w: 7, h: 26, col: '#DC2626' }, // 4: Red
-    { x: logoCenterX + 18, y: logoY + 2, w: 7, h: 36, col: '#16A34A' }, // 5: Green
-    { x: logoCenterX + 30, y: logoY + 8, w: 7, h: 28, col: '#DC2626' }, // 6: Red
+    { x: logoCenterX - 30, y: logoY + 12, w: 7, h: 30, col: '#DC2626' },
+    { x: logoCenterX - 18, y: logoY + 4, w: 7, h: 28, col: '#16A34A' },
+    { x: logoCenterX - 6, y: logoY - 10, w: 7, h: 68, col: '#10B981' },
+    { x: logoCenterX + 6, y: logoY + 10, w: 7, h: 26, col: '#DC2626' },
+    { x: logoCenterX + 18, y: logoY + 2, w: 7, h: 36, col: '#16A34A' },
+    { x: logoCenterX + 30, y: logoY + 8, w: 7, h: 28, col: '#DC2626' },
   ];
 
   logoBars.forEach((bar) => {
@@ -202,7 +203,6 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.fillRect(bar.x, bar.y, bar.w, bar.h);
   });
 
-  // White zig-zag line connecting candles with vertex dots
   ctx.strokeStyle = '#FFFFFF';
   ctx.lineWidth = 1.6;
   ctx.beginPath();
@@ -214,7 +214,6 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   ctx.lineTo(logoBars[5].x + 3.5, logoBars[5].y + 12);
   ctx.stroke();
 
-  // Dots at vertices
   ctx.fillStyle = '#FFFFFF';
   [
     { x: logoBars[0].x + 3.5, y: logoBars[0].y + 15 },
@@ -229,7 +228,6 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.fill();
   });
 
-  // Text: MARKET | ANALYSIS
   ctx.font = '900 13px Montserrat, sans-serif';
   ctx.fillStyle = '#164E33';
   ctx.textAlign = 'right';
@@ -239,14 +237,13 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   ctx.fillText('ANALYSIS', logoCenterX + 10, logoY + 70);
   ctx.restore();
 
-  // 3. Kinetic 2-Line Headlines (Synchronized to exact 58.5s video timeline)
+  // 3. Kinetic 2-Line Headlines
   ctx.save();
   let line1 = 'BREAKOUT';
   let line2 = 'ENTRY?';
   let showTypingCursor = false;
   let showUnderline = false;
 
-  // Check if user entered an explicit custom text that is NOT the default
   const isCustomUserText =
     headlineText &&
     headlineText !== 'BREAKOUT' &&
@@ -259,14 +256,12 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     line2 = (sublineText || '').toUpperCase();
     showUnderline = !!line2;
   } else {
-    // Exact 58.5s Video Timeline Progression from 2W7MgNk3Wss
     if (timeSec < 6.0) {
       line1 = 'BREAKOUT';
       line2 = 'ENTRY?';
       showUnderline = true;
     } else if (timeSec < 12.0) {
       line1 = 'SAVE THIS';
-      // Typewriter effect for "STRATEGY."
       const fullWord = 'STRATEGY.';
       const elapsed = timeSec - 6.0;
       const charCount = Math.min(fullWord.length, Math.floor((elapsed / 4.5) * fullWord.length));
@@ -297,15 +292,12 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   const headlineY = 120;
   const maxTextW = width - 40;
 
-  // Render Line 1 with auto-fit protection
   renderSafeText(ctx, line1, width / 2, headlineY, maxTextW, 20, '#0F172A', 'center');
 
-  // Render Line 2 with auto-fit protection
   if (line2 || showTypingCursor) {
     const textToDraw = showTypingCursor ? `${line2}|` : line2;
     renderSafeText(ctx, textToDraw, width / 2, headlineY + 26, maxTextW, 20, '#1D4ED8', 'center');
 
-    // Blue Underline with Stylus Pen resting at end
     if (showUnderline && line2) {
       ctx.font = '900 20px Montserrat, sans-serif';
       const m = ctx.measureText(line2);
@@ -331,23 +323,22 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   // 4. Chart Geometry & Structural Levels
   const chartLeft = 38;
   const chartRight = width - 40;
-  const yDailyHigh = height * 0.44; // ~280px
-  const yDailyLow = height * 0.68; // ~435px
-  const yRecentHigh = height * 0.58; // ~370px
-  const ySweepLow = height * 0.73; // ~467px
+  const yDailyHigh = height * 0.44;
+  const yDailyLow = height * 0.68;
+  const yRecentHigh = height * 0.58;
+  const ySweepLow = height * 0.73;
   const yFvgTop = height * 0.60;
   const yFvgBottom = height * 0.65;
   const yEntry = yFvgBottom;
 
   ctx.save();
 
-  // 4a. Left Daily Reference Candlestick (Appears around 12s - 20s)
+  // 4a. Left Daily Reference Candlestick
   if (timeSec >= 12.0 && timeSec < 24.0) {
     const d1CandleX = chartLeft - 6;
     const d1BodyTop = yDailyHigh + (yDailyLow - yDailyHigh) * 0.35;
     const d1BodyHeight = (yDailyLow - yDailyHigh) * 0.45;
 
-    // Wick from Daily High all the way down to Daily Low
     ctx.strokeStyle = '#DC2626';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -355,12 +346,11 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.lineTo(d1CandleX, yDailyLow);
     ctx.stroke();
 
-    // Body
     ctx.fillStyle = '#DC2626';
     ctx.fillRect(d1CandleX - 10, d1BodyTop, 20, d1BodyHeight);
   }
 
-  // 4b. DAILY HIGH Line (Drawn across by stylus pen from 12s onwards)
+  // 4b. DAILY HIGH Line
   if (timeSec >= 12.0) {
     const drawHighProgress = Math.min(1, Math.max(0, (timeSec - 12.0) / 4.0));
     const currentHighX2 = chartLeft + drawHighProgress * (chartRight - chartLeft);
@@ -382,7 +372,7 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     }
   }
 
-  // 4c. DAILY LOW Line (Drawn across from 0s onwards)
+  // 4c. DAILY LOW Line
   ctx.strokeStyle = '#1E3A5F';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -395,7 +385,7 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   ctx.textAlign = 'right';
   ctx.fillText('DAILY LOW', chartRight, yDailyLow + 16);
 
-  // Early Sell Trap & SL Dashed Line (Visible during 0s - 12s)
+  // Early Sell Trap & SL Dashed Line
   if (timeSec <= 12.0) {
     const earlySellY = yDailyLow + 20;
     const earlySlY = yDailyLow - 14;
@@ -412,7 +402,6 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.textAlign = 'center';
     ctx.fillText('EARLY SELL', width * 0.70, earlySellY + 12);
 
-    // Red dashed SL line
     ctx.setLineDash([4, 3]);
     ctx.beginPath();
     ctx.moveTo(width * 0.60, earlySlY);
@@ -426,17 +415,15 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     }
   }
 
-  // 4d. Sweep Wick Circle & STOP Line (Visible when sweep occurs from 18s onwards)
+  // 4d. Sweep Wick Circle & STOP Line
   const sweepCandleX = chartLeft + 5 * ((chartRight - chartLeft) / 18) + 7;
   if (timeSec >= 18.0) {
-    // Circle around lower wick
     ctx.strokeStyle = '#1E3A5F';
     ctx.lineWidth = 2.2;
     ctx.beginPath();
     ctx.arc(sweepCandleX, ySweepLow - 4, 11, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Red horizontal line extending to the right
     ctx.strokeStyle = '#DC2626';
     ctx.lineWidth = 1.6;
     ctx.beginPath();
@@ -444,14 +431,13 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.lineTo(chartRight, ySweepLow - 4);
     ctx.stroke();
 
-    // Bold red STOP text
     ctx.font = '900 11px Montserrat, sans-serif';
     ctx.fillStyle = '#DC2626';
     ctx.textAlign = 'center';
     ctx.fillText('STOP', sweepCandleX, ySweepLow + 18);
   }
 
-  // 4e. RECENT HIGH Line (Appears around 28s for MSS)
+  // 4e. RECENT HIGH Line
   if (timeSec >= 28.0) {
     ctx.strokeStyle = '#1D4ED8';
     ctx.lineWidth = 1.8;
@@ -466,7 +452,7 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.fillText('RECENT HIGH', chartLeft + 40, yRecentHigh - 6);
   }
 
-  // 4f. Numbers 1, 2, 3 marking FVG Candles (Visible around 36s - 45s)
+  // 4f. Numbers 1, 2, 3 marking FVG Candles
   if (timeSec >= 36.0) {
     const candleSpacingLocal = (chartRight - chartLeft) / 18;
     const c1X = chartLeft + 8 * candleSpacingLocal;
@@ -476,16 +462,12 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.font = '900 12px Montserrat, sans-serif';
     ctx.fillStyle = '#1D4ED8';
     ctx.textAlign = 'center';
-
-    // 1 below candle 1
     ctx.fillText('1', c1X, yDailyLow + 14);
-    // 2 above candle 2
     ctx.fillText('2', c2X, yRecentHigh - 12);
-    // 3 above candle 3
     ctx.fillText('3', c3X, yRecentHigh - 12);
   }
 
-  // 4g. FVG Box (Amber box between candle 1 high and candle 3 low, from 36s onwards)
+  // 4g. FVG Box
   if (timeSec >= 36.0) {
     const fvgStartX = chartLeft + 9 * ((chartRight - chartLeft) / 18);
     const fvgDrawProgress = Math.min(1, Math.max(0, (timeSec - 36.0) / 4.0));
@@ -511,7 +493,7 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     }
   }
 
-  // 4h. "BULLISH CLOSE ✓" Annotation (Visible around 44s - 50s)
+  // 4h. "BULLISH CLOSE ✓"
   if (timeSec >= 44.0 && timeSec < 52.0) {
     ctx.font = '900 11.5px Montserrat, sans-serif';
     ctx.fillStyle = '#15803D';
@@ -519,20 +501,17 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.fillText('BULLISH CLOSE ✓', width * 0.65, yFvgTop - 12);
   }
 
-  // 4i. Long Position Tool (Profit Target & Entry Pill from 45s onwards)
+  // 4i. Long Position Tool
   if (timeSec >= 45.0) {
     const posStartX = chartLeft + 12 * ((chartRight - chartLeft) / 18);
     const posWidth = chartRight - posStartX;
 
-    // Green Profit Box
     ctx.fillStyle = 'rgba(22, 163, 74, 0.25)';
     ctx.fillRect(posStartX, yDailyHigh, posWidth, yEntry - yDailyHigh);
 
-    // Red Risk Box
     ctx.fillStyle = 'rgba(220, 38, 38, 0.22)';
     ctx.fillRect(posStartX, yEntry, posWidth, ySweepLow - 4 - yEntry);
 
-    // Green Entry Line
     ctx.strokeStyle = '#15803D';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -540,7 +519,6 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.lineTo(chartRight, yEntry);
     ctx.stroke();
 
-    // Dark Green ENTRY Pill
     const pillW = 46;
     const pillH = 18;
     const pillX = chartRight - pillW - 6;
@@ -556,13 +534,11 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.textAlign = 'center';
     ctx.fillText('ENTRY', pillX + pillW / 2, pillY + 12.5);
 
-    // TARGET text above Daily High
     ctx.font = '900 13px Montserrat, sans-serif';
     ctx.fillStyle = '#15803D';
     ctx.textAlign = 'right';
     ctx.fillText('TARGET', chartRight, yDailyHigh - 9);
 
-    // "1:2 R:R" in green with pen
     if (timeSec >= 50.0) {
       ctx.font = '900 13px Montserrat, sans-serif';
       ctx.fillStyle = '#15803D';
@@ -576,7 +552,7 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   }
   ctx.restore();
 
-  // 5. Candlesticks (Rendered progressively matching the 58.5s timeline)
+  // 5. Candlesticks (Progressive display matching 58.5s)
   ctx.save();
   const candleSpacing = (chartRight - chartLeft) / 18;
   const candleWidth = 13;
@@ -609,7 +585,7 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
     ctx.lineTo(cx, lowY);
     ctx.stroke();
 
-    // Solid Body
+    // Body
     ctx.fillStyle = color;
     ctx.fillRect(cx - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
   });
@@ -620,7 +596,6 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   const wmY = height - 42;
   const wmCenterX = width / 2;
 
-  // Red YouTube Rounded Play Button
   const ytW = 32;
   const ytH = 22;
   const ytX = wmCenterX - 78;
@@ -631,7 +606,6 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   ctx.roundRect(ytX, ytY, ytW, ytH, 6);
   ctx.fill();
 
-  // White play triangle inside
   ctx.fillStyle = '#FFFFFF';
   ctx.beginPath();
   ctx.moveTo(ytX + 12, ytY + 6);
@@ -640,7 +614,6 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   ctx.closePath();
   ctx.fill();
 
-  // Username: @marketanalysis-13
   ctx.font = '700 13px Montserrat, sans-serif';
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 2.5;
@@ -649,4 +622,420 @@ export function renderPaperTheme(opts: PaperThemeOptions) {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillText('@marketanalysis-13', wmCenterX - 36, wmY);
   ctx.restore();
+}
+
+/**
+ * 2. Dynamic Hand-Drawn Paper Theme for ANY Script & SMC Setup
+ */
+function renderDynamicPaperSetup(opts: PaperThemeOptions) {
+  const { ctx, width, height, progress, currentTime, duration, candles, overlays, headlineText, sublineText } = opts;
+  const safeDuration = duration > 0 ? duration : 30;
+  const safeProgress = Math.min(1, Math.max(0, currentTime > 0 ? currentTime / safeDuration : progress));
+
+  // 1. Parchment Background (#E6C191)
+  ctx.fillStyle = '#E6C191';
+  ctx.fillRect(0, 0, width, height);
+
+  // Subtle circular watermark
+  const centerWatermarkY = height * 0.48;
+  const watermarkRadius = width * 0.42;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(width / 2, centerWatermarkY, watermarkRadius, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(224, 185, 134, 0.45)';
+  ctx.fill();
+
+  ctx.font = '900 24px Montserrat, sans-serif';
+  ctx.fillStyle = 'rgba(210, 168, 115, 0.35)';
+  ctx.textAlign = 'center';
+  ctx.fillText('MARKET   ANALYSIS', width / 2, centerWatermarkY + 80);
+
+  // Faint candlestick bars in watermark
+  const wmcX = width / 2;
+  const wmHeights = [40, 50, 90, 45, 65, 40];
+  const wmOffsets = [-35, -21, -7, 7, 21, 35];
+  ctx.fillStyle = 'rgba(210, 168, 115, 0.3)';
+  for (let i = 0; i < 6; i++) {
+    const h = wmHeights[i];
+    ctx.fillRect(wmcX + wmOffsets[i] - 4, centerWatermarkY - h / 2, 8, h);
+  }
+  ctx.restore();
+
+  // 2. Top Header Candlestick Logo + MARKET ANALYSIS
+  ctx.save();
+  const logoCenterX = width / 2;
+  const logoY = 20;
+
+  const logoBars = [
+    { x: logoCenterX - 30, y: logoY + 12, w: 7, h: 30, col: '#DC2626' },
+    { x: logoCenterX - 18, y: logoY + 4, w: 7, h: 28, col: '#16A34A' },
+    { x: logoCenterX - 6, y: logoY - 10, w: 7, h: 68, col: '#10B981' },
+    { x: logoCenterX + 6, y: logoY + 10, w: 7, h: 26, col: '#DC2626' },
+    { x: logoCenterX + 18, y: logoY + 2, w: 7, h: 36, col: '#16A34A' },
+    { x: logoCenterX + 30, y: logoY + 8, w: 7, h: 28, col: '#DC2626' },
+  ];
+
+  logoBars.forEach((bar) => {
+    ctx.fillStyle = bar.col;
+    ctx.fillRect(bar.x, bar.y, bar.w, bar.h);
+  });
+
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(logoBars[0].x + 3.5, logoBars[0].y + 15);
+  ctx.lineTo(logoBars[1].x + 3.5, logoBars[1].y + 6);
+  ctx.lineTo(logoBars[2].x + 3.5, logoBars[2].y + 22);
+  ctx.lineTo(logoBars[3].x + 3.5, logoBars[3].y + 18);
+  ctx.lineTo(logoBars[4].x + 3.5, logoBars[4].y + 8);
+  ctx.lineTo(logoBars[5].x + 3.5, logoBars[5].y + 12);
+  ctx.stroke();
+
+  ctx.fillStyle = '#FFFFFF';
+  [
+    { x: logoBars[0].x + 3.5, y: logoBars[0].y + 15 },
+    { x: logoBars[1].x + 3.5, y: logoBars[1].y + 6 },
+    { x: logoBars[2].x + 3.5, y: logoBars[2].y + 22 },
+    { x: logoBars[3].x + 3.5, y: logoBars[3].y + 18 },
+    { x: logoBars[4].x + 3.5, y: logoBars[4].y + 8 },
+    { x: logoBars[5].x + 3.5, y: logoBars[5].y + 12 },
+  ].forEach((pt) => {
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.font = '900 13px Montserrat, sans-serif';
+  ctx.fillStyle = '#164E33';
+  ctx.textAlign = 'right';
+  ctx.fillText('MARKET', logoCenterX - 10, logoY + 70);
+
+  ctx.textAlign = 'left';
+  ctx.fillText('ANALYSIS', logoCenterX + 10, logoY + 70);
+  ctx.restore();
+
+  // 3. Responsive Auto-Wrapping Headlines & Sublines (NO CLIPPING)
+  ctx.save();
+  const rawHeadline = (headlineText || 'THE STOP LOSS CAME FIRST').toUpperCase();
+  const maxTextW = width - 40;
+
+  // Measure and wrap headline into max 2 lines
+  ctx.font = '900 16px Montserrat, sans-serif';
+  let headSize = rawHeadline.length > 36 ? 14 : 16;
+  ctx.font = `900 ${headSize}px Montserrat, sans-serif`;
+  const headLines = wrapTextLines(ctx, rawHeadline, maxTextW).slice(0, 2);
+
+  const startHeadY = 114;
+  const lineSpacing = headSize + 6;
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#0F172A';
+
+  headLines.forEach((hLine, i) => {
+    ctx.fillText(hLine, width / 2, startHeadY + i * lineSpacing);
+  });
+
+  // Underline beneath last headline line + Stylus Pen
+  const lastLineIdx = headLines.length - 1;
+  const lastLineText = headLines[lastLineIdx] || '';
+  const lastLineY = startHeadY + lastLineIdx * lineSpacing + 6;
+  const m = ctx.measureText(lastLineText);
+  const underlineW = Math.min(maxTextW, m.width + 16);
+  const uX1 = (width - underlineW) / 2;
+  const uX2 = uX1 + underlineW;
+
+  ctx.strokeStyle = '#1D4ED8';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(uX1, lastLineY);
+  ctx.lineTo(uX2, lastLineY);
+  ctx.stroke();
+
+  // Stylus Pen at the end of headline underline
+  drawStylusPen(ctx, uX2 + 2, lastLineY, -0.6);
+
+  // Subline Auto-Wrapping
+  const rawSubline = sublineText || '';
+  if (rawSubline) {
+    ctx.font = '600 11px Montserrat, sans-serif';
+    ctx.fillStyle = '#1D4ED8';
+    const subLines = wrapTextLines(ctx, rawSubline, maxTextW).slice(0, 2);
+    const startSubY = lastLineY + 16;
+    subLines.forEach((sLine, idx) => {
+      ctx.fillText(sLine, width / 2, startSubY + idx * 14);
+    });
+  }
+  ctx.restore();
+
+  // 4. Dynamic Candlestick Stage
+  const activeCandles = candles && candles.length > 0 ? candles : REA_ORIGINAL_CANDLES.map((c, i) => ({
+    id: `c-${i}`,
+    index: i,
+    open: c.open,
+    high: c.high,
+    low: c.low,
+    close: c.close,
+  }));
+
+  const chartLeft = 38;
+  const chartRight = width - 40;
+  const chartTop = 185;
+  const chartBottom = height - 76;
+  const chartHeight = chartBottom - chartTop;
+
+  // Dynamic Price Scaling based on real candle data
+  const allPrices = activeCandles.flatMap((c) => [c.high, c.low]);
+  const minPrice = Math.min(...allPrices) - 1.5;
+  const maxPrice = Math.max(...allPrices) + 2.0;
+  const priceRange = Math.max(1.0, maxPrice - minPrice);
+
+  const toY = (p: number) => chartBottom - ((p - minPrice) / priceRange) * chartHeight;
+
+  const totalCandles = activeCandles.length;
+  const revealedCount = Math.max(1, Math.min(totalCandles, Math.ceil(safeProgress * totalCandles)));
+  const candleSpacing = (chartRight - chartLeft) / (totalCandles + 1);
+  const candleWidth = Math.min(22, Math.max(10, candleSpacing * 0.65));
+
+  // 4a. Render Overlays (FVG, Liquidity Line, Long/Short Position, Zone)
+  if (overlays && overlays.length > 0) {
+    overlays.forEach((ov) => {
+      if (ov.startCandleIndex >= revealedCount) return;
+
+      const effectiveEndIndex = Math.min(ov.endCandleIndex, revealedCount - 1);
+      const startX = chartLeft + (ov.startCandleIndex + 1) * candleSpacing - candleWidth / 2;
+      const endX = chartLeft + (effectiveEndIndex + 1) * candleSpacing + candleWidth / 2;
+      const ovBoxWidth = Math.max(candleWidth * 2, endX - startX + candleWidth);
+
+      const yHigh = toY(Math.max(ov.priceStart, ov.priceEnd));
+      const yLow = toY(Math.min(ov.priceStart, ov.priceEnd));
+      const boxHeight = Math.max(4, yLow - yHigh);
+
+      ctx.save();
+      if (ov.type === 'LIQUIDITY_LINE' || ov.type === 'BREAK_OF_STRUCTURE' || ov.type === 'SUPPORT_RESISTANCE') {
+        const yLine = toY(ov.priceStart);
+        const isRed = ov.color === '#F43F5E' || /sweep|sl|loss|stop/i.test(ov.label || '');
+        ctx.strokeStyle = isRed ? '#DC2626' : '#1E3A5F';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(chartLeft, yLine);
+        ctx.lineTo(chartRight, yLine);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Label Pill
+        if (ov.label) {
+          ctx.font = 'bold 9.5px Montserrat, sans-serif';
+          const txtMetrics = ctx.measureText(ov.label);
+          const pillW = Math.min(150, txtMetrics.width + 12);
+          const pillH = 17;
+          const pillX = chartLeft;
+          const pillY = yLine - pillH - 3;
+
+          ctx.fillStyle = isRed ? '#DC2626' : '#1E3A5F';
+          ctx.beginPath();
+          ctx.roundRect(pillX, pillY, pillW, pillH, 4);
+          ctx.fill();
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.textAlign = 'left';
+          ctx.fillText(ov.label, pillX + 6, pillY + 12);
+        }
+      } else if (ov.type === 'FVG') {
+        // Hand-drawn Parchment Amber Highlighter
+        ctx.fillStyle = 'rgba(224, 160, 60, 0.28)';
+        ctx.fillRect(startX, yHigh, ovBoxWidth, boxHeight);
+
+        ctx.strokeStyle = '#B47A2B';
+        ctx.lineWidth = 1.8;
+        ctx.strokeRect(startX, yHigh, ovBoxWidth, boxHeight);
+
+        // 50% Consequent Encroachment (C.E.) Line
+        const ceY = yHigh + boxHeight / 2;
+        ctx.setLineDash([4, 3]);
+        ctx.strokeStyle = '#92400E';
+        ctx.beginPath();
+        ctx.moveTo(startX, ceY);
+        ctx.lineTo(startX + ovBoxWidth, ceY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = '900 11px Montserrat, sans-serif';
+        ctx.fillStyle = '#92400E';
+        ctx.textAlign = 'right';
+        ctx.fillText('FVG 50% C.E.', startX + ovBoxWidth - 6, yHigh + boxHeight / 2 + 4);
+
+        // Stylus pen pointing at FVG when revealed
+        if (safeProgress < 0.85) {
+          drawStylusPen(ctx, startX + ovBoxWidth, yHigh, -0.7);
+        }
+      } else if (ov.type === 'LONG_SHORT') {
+        // Hand-drawn Position Tool
+        const isSell = ov.priceEnd < ov.priceStart;
+        const entryY = toY(ov.priceStart);
+        const targetY = toY(ov.priceEnd);
+
+        // Risk vs Profit Boxes
+        if (!isSell) {
+          // BUY: Green profit above, red risk below
+          ctx.fillStyle = 'rgba(22, 163, 74, 0.25)';
+          ctx.fillRect(startX, targetY, ovBoxWidth, entryY - targetY);
+
+          ctx.fillStyle = 'rgba(220, 38, 38, 0.22)';
+          ctx.fillRect(startX, entryY, ovBoxWidth, Math.min(chartBottom - entryY, 40));
+        } else {
+          // SELL: Red risk above, green profit below
+          ctx.fillStyle = 'rgba(220, 38, 38, 0.22)';
+          ctx.fillRect(startX, Math.max(chartTop, entryY - 40), ovBoxWidth, 40);
+
+          ctx.fillStyle = 'rgba(22, 163, 74, 0.25)';
+          ctx.fillRect(startX, entryY, ovBoxWidth, targetY - entryY);
+        }
+
+        // Green Entry Line
+        ctx.strokeStyle = '#15803D';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(startX, entryY);
+        ctx.lineTo(chartRight, entryY);
+        ctx.stroke();
+
+        // ENTRY Pill
+        const pillW = 48;
+        const pillH = 18;
+        const pillX = chartRight - pillW - 4;
+        const pillY = entryY - pillH / 2;
+
+        ctx.fillStyle = '#15803D';
+        ctx.beginPath();
+        ctx.roundRect(pillX, pillY, pillW, pillH, 4);
+        ctx.fill();
+
+        ctx.font = '900 9px Montserrat, sans-serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        ctx.fillText('ENTRY', pillX + pillW / 2, pillY + 12);
+
+        // Target Label & R:R annotation
+        ctx.font = '900 12px Montserrat, sans-serif';
+        ctx.fillStyle = '#15803D';
+        ctx.textAlign = 'right';
+        ctx.fillText(ov.label || '1:3.5 R:R', chartRight, targetY - 6);
+
+        if (safeProgress > 0.6) {
+          drawStylusPen(ctx, chartRight - 8, targetY - 6, -0.6);
+        }
+      } else if (ov.type === 'ZONE') {
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+        ctx.fillRect(startX, yHigh, ovBoxWidth, boxHeight);
+        ctx.strokeStyle = '#0284C7';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(startX, yHigh, ovBoxWidth, boxHeight);
+
+        if (ov.label) {
+          ctx.font = 'bold 9px Montserrat, sans-serif';
+          ctx.fillStyle = '#0369A1';
+          ctx.textAlign = 'left';
+          ctx.fillText(ov.label, startX + 6, yHigh + 12);
+        }
+      }
+      ctx.restore();
+    });
+  }
+
+  // 4b. Draw Progressive Candlesticks
+  ctx.save();
+  for (let idx = 0; idx < revealedCount; idx++) {
+    const c = activeCandles[idx];
+    const cx = chartLeft + (idx + 1) * candleSpacing;
+    const isBull = c.close >= c.open;
+    const color = isBull ? '#16A34A' : '#DC2626';
+
+    const highY = toY(c.high);
+    const lowY = toY(c.low);
+    const openY = toY(c.open);
+    const closeY = toY(c.close);
+
+    const bodyTop = Math.min(openY, closeY);
+    const bodyHeight = Math.max(3.5, Math.abs(closeY - openY));
+
+    // Wick
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(cx, highY);
+    ctx.lineTo(cx, lowY);
+    ctx.stroke();
+
+    // Body
+    ctx.fillStyle = color;
+    ctx.fillRect(cx - candleWidth / 2, bodyTop, candleWidth, bodyHeight);
+
+    // Dynamic Stylus Marker Pen on currently forming candle
+    if (idx === revealedCount - 1 && safeProgress < 0.98) {
+      drawStylusPen(ctx, cx + candleWidth / 2 + 4, closeY, -0.7);
+    }
+  }
+  ctx.restore();
+
+  // 5. Compliance & Channel Watermark (Official YouTube Channel + Legal Disclaimer)
+  ctx.save();
+  const wmY = height - 42;
+  const wmCenterX = width / 2;
+
+  // Red YouTube Rounded Play Button
+  const ytW = 30;
+  const ytH = 20;
+  const ytX = wmCenterX - 95;
+  const ytY = wmY - 14;
+
+  ctx.fillStyle = '#FF0000';
+  ctx.beginPath();
+  ctx.roundRect(ytX, ytY, ytW, ytH, 5);
+  ctx.fill();
+
+  // White play triangle inside
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(ytX + 11, ytY + 5);
+  ctx.lineTo(ytX + 21, ytY + 10);
+  ctx.lineTo(ytX + 11, ytY + 15);
+  ctx.closePath();
+  ctx.fill();
+
+  // Channel Identity
+  ctx.font = '700 12.5px Montserrat, sans-serif';
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 2.5;
+  ctx.strokeText('@azzammastertradinggold', wmCenterX - 55, wmY);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText('@azzammastertradinggold', wmCenterX - 55, wmY);
+
+  // Legal Risk-First Disclaimer
+  ctx.font = 'bold 8px monospace';
+  ctx.fillStyle = '#78350F';
+  ctx.textAlign = 'center';
+  ctx.fillText('EDUCATIONAL ILLUSTRATION — NOT FINANCIAL ADVICE', width / 2, height - 12);
+  ctx.restore();
+}
+
+/**
+ * Main Paper Theme Canvas Renderer:
+ * Dispatches cleanly between REA Replica and Dynamic Script Setup.
+ */
+export function renderPaperTheme(opts: PaperThemeOptions) {
+  const isExactReaReplica =
+    (!opts.candles || opts.candles.length === 0 || opts.candles === (REA_ORIGINAL_CANDLES as any)) &&
+    (!opts.headlineText ||
+      opts.headlineText === 'BREAKOUT' ||
+      opts.headlineText === 'BREAKOUT TRAP: DONT BE LIQUIDITY') &&
+    (opts.duration === 58.5 || !opts.duration);
+
+  if (isExactReaReplica) {
+    renderReaReplica(opts);
+  } else {
+    renderDynamicPaperSetup(opts);
+  }
 }
