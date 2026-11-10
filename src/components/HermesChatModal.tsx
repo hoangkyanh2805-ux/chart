@@ -37,6 +37,12 @@ interface ChatMessage {
     headline: string;
     subline: string;
     strategy: string;
+    duration?: number;
+    stageTheme?: 'dark' | 'white' | 'paper';
+    cleanMode?: boolean;
+    showPipCounter?: boolean;
+    showExecutionBadge?: boolean;
+    showCalloutPin?: boolean;
     basePrice: number;
     riskBudget: number;
     slPips: number;
@@ -476,7 +482,12 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
     const finalSubline = payload.subline;
 
     const isMarubozu = /marubozu|dwkppr0i8wg/i.test(`${payload.strategy} ${payload.headline} ${payload.title}`);
+    const isBpr = /bpr|balanced price|nxficl21nze/i.test(`${payload.strategy} ${payload.headline} ${payload.title}`);
     const effectiveStrategy = isMarubozu ? 'Marubozu Daily Bias' : payload.strategy;
+
+    const targetDuration = (payload as any).duration && (payload as any).duration > 0
+      ? (payload as any).duration
+      : (isMarubozu ? 63.4 : (isBpr ? 81.0 : 12));
 
     const isClean = payload.cleanMode || payload.stageTheme === 'white' || payload.strategy?.toLowerCase().includes('bpr') || isMarubozu;
     const targetTheme = isMarubozu ? 'white' : (payload.stageTheme || (isClean ? 'white' : 'dark'));
@@ -540,7 +551,7 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
       },
       voiceAudioUrl: null, // Clear previous audio so new script's voice is freshly generated
       voiceAudioBase64: null,
-      duration: 12,
+      duration: targetDuration,
       executionOrder: {
         type: dir,
         lot: lotNum,

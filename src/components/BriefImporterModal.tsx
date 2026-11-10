@@ -652,7 +652,10 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
     if (hermesDirective && hermesDirective.badges) {
       useChartStore.getState().setBadges(hermesDirective.badges);
     }
-    useChartStore.setState({ duration: 12 });
+    const targetDur = (hermesDirective as any)?.duration && (hermesDirective as any).duration > 0
+      ? (hermesDirective as any).duration
+      : 12;
+    useChartStore.setState({ duration: targetDur });
 
     clearAllCandles();
 
