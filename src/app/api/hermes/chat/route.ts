@@ -547,6 +547,20 @@ function generateHermesLocalReply(userQuery: string): string {
         { timePercent: 0.58, text: "Kiên nhẫn chờ nến kiểm tra lại vùng cản vừa phá vỡ với volume xác nhận.", stageName: "Setup" },
         { timePercent: 0.82, text: "Kích hoạt lệnh chuẩn kỷ luật, Risk $30 ăn $105.", stageName: "Execution" }
       ];
+    } else if (/marubozu|bias|dwkppr0i8wg|nến\s*tiêu\s*chuẩn|power\s*candle/i.test(query)) {
+      strategy = 'Marubozu Daily Bias';
+      topicName = 'Marubozu Candle & Daily Bias Explained';
+      headline = 'HOW TO USE THE MARUBOZU FOR\n[DAILY BIAS]';
+      subline = 'Closes above previous candle high confirms next day is bullish.';
+      badges = ['1. MARUBOZU CANDLE', '2. D1 HIGH BREAK', '3. BULLISH BIAS'];
+      theme = 'white';
+      isClean = true;
+      subtitles = [
+        { timePercent: 0.0, text: "Nến Marubozu bùng nổ cực mạnh và hoàn toàn KHÔNG CÓ RÂU ở hai đầu.", stageName: "Hook" },
+        { timePercent: 0.28, text: "Thân nến thể hiện phe Mua hoặc Bán kiểm soát tuyệt đối toàn bộ thời gian.", stageName: "Trap" },
+        { timePercent: 0.58, text: "Ứng dụng mạnh nhất trên khung D1: Đóng nến vượt đỉnh nến trước đó.", stageName: "Setup" },
+        { timePercent: 0.82, text: "Xác nhận Daily Bias hôm sau tăng mạnh! Drop khung nhỏ chỉ canh BUY.", stageName: "Execution" }
+      ];
     }
 
     return `🎯 **BÁO CÁO GIẢI PHẪU & REMAKE VIDEO ĐỐI THỦ (HERMES DIRECTOR)**

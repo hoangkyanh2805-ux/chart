@@ -268,7 +268,7 @@ export const StageCanvas: React.FC = () => {
     if (hasStoreCandles) {
       // DYNAMIC MULTI-CANDLE WALK (Risk-First setup from Brief)
       const chartTop = sublineStartY + sublineLines.length * 15 + 16;
-      const chartBottom = height - 98; // Completely clear of bottom teleprompter HUD
+      const chartBottom = isWhite && !showExecutionBadge ? height - 56 : height - 98; // Extra vertical room in clean minimalist mode
       const chartHeight = chartBottom - chartTop;
       const chartLeft = 32;
       const chartRight = width - 32;
@@ -663,6 +663,32 @@ export const StageCanvas: React.FC = () => {
       }
 
       // 4d. UNIFIED CINEMATIC TELEPROMPTER & TRADE EXECUTION HUD (Bottom Safe Zone - ZERO Overlap)
+      // Active Subtitle Resolution
+      let activeSub = scriptSubtitles && scriptSubtitles.length > 0 ? scriptSubtitles[0] : null;
+      if (scriptSubtitles && scriptSubtitles.length > 0) {
+        for (const sub of scriptSubtitles) {
+          if (progress >= sub.timePercent) activeSub = sub;
+        }
+      }
+
+      // Minimalist Clean Captions for White Theme (No bulky gray card covering chart)
+      if (isWhite && !showExecutionBadge) {
+        const subText = activeSub?.text || '';
+        if (subText && progress > 0.08) {
+          ctx.save();
+          ctx.font = `bold 11px "${activeFont}", sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#0F172A';
+          const maxSubW = width - 40;
+          const subLines = wrapTextLines(ctx, subText, maxSubW).slice(0, 2);
+          subLines.forEach((line, lIdx) => {
+            ctx.fillText(line, width / 2, height - 36 + lIdx * 15);
+          });
+          ctx.restore();
+        }
+        return;
+      }
+
       const teleW = width - 32;
       const teleH = 68;
       const teleX = 16;
@@ -670,34 +696,6 @@ export const StageCanvas: React.FC = () => {
 
       ctx.save();
       // Outer Card
-      ctx.fillStyle = isWhite
-        ? 'rgba(255, 255, 255, 0.96)'
-        : isPaper
-        ? 'rgba(254, 243, 199, 0.96)'
-        : 'rgba(11, 15, 25, 0.94)';
-      ctx.strokeStyle = isWhite
-        ? '#CBD5E1'
-        : isPaper
-        ? '#D97706'
-        : 'rgba(99, 102, 241, 0.35)';
-      ctx.lineWidth = 1.2;
-      ctx.shadowColor = isWhite ? 'rgba(0,0,0,0.06)' : 'rgba(0,0,0,0.45)';
-      ctx.shadowBlur = 8;
-      ctx.shadowOffsetY = 2;
-      ctx.beginPath();
-      ctx.roundRect(teleX, teleY, teleW, teleH, 8);
-      ctx.fill();
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetY = 0;
-
-      // Header Row (inside card)
-      let activeSub = scriptSubtitles && scriptSubtitles.length > 0 ? scriptSubtitles[0] : null;
-      if (scriptSubtitles && scriptSubtitles.length > 0) {
-        for (const sub of scriptSubtitles) {
-          if (progress >= sub.timePercent) activeSub = sub;
-        }
-      }
 
       const stageName = activeSub?.stageName || 'SMC LESSON';
       ctx.font = '900 7.5px monospace';
