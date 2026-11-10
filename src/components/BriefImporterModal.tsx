@@ -159,8 +159,8 @@ function parseBriefText(text: string): ParsedBrief {
 
   if (isBPR) {
     setupType = 'fvg';
-    headline = 'STOP TRUSTING INVERSE FVGS';
-    subline = 'Look for Balanced Price Range overlap. Define $30 loss first.';
+    headline = "Here's why I'm not a big fan of\n[Inverse Fair Value Gaps]";
+    subline = 'Traders jump into Inverse FVGs too early. Look for a BPR instead.';
     basePrice = 4128.0;
   } else if (isBreakoutTrap) {
     setupType = 'breakout-trap';
@@ -695,7 +695,16 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
     const targetPips = Math.round(slP * rr);
     const lotNum = parseFloat(lotStr.replace(/[^0-9.]/g, '')) || 0.05;
 
+    const isBPR = /bpr|balanced price|inverse fvg/i.test(`${parsedHeadline} ${parsedSubline} ${briefText}`);
+    const currSettings = useChartStore.getState().settings;
+
     useChartStore.setState({
+      stageTheme: isBPR ? 'white' : useChartStore.getState().stageTheme,
+      settings: {
+        ...currSettings,
+        bullishColor: isBPR ? '#11806C' : currSettings.bullishColor,
+        bearishColor: isBPR ? '#000000' : currSettings.bearishColor,
+      },
       executionOrder: {
         type: dir,
         lot: lotNum,
@@ -707,11 +716,11 @@ export const BriefImporterModal: React.FC<BriefImporterModalProps> = ({ isOpen, 
         pips: targetPips,
       },
       targetPips,
-      showPipCounter: true,
-      showExecutionBadge: true,
+      showPipCounter: !isBPR,
+      showExecutionBadge: !isBPR,
       calloutPinText: dir === 'BUY' ? `🎯 RÚT CHÂN HỖ TRỢ ($${baseP.toFixed(0)})` : `🎯 BẪY DỤ BUY QUÉT ĐỈNH ($${baseP.toFixed(0)})`,
       calloutCandleIndex: 4,
-      showCalloutPin: true,
+      showCalloutPin: !isBPR,
       scriptSubtitles: [
         { timePercent: 0.0, text: `Khóa rủi ro 1R ($${riskB}) trước khi nhìn chart!`, stageName: 'Hook' },
         { timePercent: 0.28, text: `Thị trường test lại cản kỹ thuật, dụ đám đông vào lệnh cảm xúc.`, stageName: 'Trap' },

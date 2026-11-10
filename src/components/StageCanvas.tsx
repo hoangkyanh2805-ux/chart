@@ -138,94 +138,127 @@ export const StageCanvas: React.FC = () => {
     ctx.save();
     // Left: Asset Tag
     ctx.font = 'bold 9.5px monospace';
-    ctx.fillStyle = isWhite ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.6)';
+    ctx.fillStyle = isWhite ? 'rgba(0, 0, 0, 0.45)' : 'rgba(255, 255, 255, 0.6)';
     ctx.fillText(`${settings.symbol || 'XAUUSD'} · M15`, 18, 25);
 
-    // Pre-Flight Semantic Integrity Pill (Positioned on Left side next to Asset tag, leaving center Dynamic Island 100% CLEAR)
-    const isVerified = validationReport ? validationReport.isValid : true;
-    const vPillW = isVerified ? 74 : 84;
-    const vPillX = 105;
-    const pillH = 17;
-    const pillY = 13;
+    // Pre-Flight Semantic Integrity Pill (Hide when in clean white mode to preserve minimalist aesthetic)
+    if (!isWhite) {
+      const isVerified = validationReport ? validationReport.isValid : true;
+      const vPillW = isVerified ? 74 : 84;
+      const vPillX = 105;
+      const pillH = 17;
+      const pillY = 13;
 
-    ctx.fillStyle = isVerified
-      ? (isWhite ? '#ECFDF5' : 'rgba(16, 185, 129, 0.16)')
-      : (isWhite ? '#FEF2F2' : 'rgba(239, 68, 68, 0.18)');
-    ctx.strokeStyle = isVerified ? '#10B981' : '#EF4444';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(vPillX, pillY, vPillW, pillH, 4);
-    ctx.fill();
-    ctx.stroke();
+      ctx.fillStyle = isVerified
+        ? 'rgba(16, 185, 129, 0.16)'
+        : 'rgba(239, 68, 68, 0.18)';
+      ctx.strokeStyle = isVerified ? '#10B981' : '#EF4444';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(vPillX, pillY, vPillW, pillH, 4);
+      ctx.fill();
+      ctx.stroke();
 
-    ctx.font = 'bold 8px monospace';
-    ctx.fillStyle = isVerified
-      ? (isWhite ? '#065F46' : '#34D399')
-      : (isWhite ? '#991B1B' : '#F87171');
-    ctx.textAlign = 'center';
-    ctx.fillText(isVerified ? '✓ VERIFIED' : '⚠️ LỆCH PHA', vPillX + vPillW / 2, pillY + 11.5);
+      ctx.font = 'bold 8px monospace';
+      ctx.fillStyle = isVerified ? '#34D399' : '#F87171';
+      ctx.textAlign = 'center';
+      ctx.fillText(isVerified ? '✓ VERIFIED' : '⚠️ LỆCH PHA', vPillX + vPillW / 2, pillY + 11.5);
 
-    // Right: Compact Compliance Pill
-    const pillW = 86;
-    const pillX = width - pillW - 16;
+      // Right: Compact Compliance Pill
+      const pillW = 86;
+      const pillX = width - pillW - 16;
 
-    ctx.fillStyle = isWhite ? '#FEF3C7' : 'rgba(245, 158, 11, 0.15)';
-    ctx.strokeStyle = '#F59E0B';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(pillX, pillY, pillW, pillH, 4);
-    ctx.fill();
-    ctx.stroke();
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
+      ctx.strokeStyle = '#F59E0B';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(pillX, pillY, pillW, pillH, 4);
+      ctx.fill();
+      ctx.stroke();
 
-    ctx.font = 'bold 8.5px monospace';
-    ctx.fillStyle = isWhite ? '#92400E' : '#FBBF24';
-    ctx.textAlign = 'center';
-    ctx.fillText('ILLUSTRATION', pillX + pillW / 2, pillY + 12);
+      ctx.font = 'bold 8.5px monospace';
+      ctx.fillStyle = '#FBBF24';
+      ctx.textAlign = 'center';
+      ctx.fillText('ILLUSTRATION', pillX + pillW / 2, pillY + 12);
+    }
     ctx.restore();
 
-    // 3. Headline & Subline Typography with Auto-Wrapping (NO CLIPPING)
+    // 3. Headline & Subline Typography with Auto-Wrapping (NO CLIPPING & YELLOW HIGHLIGHT PILL)
     ctx.save();
     const activeFont = settings.fontFamily || 'Montserrat';
-    const rawHeadline = (headlineText || 'THE STOP LOSS CAME FIRST').toUpperCase();
+    const rawHeadline = headlineText || 'THE STOP LOSS CAME FIRST';
 
-    // Responsive font scaling
-    const isLongHeadline = rawHeadline.length > 32;
-    const headFontSize = isLongHeadline ? 15 : 17;
-    const headLineHeight = headFontSize + 5;
+    // Parse lines: prioritize explicit \n, otherwise wrapTextLines
+    let headlineLines: string[] = [];
+    if (rawHeadline.includes('\n')) {
+      headlineLines = rawHeadline.split('\n').map((l) => l.trim()).filter(Boolean).slice(0, 2);
+    } else {
+      const maxTextWidth = width - 40;
+      ctx.font = `900 16px "${activeFont}", sans-serif`;
+      headlineLines = wrapTextLines(ctx, rawHeadline, maxTextWidth).slice(0, 2);
+    }
+
+    const headFontSize = isWhite ? 15 : 16;
+    const headLineHeight = headFontSize + 8;
     ctx.font = `900 ${headFontSize}px "${activeFont}", sans-serif`;
 
-    const maxTextWidth = width - 40;
-    const headlineLines = wrapTextLines(ctx, rawHeadline, maxTextWidth).slice(0, 2); // Max 2 lines for punchy video
-
-    // Typing / Reveal animation for Headline
-    const totalChars = headlineLines.join(' ').length;
-    const headlineProgress = Math.min(1, progress / 0.35);
-    const charsToShow = Math.ceil(totalChars * headlineProgress);
-
-    let charCounter = 0;
-    const startY = 48;
+    const startY = isWhite ? 44 : 48;
     ctx.textAlign = 'center';
-    ctx.fillStyle = isWhite ? '#09090B' : '#FFFFFF';
 
     headlineLines.forEach((line, lineIdx) => {
       const lineY = startY + lineIdx * headLineHeight;
-      const remainingChars = Math.max(0, charsToShow - charCounter);
-      const displayedLine = line.substring(0, remainingChars);
-      ctx.fillText(displayedLine, width / 2, lineY);
-      charCounter += line.length + 1;
+      const bracketMatch = line.match(/\[(.*?)\]/);
+      const isAutoHighlight = isWhite && (line.includes('Inverse Fair Value') || line.includes('Balanced Price Range'));
+
+      if (bracketMatch || isAutoHighlight) {
+        const highlightText = bracketMatch ? bracketMatch[1] : line;
+        const prefix = bracketMatch ? line.substring(0, bracketMatch.index).trim() : '';
+
+        if (prefix) {
+          ctx.fillStyle = isWhite ? '#09090B' : '#FFFFFF';
+          ctx.font = `800 ${headFontSize - 1}px "${activeFont}", sans-serif`;
+          ctx.fillText(prefix, width / 2, lineY - headLineHeight + 4);
+        }
+
+        ctx.font = `900 ${headFontSize}px "${activeFont}", sans-serif`;
+        const textMetrics = ctx.measureText(highlightText);
+        const pillPadX = 8;
+        const pillW = textMetrics.width + pillPadX * 2;
+        const pillH = headFontSize + 7;
+        const pillX = width / 2 - pillW / 2;
+        const pillY = lineY - headFontSize - 1;
+
+        // Draw Yellow highlight pill
+        ctx.fillStyle = '#FFED2E';
+        ctx.beginPath();
+        ctx.roundRect(pillX, pillY, pillW, pillH, 4);
+        ctx.fill();
+
+        // Draw Black text inside pill
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.fillText(highlightText, width / 2, lineY);
+      } else {
+        ctx.fillStyle = isWhite ? '#09090B' : '#FFFFFF';
+        ctx.fillText(line, width / 2, lineY);
+      }
     });
 
     // Subline
     const sublineStartY = startY + headlineLines.length * headLineHeight + 4;
-    const rawSubline = sublineText || 'The entry came second. That order is the whole video.';
-    ctx.font = `600 11px "${activeFont}", sans-serif`;
-    const sublineLines = wrapTextLines(ctx, rawSubline, maxTextWidth).slice(0, 2);
+    const rawSubline = sublineText || '';
+    let sublineLines: string[] = [];
+    if (rawSubline) {
+      ctx.font = `600 11px "${activeFont}", sans-serif`;
+      const maxTextWidth = width - 40;
+      sublineLines = wrapTextLines(ctx, rawSubline, maxTextWidth).slice(0, 2);
 
-    if (progress > 0.15) {
-      ctx.fillStyle = isWhite ? '#4B5563' : '#94A3B8';
-      sublineLines.forEach((sLine, sIdx) => {
-        ctx.fillText(sLine, width / 2, sublineStartY + sIdx * 15);
-      });
+      if (progress > 0.15) {
+        ctx.fillStyle = isWhite ? '#4B5563' : '#94A3B8';
+        sublineLines.forEach((sLine, sIdx) => {
+          ctx.fillText(sLine, width / 2, sublineStartY + sIdx * 15);
+        });
+      }
     }
     ctx.restore();
 
@@ -298,21 +331,20 @@ export const StageCanvas: React.FC = () => {
           }
         } else if (overlay.type === 'FVG') {
           // Fair Value Gap with 50% Consequent Encroachment (C.E.) Line
-          // REA-Enriched: Glow Shimmer Effect when animated
           const fvgPulse = (Math.sin(currentTime * 3.5) + 1) / 2;
           ctx.fillStyle = isWhite
-            ? `rgba(16, 185, 129, ${0.16 + fvgPulse * 0.08})`
+            ? `rgba(205, 235, 252, ${0.55 + fvgPulse * 0.12})`
             : `rgba(0, 245, 160, ${0.18 + fvgPulse * 0.12})`;
           ctx.fillRect(startX, yTop, boxWidth, boxHeight);
 
-          ctx.strokeStyle = '#10B981';
+          ctx.strokeStyle = isWhite ? '#38BDF8' : '#10B981';
           ctx.lineWidth = 1;
           ctx.strokeRect(startX, yTop, boxWidth, boxHeight);
 
           // 50% C.E. Dotted Line
           const midY = yTop + boxHeight / 2;
           ctx.setLineDash([4, 3]);
-          ctx.strokeStyle = isWhite ? '#059669' : '#00F5A0';
+          ctx.strokeStyle = isWhite ? '#0284C7' : '#00F5A0';
           ctx.beginPath();
           ctx.moveTo(startX, midY);
           ctx.lineTo(startX + boxWidth, midY);
@@ -321,12 +353,12 @@ export const StageCanvas: React.FC = () => {
 
           if (overlay.label) {
             ctx.font = 'bold 8px monospace';
-            ctx.fillStyle = isWhite ? '#065F46' : '#6EE7B7';
+            ctx.fillStyle = isWhite ? '#0369A1' : '#6EE7B7';
             ctx.fillText(overlay.label, startX + 4, yTop + 11);
           }
         } else if (overlay.type === 'ORDER_BLOCK') {
           // Order Block / Supply-Demand Zone
-          ctx.fillStyle = isWhite ? 'rgba(239, 68, 68, 0.2)' : 'rgba(244, 63, 94, 0.22)';
+          ctx.fillStyle = isWhite ? 'rgba(239, 68, 68, 0.18)' : 'rgba(244, 63, 94, 0.22)';
           ctx.fillRect(startX, yTop, boxWidth, boxHeight);
 
           ctx.strokeStyle = '#EF4444';
@@ -339,7 +371,12 @@ export const StageCanvas: React.FC = () => {
             ctx.fillText(overlay.label, startX + 4, yTop + 11);
           }
         } else if (overlay.type === 'LONG_SHORT') {
-          // Risk:Reward Target & SL Boxes
+          // Risk:Reward Target & SL Boxes (Hidden in clean minimal white mode unless explicitly enabled)
+          if (isWhite && !showExecutionBadge) {
+            ctx.restore();
+            return;
+          }
+
           const isLong = overlay.priceEnd >= overlay.priceStart;
           const entryY = toY(overlay.priceStart);
           const tpY = toY(overlay.priceEnd);
@@ -381,9 +418,10 @@ export const StageCanvas: React.FC = () => {
         const centerX = x + cWidth / 2;
 
         const isBull = c.close >= c.open;
-        const bullCol = isWhite ? '#10B981' : '#00F5A0';
-        const bearCol = isWhite ? '#EF4444' : '#FF3366';
+        const bullCol = isWhite ? (settings.bullishColor || '#11806C') : '#00F5A0';
+        const bearCol = isWhite ? (settings.bearishColor || '#000000') : '#FF3366';
         const col = isBull ? bullCol : bearCol;
+        const wickCol = isWhite ? '#000000' : col;
 
         const yHigh = toY(c.high);
         const yLow = toY(c.low);
@@ -395,8 +433,8 @@ export const StageCanvas: React.FC = () => {
 
         ctx.save();
         // Wick
-        ctx.strokeStyle = col;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = wickCol;
+        ctx.lineWidth = isWhite ? 1.5 : 2;
         ctx.beginPath();
         ctx.moveTo(centerX, yHigh);
         ctx.lineTo(centerX, yLow);
@@ -404,8 +442,10 @@ export const StageCanvas: React.FC = () => {
 
         // Body
         ctx.fillStyle = col;
-        ctx.shadowColor = col;
-        ctx.shadowBlur = isWhite ? 0 : 5;
+        if (!isWhite) {
+          ctx.shadowColor = col;
+          ctx.shadowBlur = 5;
+        }
         ctx.fillRect(x, bodyTop, cWidth, bodyHeight);
         ctx.restore();
       });

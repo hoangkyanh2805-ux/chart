@@ -210,19 +210,23 @@ CRITICAL INSTRUCTION:
 The user wants to analyze and remake this video for @azzammastertradinggold!
 You MUST:
 1. Break down the specific technical trading concept of "${oeData.title}" (e.g. Balanced Price Range vs Inverse FVG).
-2. Remake it into an institutional Risk-First setup on XAUUSD.
+2. Reconstruct the clean visual style of the competitor:
+   - For ChartTactix / Minimalist styles, use "stageTheme": "white", "cleanMode": true, "showPipCounter": false, "showExecutionBadge": false, "showCalloutPin": false.
+   - For headline, use a 2-line structure with [Bracketed Highlight Keyword] so ChartAnimator renders the iconic Yellow Highlight Pill (e.g. "Here's why I'm not a big fan of\\n[Inverse Fair Value Gaps]").
 3. BẮT BUỘC PHẢI XUẤT KÈM KHỐI \`\`\`chart_setup CHỨA:
    - "title": "${(oeData.title || '').toUpperCase()}"
-   - "headline": Max 6 words in UPPERCASE (e.g. "STOP TRUSTING INVERSE FVGS")
-   - "subline": Max 10 words (e.g. "Look for Balanced Price Range overlap. Define loss first.")
-   - "strategy": "Balanced Price Range" | "Fair Value Gap" | "Liquidity Sweep"
+   - "headline": "Here's why I'm not a big fan of\\n[Inverse Fair Value Gaps]" (hoặc từ khóa tương tự bọc trong [...])
+   - "subline": "Traders jump into Inverse FVGs too early. Look for a Balanced Price Range instead."
+   - "strategy": "Balanced Price Range"
+   - "stageTheme": "white"
+   - "cleanMode": true
    - "basePrice": 4128
    - "riskBudget": 30
    - "slPips": 20
    - "lotSize": "0.15 lot"
    - "rrRatio": 3.5
-   - "badges": ["1. LOSS $30", "2. ENTRY SL 20p", "3. BPR OVERLAP"]
-   - "scriptSubtitles": 4 câu tiếng Việt Hook -> Trap -> Setup -> Execution\n`;
+   - "badges": ["1. BULLISH FVG", "2. INVERSION DROP", "3. BPR CONFIRMATION"]
+   - "scriptSubtitles": 4 câu tiếng Anh hoặc tiếng Việt Hook -> Trap -> Setup -> Execution\n`;
         }
       } catch (e) {
         console.warn('Failed to fetch oEmbed in chat route:', e);
@@ -476,34 +480,37 @@ function generateHermesLocalReply(userQuery: string): string {
 📌 **Chủ đề bóc tách:** **Why I Look for a BPR Instead of an Inverse FVG** *(Kênh ChartTactix - 32k Subs)*
 
 🧠 **Bóc tách cơ chế (Mechanism Deconstruction):**
-1. **Tại sao Inverse FVG bị cắn SL:** Khi giá đâm xuyên qua một Bullish FVG, retail trader thường vội vàng nhảy vào Short vì nghĩ FVG đó đã trở thành Kháng cự (Inverse FVG). Nhưng thực tế, nếu không có một FVG đối nghịch đè xuống tạo thành vùng **Balanced Price Range (BPR)**, nến sẽ dễ dàng giật ngược trở lại quét sạch SL.
-2. **Kế hoạch Remake cho @azzammastertradinggold:**
-   - **Hook 0-3s:** *"Stop trusting Inverse FVGs. Most of them are retail traps."*
-   - **Tọa độ nến XAUUSD:** Xác định vùng giao thoa giữa FVG tăng và FVG giảm quanh $4,126 - $4,134.
-   - **Risk-First:** Khóa chặt **Risk Budget $30, SL 20 pips, 0.15 lot, Target $105 (+70 pips, R:R 1:3.5)**.
+1. **Phong cách thị giác (Visual Style):** Nền trắng tối giản (#FFFFFF), nến xanh Teal (#11806C) và đen (#000000). Tiêu đề có khối Highlight vàng bo góc \`[Inverse Fair Value Gaps]\`. Biểu đồ tuyệt đối không rác indicator.
+2. **Tại sao Inverse FVG bị cắn SL:** Khi giá đâm xuyên qua một Bullish FVG, retail trader thường vội vàng nhảy vào Short vì nghĩ FVG đó đã trở thành Kháng cự (Inverse FVG). Nhưng nến thường giật ngược trở lại quét sạch SL.
+3. **Giải pháp Balanced Price Range (BPR):** Chỉ vào lệnh khi xuất hiện nến giảm tạo ra một Bearish FVG đối nghịch đè xuống tạo thành vùng chồng lấn BPR.
 
 \`\`\`chart_setup
 {
-  "title": "BALANCED PRICE RANGE (BPR) VS INVERSE FVG",
-  "headline": "STOP TRUSTING INVERSE FVGS",
-  "subline": "Look for Balanced Price Range overlap. Define $30 loss first.",
+  "title": "WHY I LOOK FOR A BPR INSTEAD OF AN INVERSE FVG",
+  "headline": "Here's why I'm not a big fan of\\n[Inverse Fair Value Gaps]",
+  "subline": "Traders jump into Inverse FVGs too early. Look for a BPR instead.",
   "strategy": "Balanced Price Range",
+  "stageTheme": "white",
+  "cleanMode": true,
   "basePrice": 4128,
   "riskBudget": 30,
   "slPips": 20,
   "lotSize": "0.15 lot",
   "rrRatio": 3.5,
-  "badges": ["1. LOSS $30", "2. ENTRY SL 20p", "3. BPR OVERLAP"],
+  "showPipCounter": false,
+  "showExecutionBadge": false,
+  "showCalloutPin": false,
+  "badges": ["1. BULLISH FVG", "2. INVERSION DROP", "3. BPR CONFIRMATION"],
   "scriptSubtitles": [
-    { "timePercent": 0.0, "text": "Hầu hết retail trader đều chết vì đu theo Inverse FVG.", "stageName": "Hook" },
-    { "timePercent": 0.28, "text": "Họ nghĩ nến đảo chiều nhưng thực chất chỉ là một khoảng trống bị quét râu.", "stageName": "Trap" },
-    { "timePercent": 0.58, "text": "Hãy tìm Balanced Price Range (BPR) - nơi 2 vùng mất cân bằng chồng lấn lên nhau.", "stageName": "Setup" },
-    { "timePercent": 0.82, "text": "Kích hoạt lệnh Sell khi retest BPR, khóa chặt Risk Budget 30 đô.", "stageName": "Execution" }
+    { "timePercent": 0.0, "text": "Here's why I'm not a big fan of inverse fair value gaps.", "stageName": "Hook" },
+    { "timePercent": 0.25, "text": "Traders jump in thinking it's inversed, but price easily pushes back up.", "stageName": "Trap" },
+    { "timePercent": 0.55, "text": "Instead, wait for displacement down creating a bearish FVG—a Balanced Price Range.", "stageName": "Setup" },
+    { "timePercent": 0.85, "text": "This confirms price cannot push higher and is ready to expand downward.", "stageName": "Execution" }
   ]
 }
 \`\`\`
 
-Bấm nút **Áp Dụng Lên Canvas** bên dưới để nạp setup BPR động lên biểu đồ video ngay lập tức!`;
+Bấm nút **Áp Dụng Lên Canvas** bên dưới để nạp setup BPR chuẩn phong cách ChartTactix lên biểu đồ ngay lập tức!`;
   }
 
   // 0. TRADING SESSION / PHIÊN GIAO DỊCH / THỜI GIAN HIỆN TẠI

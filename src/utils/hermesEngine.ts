@@ -102,37 +102,43 @@ export function generateStrategySetup(
     stratLower.includes('inverse fvg') ||
     stratLower.includes('inverse fair value')
   ) {
-    // ⚖️ Balanced Price Range (BPR) & Inverse FVG Setup
-    const bprLow = basePrice - 2.0;
-    const bprHigh = basePrice + 6.0;
+    // ⚖️ Balanced Price Range (BPR) & Inverse FVG Setup (Reconstructed directly from ChartTactix NXFicL21nZE)
+    // 11-Candle Institutional Sequence
+    const fvgLow = basePrice - 2.0;
+    const fvgHigh = basePrice + 2.0;
     candles = [
-      { id: 'c-1', index: 0, open: basePrice - 10.0, high: bprLow, low: basePrice - 11.0, close: basePrice - 3.0 },
-      { id: 'c-2', index: 1, open: basePrice - 3.0, high: basePrice + 14.0, low: basePrice - 3.5, close: basePrice + 12.0 },
-      { id: 'c-3', index: 2, open: basePrice + 12.0, high: basePrice + 18.0, low: bprHigh, close: basePrice + 16.0 },
-      { id: 'c-4', index: 3, open: basePrice + 16.0, high: basePrice + 17.0, low: basePrice - 8.0, close: basePrice - 6.0 },
-      { id: 'c-5', index: 4, open: basePrice - 6.0, high: basePrice + 4.0, low: basePrice - 7.0, close: basePrice + 1.0 },
-      { id: 'c-6', index: 5, open: basePrice + 1.0, high: basePrice + 2.0, low: basePrice - 22.0, close: basePrice - 20.0 },
+      { id: 'c-1', index: 0, open: basePrice - 18.0, high: basePrice - 9.0, low: basePrice - 20.0, close: basePrice - 10.0 }, // Bullish impulse 1
+      { id: 'c-2', index: 1, open: basePrice - 10.0, high: basePrice - 1.0, low: basePrice - 11.0, close: basePrice - 2.0 }, // Bullish step 2
+      { id: 'c-3', index: 2, open: basePrice - 2.0, high: basePrice + 8.0, low: basePrice - 3.0, close: basePrice + 5.0 }, // Bullish push 3
+      { id: 'c-4', index: 3, open: basePrice + 5.0, high: basePrice + 12.0, low: basePrice, close: basePrice + 1.0 }, // Black pullback
+      { id: 'c-5', index: 4, open: basePrice + 1.0, high: basePrice + 2.0, low: basePrice - 4.0, close: basePrice - 3.0 }, // Black continuation down
+      { id: 'c-6', index: 5, open: basePrice - 3.0, high: fvgLow, low: basePrice - 10.0, close: basePrice - 4.0 }, // Black sweep wick (gap bottom anchor)
+      { id: 'c-7', index: 6, open: basePrice - 4.0, high: basePrice + 3.0, low: basePrice - 5.0, close: basePrice + 2.0 }, // Green recovery
+      { id: 'c-8', index: 7, open: basePrice + 2.0, high: basePrice + 17.0, low: fvgHigh, close: basePrice + 16.0 }, // Massive green displacement (gap top anchor)
+      { id: 'c-9', index: 8, open: basePrice + 16.0, high: basePrice + 19.0, low: basePrice + 12.0, close: basePrice + 13.0 }, // Black pause at top
+      { id: 'c-10', index: 9, open: basePrice + 13.0, high: basePrice + 14.0, low: basePrice - 7.0, close: basePrice - 6.0 }, // Inversion candle punching down
+      { id: 'c-11', index: 10, open: basePrice - 6.0, high: fvgLow + 1.0, low: basePrice - 7.0, close: basePrice - 3.0 }, // Retest rejected into BPR
     ];
     overlays = [
       {
-        id: 'bpr-box',
+        id: 'bullish-fvg-box',
         type: 'FVG',
-        startCandleIndex: 1,
-        endCandleIndex: 4,
-        priceStart: bprLow,
-        priceEnd: bprHigh,
-        color: '#F59E0B',
-        label: `BPR Zone [${bprLow.toFixed(1)} - ${bprHigh.toFixed(1)}]`,
+        startCandleIndex: 6,
+        endCandleIndex: 10,
+        priceStart: fvgLow,
+        priceEnd: fvgHigh,
+        color: '#38BDF8',
+        label: `Bullish FVG [$${fvgLow.toFixed(1)} - $${fvgHigh.toFixed(1)}]`,
       },
       {
-        id: 'bpr-rr',
-        type: 'LONG_SHORT',
-        startCandleIndex: 4,
-        endCandleIndex: 5,
-        priceStart: basePrice + 1.0,
-        priceEnd: basePrice - 20.0,
-        color: '#EF4444',
-        label: `Sell BPR Retest | 1:${rrRatio} RR`,
+        id: 'bpr-box',
+        type: 'FVG',
+        startCandleIndex: 9,
+        endCandleIndex: 10,
+        priceStart: fvgLow - 2.0,
+        priceEnd: fvgLow + 1.0,
+        color: '#F59E0B',
+        label: `Balanced Price Range (BPR)`,
       },
     ];
   } else if (stratLower.includes('break') || stratLower.includes('bos') || stratLower.includes('retest')) {

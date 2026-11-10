@@ -475,11 +475,15 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
     const finalHeadline = payload.headline;
     const finalSubline = payload.subline;
 
+    const isClean = payload.cleanMode || payload.stageTheme === 'white' || payload.strategy?.toLowerCase().includes('bpr');
+    const targetTheme = payload.stageTheme || (isClean ? 'white' : 'dark');
+    const showPips = payload.showPipCounter !== undefined ? payload.showPipCounter : !isClean;
+    const showExec = payload.showExecutionBadge !== undefined ? payload.showExecutionBadge : !isClean;
+    const showPin = payload.showCalloutPin !== undefined ? payload.showCalloutPin : !isClean;
+
     setHeadlineText(finalHeadline);
     setSublineText(finalSubline);
-    if (payload.badges) {
-      setBadges(payload.badges);
-    }
+    setBadges(payload.badges || []);
 
     // 2. Derive direction & mathematical execution order
     const dir: 'BUY' | 'SELL' = /sell|supply|bearish/i.test(payload.strategy) ? 'SELL' : 'BUY';
@@ -523,7 +527,14 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
         });
 
     // 4. State Hygiene: completely overwrite old dirty state to guarantee semantic alignment
+    const currentState = useChartStore.getState();
     useChartStore.setState({
+      stageTheme: targetTheme,
+      settings: {
+        ...currentState.settings,
+        bullishColor: isClean ? '#11806C' : currentState.settings.bullishColor,
+        bearishColor: isClean ? '#000000' : currentState.settings.bearishColor,
+      },
       voiceAudioUrl: null, // Clear previous audio so new script's voice is freshly generated
       voiceAudioBase64: null,
       duration: 12,
@@ -538,13 +549,13 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
         pips: targetPips,
       },
       targetPips,
-      showPipCounter: true,
-      showExecutionBadge: true,
+      showPipCounter: showPips,
+      showExecutionBadge: showExec,
       calloutPinText: dir === 'BUY'
         ? `🎯 RÚT CHÂN HỖ TRỢ ($${baseP.toFixed(0)})`
         : `🎯 BẪY DỤ BUY QUÉT ĐỈNH ($${baseP.toFixed(0)})`,
       calloutCandleIndex: 4,
-      showCalloutPin: true,
+      showCalloutPin: showPin,
       beforeAfterMode: /overcomplicating|tối giản|pp-0009|indicator|chỉ báo/i.test(`${payload.headline} ${payload.title} ${payload.subline}`)
         ? 'auto'
         : 'off',
