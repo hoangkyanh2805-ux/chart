@@ -206,27 +206,28 @@ export async function POST(req: NextRequest) {
 - Video URL: ${videoUrl}
 - Video Title: "${oeData.title || ''}"
 - Creator/Channel: "${oeData.author_name || ''}"
-CRITICAL INSTRUCTION:
-The user wants to analyze and remake this video for @azzammastertradinggold!
-You MUST:
-1. Break down the specific technical trading concept of "${oeData.title}" (e.g. Balanced Price Range vs Inverse FVG).
-2. Reconstruct the clean visual style of the competitor:
-   - For ChartTactix / Minimalist styles, use "stageTheme": "white", "cleanMode": true, "showPipCounter": false, "showExecutionBadge": false, "showCalloutPin": false.
-   - For headline, use a 2-line structure with [Bracketed Highlight Keyword] so ChartAnimator renders the iconic Yellow Highlight Pill (e.g. "Here's why I'm not a big fan of\\n[Inverse Fair Value Gaps]").
-3. BẮT BUỘC PHẢI XUẤT KÈM KHỐI \`\`\`chart_setup CHỨA:
-   - "title": "${(oeData.title || '').toUpperCase()}"
-   - "headline": "Here's why I'm not a big fan of\\n[Inverse Fair Value Gaps]" (hoặc từ khóa tương tự bọc trong [...])
-   - "subline": "Traders jump into Inverse FVGs too early. Look for a Balanced Price Range instead."
-   - "strategy": "Balanced Price Range"
-   - "stageTheme": "white"
-   - "cleanMode": true
+CRITICAL INSTRUCTION FOR REMAKING THIS SPECIFIC VIDEO:
+The user pasted a real YouTube video to remake for @azzammastertradinggold!
+You MUST dynamically deconstruct and adapt THIS SPECIFIC VIDEO ("${oeData.title}"):
+1. Identify the exact technical trading mechanism of THIS video (e.g. Liquidity Sweep, Order Block, Fair Value Gap, Break & Retest, Market Structure Shift, BPR, or Risk Management).
+2. Reconstruct the visual style matching the creator:
+   - If creator is "${oeData.author_name}" (such as ChartTactix) or video uses a minimalist white look, use "stageTheme": "white", "cleanMode": true, "showPipCounter": false, "showExecutionBadge": false, "showCalloutPin": false.
+   - Otherwise, select "stageTheme": "dark" or "white" appropriately.
+   - For headline: ALWAYS formulate a punchy 2-line title with a [Bracketed Highlight Keyword] so ChartAnimator renders the Yellow Highlight Pill for the main topic (e.g. "HOW INSTITUTIONS TRADE\\n[LIQUIDITY SWEEPS]" or "WHY RETAIL GETS TRAPPED IN\\n[ORDER BLOCKS]" or "THE 50% REACTION IN\\n[FAIR VALUE GAPS]").
+3. BẮT BUỘC PHẢI XUẤT KÈM KHỐI \`\`\`chart_setup CHỨA CÁC THÔNG SỐ ĐỘNG THEO ĐÚNG VIDEO NÀY:
+   - "title": "${(oeData.title || 'COMPETITOR REMAKE').toUpperCase()}"
+   - "headline": 2 dòng với từ khóa bọc trong [Từ Khóa] bám sát chủ đề "${oeData.title}"
+   - "subline": Tóm tắt quy tắc cốt lõi (tối đa 12 từ)
+   - "strategy": Chọn chính xác 1 trong các chiến lược: "Liquidity Sweep" | "Order Block" | "Fair Value Gap" | "Balanced Price Range" | "Break & Retest" | "Risk-First Pullback"
+   - "stageTheme": "white" | "dark"
+   - "cleanMode": true | false
    - "basePrice": 4128
    - "riskBudget": 30
    - "slPips": 20
    - "lotSize": "0.15 lot"
    - "rrRatio": 3.5
-   - "badges": ["1. BULLISH FVG", "2. INVERSION DROP", "3. BPR CONFIRMATION"]
-   - "scriptSubtitles": 4 câu tiếng Anh hoặc tiếng Việt Hook -> Trap -> Setup -> Execution\n`;
+   - "badges": 3 badge tóm tắt 3 bước kỹ thuật
+   - "scriptSubtitles": 4 câu tiếng Việt (Hook -> Trap -> Setup -> Execution) phân tích trực tiếp cơ chế của video "${oeData.title}"\n`;
         }
       } catch (e) {
         console.warn('Failed to fetch oEmbed in chat route:', e);
@@ -470,47 +471,118 @@ function parseCustomSetupParameters(query: string) {
 function generateHermesLocalReply(userQuery: string): string {
   const query = userQuery.toLowerCase();
 
-  // 0. YOUTUBE COMPETITOR REMAKE (e.g. NXFicL21nZE / BPR / Inverse FVG)
+  // 0. YOUTUBE COMPETITOR REMAKE (Dynamic Universal Pipeline for Any Video)
   const ytMatch = userQuery.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
   if (ytMatch || /bpr|balanced price|inverse fvg|nxficl21nze/i.test(query)) {
     const videoId = ytMatch ? ytMatch[1] : 'NXFicL21nZE';
+
+    // 🎯 DYNAMIC STRATEGY DETECTION BASED ON VIDEO / QUERY TOPIC
+    let strategy = 'Balanced Price Range';
+    let topicName = 'Balanced Price Range vs Inverse FVG';
+    let headline = "Here's why I'm not a big fan of\n[Inverse Fair Value Gaps]";
+    let subline = 'Traders jump into Inverse FVGs too early. Look for a BPR instead.';
+    let badges = ['1. BULLISH FVG', '2. INVERSION DROP', '3. BPR CONFIRMATION'];
+    let theme = 'white';
+    let isClean = true;
+    let subtitles = [
+      { timePercent: 0.0, text: "Here's why I'm not a big fan of inverse fair value gaps.", stageName: "Hook" },
+      { timePercent: 0.25, text: "Traders jump in thinking it's inversed, but price easily pushes back up.", stageName: "Trap" },
+      { timePercent: 0.55, text: "Instead, wait for displacement down creating a bearish FVG—a Balanced Price Range.", stageName: "Setup" },
+      { timePercent: 0.85, text: "This confirms price cannot push higher and is ready to expand downward.", stageName: "Execution" }
+    ];
+
+    if (/sweep|liquidity|bsl|ssl|quét|hunt|thanh\s*khoản/i.test(query)) {
+      strategy = 'Liquidity Sweep';
+      topicName = 'Buy-Side Liquidity Purge & Rejection';
+      headline = 'HOW SMART MONEY RUNS\n[LIQUIDITY SWEEPS]';
+      subline = 'Wait for the purge above swing high. Lock $30 risk first.';
+      badges = ['1. BSL PURGE', '2. REJECTION WICK', '3. 1:3.5 TARGET'];
+      theme = 'dark';
+      isClean = false;
+      subtitles = [
+        { timePercent: 0.0, text: "Retail traders buy breakouts, Smart Money hunts their stops.", stageName: "Hook" },
+        { timePercent: 0.28, text: "Râu nến quét qua đỉnh cũ dụ hàng nghìn lệnh FOMO nhảy vào.", stageName: "Trap" },
+        { timePercent: 0.58, text: "Nến rút chân mạnh đóng dưới cản, xác nhận cạn kiệt lực mua.", stageName: "Setup" },
+        { timePercent: 0.82, text: "Vào lệnh Sell theo dòng tiền lớn, cố định rủi ro 30 đô.", stageName: "Execution" }
+      ];
+    } else if (/order\s*block|ob\b|breaker|khối\s*lệnh/i.test(query)) {
+      strategy = 'Order Block';
+      topicName = 'Institutional Order Block Mitigation';
+      headline = 'WHY RETAIL TRAP IN\n[ORDER BLOCKS]';
+      subline = 'Wait for displacement BOS and clean mitigation into the block.';
+      badges = ['1. ORDER BLOCK', '2. BOS DISPLACE', '3. MITIGATION'];
+      theme = 'white';
+      isClean = true;
+      subtitles = [
+        { timePercent: 0.0, text: "Hầu hết trader vẽ Order Block bừa bãi và bị cắn SL liên tục.", stageName: "Hook" },
+        { timePercent: 0.28, text: "Một Order Block chuẩn phải tạo ra cú giật phá vỡ cấu trúc BOS.", stageName: "Trap" },
+        { timePercent: 0.58, text: "Chờ giá retest nhẹ vào thân cây nến tăng cuối cùng.", stageName: "Setup" },
+        { timePercent: 0.82, text: "Khóa chặt Stop Loss 20 pips, chốt lời tỷ lệ 1:3.5 an toàn.", stageName: "Execution" }
+      ];
+    } else if (/fvg\b|fair\s*value|imbalance|mất\s*cân\s*bằng/i.test(query)) {
+      strategy = 'Fair Value Gap';
+      topicName = '50% Consequent Encroachment (C.E.) FVG';
+      headline = 'THE 50% SECRET OF\n[FAIR VALUE GAPS]';
+      subline = 'Respect 50% Consequent Encroachment level before pulling trigger.';
+      badges = ['1. FVG IMBALANCE', '2. 50% CE RETEST', '3. 20P SL'];
+      theme = 'white';
+      isClean = true;
+      subtitles = [
+        { timePercent: 0.0, text: "Đừng vội nhảy vào ngay khi thấy một khoảng trống FVG xuất hiện.", stageName: "Hook" },
+        { timePercent: 0.28, text: "Giá thường xuyên đâm sâu quét qua cạnh ngoài để dụ retail bắt đáy.", stageName: "Trap" },
+        { timePercent: 0.58, text: "Mốc 50% Consequent Encroachment mới là điểm nảy giá thực sự của tổ chức.", stageName: "Setup" },
+        { timePercent: 0.82, text: "Đặt lệnh tại 50% C.E., giữ vững kỷ luật Risk Budget $30.", stageName: "Execution" }
+      ];
+    } else if (/break|bos|retest|breakout|bẫy/i.test(query)) {
+      strategy = 'Break & Retest';
+      topicName = 'Breakout Trap Prevention';
+      headline = 'DONT BE LIQUIDITY IN\n[BREAKOUT TRAPS]';
+      subline = 'Wait for strong close above level and confirmation test.';
+      badges = ['1. KEY LEVEL', '2. CLEAN BREAK', '3. RETEST ENTRY'];
+      theme = 'dark';
+      isClean = false;
+      subtitles = [
+        { timePercent: 0.0, text: "95% cú breakout đầu tiên của retail chỉ là mồi nhử thanh khoản.", stageName: "Hook" },
+        { timePercent: 0.28, text: "Đám đông đua lệnh xanh đỏ và lập tức bị nhấn chìm khi nến quay đầu.", stageName: "Trap" },
+        { timePercent: 0.58, text: "Kiên nhẫn chờ nến kiểm tra lại vùng cản vừa phá vỡ với volume xác nhận.", stageName: "Setup" },
+        { timePercent: 0.82, text: "Kích hoạt lệnh chuẩn kỷ luật, Risk $30 ăn $105.", stageName: "Execution" }
+      ];
+    }
+
     return `🎯 **BÁO CÁO GIẢI PHẪU & REMAKE VIDEO ĐỐI THỦ (HERMES DIRECTOR)**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🔗 **Video gốc:** \`https://www.youtube.com/shorts/${videoId}\`
-📌 **Chủ đề bóc tách:** **Why I Look for a BPR Instead of an Inverse FVG** *(Kênh ChartTactix - 32k Subs)*
+📌 **Chủ đề bóc tách:** **${topicName}**
 
 🧠 **Bóc tách cơ chế (Mechanism Deconstruction):**
-1. **Phong cách thị giác (Visual Style):** Nền trắng tối giản (#FFFFFF), nến xanh Teal (#11806C) và đen (#000000). Tiêu đề có khối Highlight vàng bo góc \`[Inverse Fair Value Gaps]\`. Biểu đồ tuyệt đối không rác indicator.
-2. **Tại sao Inverse FVG bị cắn SL:** Khi giá đâm xuyên qua một Bullish FVG, retail trader thường vội vàng nhảy vào Short vì nghĩ FVG đó đã trở thành Kháng cự (Inverse FVG). Nhưng nến thường giật ngược trở lại quét sạch SL.
-3. **Giải pháp Balanced Price Range (BPR):** Chỉ vào lệnh khi xuất hiện nến giảm tạo ra một Bearish FVG đối nghịch đè xuống tạo thành vùng chồng lấn BPR.
+1. **Phong cách thị giác (Visual Style):** ${theme === 'white' ? 'Nền trắng tối giản (#FFFFFF), nến Teal (#11806C) và Đen (#000000)' : 'Nền tối Dark Mode chuyên sâu (#080C16)'}. Tiêu đề có khối Highlight vàng nổi bật.
+2. **Cơ chế kỹ thuật SMC:** Giải mã cấu trúc ${strategy} theo dòng tiền tổ chức, loại bỏ 100% bẫy tâm lý retail.
+3. **Kế hoạch Remake cho @azzammastertradinggold:**
+   - **Hook 0-3s:** Căng thẳng, giật gân, đánh trúng nỗi đau trader.
+   - **Risk-First:** Khóa chặt **Risk Budget $30, SL 20 pips, Target 1:3.5 RR ($105)**.
 
 \`\`\`chart_setup
 {
-  "title": "WHY I LOOK FOR A BPR INSTEAD OF AN INVERSE FVG",
-  "headline": "Here's why I'm not a big fan of\\n[Inverse Fair Value Gaps]",
-  "subline": "Traders jump into Inverse FVGs too early. Look for a BPR instead.",
-  "strategy": "Balanced Price Range",
-  "stageTheme": "white",
-  "cleanMode": true,
+  "title": "${topicName.toUpperCase()}",
+  "headline": "${headline.replace(/\n/g, '\\n')}",
+  "subline": "${subline}",
+  "strategy": "${strategy}",
+  "stageTheme": "${theme}",
+  "cleanMode": ${isClean},
   "basePrice": 4128,
   "riskBudget": 30,
   "slPips": 20,
   "lotSize": "0.15 lot",
   "rrRatio": 3.5,
-  "showPipCounter": false,
-  "showExecutionBadge": false,
-  "showCalloutPin": false,
-  "badges": ["1. BULLISH FVG", "2. INVERSION DROP", "3. BPR CONFIRMATION"],
-  "scriptSubtitles": [
-    { "timePercent": 0.0, "text": "Here's why I'm not a big fan of inverse fair value gaps.", "stageName": "Hook" },
-    { "timePercent": 0.25, "text": "Traders jump in thinking it's inversed, but price easily pushes back up.", "stageName": "Trap" },
-    { "timePercent": 0.55, "text": "Instead, wait for displacement down creating a bearish FVG—a Balanced Price Range.", "stageName": "Setup" },
-    { "timePercent": 0.85, "text": "This confirms price cannot push higher and is ready to expand downward.", "stageName": "Execution" }
-  ]
+  "showPipCounter": ${!isClean},
+  "showExecutionBadge": ${!isClean},
+  "showCalloutPin": ${!isClean},
+  "badges": ${JSON.stringify(badges)},
+  "scriptSubtitles": ${JSON.stringify(subtitles, null, 2)}
 }
 \`\`\`
 
-Bấm nút **Áp Dụng Lên Canvas** bên dưới để nạp setup BPR chuẩn phong cách ChartTactix lên biểu đồ ngay lập tức!`;
+Bấm nút **Áp Dụng Lên Canvas** bên dưới để nạp setup ${strategy} chuẩn hóa lên biểu đồ ngay lập tức!`;
   }
 
   // 0. TRADING SESSION / PHIÊN GIAO DỊCH / THỜI GIAN HIỆN TẠI

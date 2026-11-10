@@ -174,6 +174,40 @@ export function generateStrategySetup(
         label: `Retest Entry | 1:${rrRatio} RR`,
       },
     ];
+  } else if (stratLower.includes('order block') || stratLower.includes('ob') || stratLower.includes('breaker') || stratLower.includes('khối lệnh')) {
+    // 🧱 Institutional Order Block (OB Mitigation & Displacement)
+    const obLow = basePrice + 5.0;
+    const obHigh = basePrice + 12.0;
+    candles = [
+      { id: 'c-1', index: 0, open: basePrice, high: basePrice + 4.0, low: basePrice - 2.0, close: basePrice + 3.0 },
+      { id: 'c-2', index: 1, open: basePrice + 3.0, high: obHigh, low: basePrice + 2.0, close: obHigh - 1.0 }, // Last Bullish Candle (OB)
+      { id: 'c-3', index: 2, open: obHigh - 1.0, high: obHigh, low: basePrice - 4.0, close: basePrice - 3.0 }, // Massive Displacement Down (BOS)
+      { id: 'c-4', index: 3, open: basePrice - 3.0, high: basePrice - 2.0, low: basePrice - 8.0, close: basePrice - 7.0 }, // Continuation
+      { id: 'c-5', index: 4, open: basePrice - 7.0, high: obLow + 2.0, low: basePrice - 7.5, close: obLow }, // Mitigation Retest into OB!
+      { id: 'c-6', index: 5, open: obLow, high: obLow + 0.5, low: basePrice - 18.0, close: basePrice - 17.0 }, // Heavy Rejection Drop
+    ];
+    overlays = [
+      {
+        id: 'ob-box',
+        type: 'ORDER_BLOCK',
+        startCandleIndex: 1,
+        endCandleIndex: 4,
+        priceStart: obLow,
+        priceEnd: obHigh,
+        color: '#EF4444',
+        label: `Bearish Order Block [$${obLow.toFixed(1)} - $${obHigh.toFixed(1)}]`,
+      },
+      {
+        id: 'bos-line',
+        type: 'LIQUIDITY_LINE',
+        startCandleIndex: 0,
+        endCandleIndex: 3,
+        priceStart: basePrice,
+        priceEnd: basePrice,
+        color: '#38BDF8',
+        label: `Structure BOS ($${basePrice.toFixed(1)})`,
+      },
+    ];
   } else if (stratLower.includes('supply') || stratLower.includes('bearish')) {
     // 📉 Bearish Supply Zone Setup
     const supplyLevel = basePrice + 12.0;
