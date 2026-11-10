@@ -246,6 +246,13 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
       const data = await res.json();
       const payload = extractSetupPayload(data.reply);
 
+      // Auto-apply setup to Canvas immediately when returned by Hermes AI
+      if (payload) {
+        handleExecuteSetup(payload);
+        setAppliedNotice(`✓ Đã tự động cập nhật biểu đồ theo kịch bản: "${payload.headline}"`);
+        setTimeout(() => setAppliedNotice(''), 5000);
+      }
+
       const botMsg: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',

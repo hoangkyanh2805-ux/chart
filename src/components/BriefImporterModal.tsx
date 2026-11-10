@@ -127,6 +127,15 @@ TITLE CUỐI: Define the Loss First: 3 Steps Before Any XAUUSD Entry
 Hook Short (10 từ): "The stop loss came first. The entry came second."
 Ví dụ XAUUSD: $30 budget → 20 pips → $1.50/pip, Previous High Support $4,128.00, 1:3.5 RR. Label: ILLUSTRATION`,
   },
+  {
+    id: 'bpr-inverse-fvg',
+    label: '⚖️ BPR vs Inverse FVG (NXFicL21nZE)',
+    strategyName: 'Balanced Price Range',
+    text: `# Kịch Bản Remake: Why I Look for a BPR Instead of an Inverse FVG (NXFicL21nZE - ChartTactix)
+TITLE CUỐI: Stop Trusting Inverse FVGs: Find the BPR Overlap
+Hook Short (10 từ): "Stop trusting Inverse FVGs. Most of them are retail traps."
+Setup: Giá đâm xuyên qua Bullish FVG nhưng không giữ được. Chờ xuất hiện Bearish FVG đè xuống tạo thành vùng Balanced Price Range (BPR) giao thoa quanh $4,126 - $4,134. Đặt lệnh SELL retest BPR, Stop Loss 20 pips ($30 Risk Budget), Target $105 lãi (RR 1:3.5).`,
+  },
 ];
 
 // Client-side quick parser supporting both Vietnamese & English
@@ -140,6 +149,7 @@ function parseBriefText(text: string): ParsedBrief {
   let slPips = 20;
   let rrRatio = 3.5;
 
+  const isBPR = /bpr|balanced price|inverse fvg|nxficl21nze/i.test(text);
   const isBreakoutTrap = /breakout trap|bẫy breakout|bẫy nến|hit stop loss|sweep low|quét đáy|trap/i.test(text);
   const isSweep = /sweep|liquidity|bsl|ssl|purge|stop watching|fakeout|quét|thanh khoản|quét đỉnh/i.test(text);
   const isFVG = /fvg|imbalance|fair value gap|consequent encroachment|50%|mất cân bằng|khoảng trống/i.test(text);
@@ -147,7 +157,12 @@ function parseBriefText(text: string): ParsedBrief {
   const isSupply = /bearish|short|dump|sell|supply|distribution|phân phối|bán tháo|cung|giảm mạnh/i.test(text);
   const isRisk = /risk-first|define the loss|stop loss first|loss budget|quản lý vốn|cắt lỗ|ngân sách rủi ro/i.test(text);
 
-  if (isBreakoutTrap) {
+  if (isBPR) {
+    setupType = 'fvg';
+    headline = 'STOP TRUSTING INVERSE FVGS';
+    subline = 'Look for Balanced Price Range overlap. Define $30 loss first.';
+    basePrice = 4128.0;
+  } else if (isBreakoutTrap) {
     setupType = 'breakout-trap';
     headline = 'BREAKOUT TRAP: DONT BE LIQUIDITY';
     subline = 'Wait for D1 Sweep + M15 MSS + 50% FVG Retest';

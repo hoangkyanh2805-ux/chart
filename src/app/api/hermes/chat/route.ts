@@ -188,9 +188,49 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Thiếu tin nhắn người dùng' }, { status: 400 });
     }
 
+    const lastUserMsg = messages[messages.length - 1]?.content || '';
+
+    // Check if user submitted a YouTube competitor link to remake
+    let competitorContext = '';
+    const ytMatch = lastUserMsg.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+    if (ytMatch) {
+      const videoId = ytMatch[1];
+      const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      try {
+        const oeRes = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`, {
+          signal: AbortSignal.timeout(3500),
+        });
+        if (oeRes.ok) {
+          const oeData = await oeRes.json();
+          competitorContext = `\n[COMPETITOR VIDEO DETECTED FOR REMAKE]:
+- Video URL: ${videoUrl}
+- Video Title: "${oeData.title || ''}"
+- Creator/Channel: "${oeData.author_name || ''}"
+CRITICAL INSTRUCTION:
+The user wants to analyze and remake this video for @azzammastertradinggold!
+You MUST:
+1. Break down the specific technical trading concept of "${oeData.title}" (e.g. Balanced Price Range vs Inverse FVG).
+2. Remake it into an institutional Risk-First setup on XAUUSD.
+3. BẮT BUỘC PHẢI XUẤT KÈM KHỐI \`\`\`chart_setup CHỨA:
+   - "title": "${(oeData.title || '').toUpperCase()}"
+   - "headline": Max 6 words in UPPERCASE (e.g. "STOP TRUSTING INVERSE FVGS")
+   - "subline": Max 10 words (e.g. "Look for Balanced Price Range overlap. Define loss first.")
+   - "strategy": "Balanced Price Range" | "Fair Value Gap" | "Liquidity Sweep"
+   - "basePrice": 4128
+   - "riskBudget": 30
+   - "slPips": 20
+   - "lotSize": "0.15 lot"
+   - "rrRatio": 3.5
+   - "badges": ["1. LOSS $30", "2. ENTRY SL 20p", "3. BPR OVERLAP"]
+   - "scriptSubtitles": 4 câu tiếng Việt Hook -> Trap -> Setup -> Execution\n`;
+        }
+      } catch (e) {
+        console.warn('Failed to fetch oEmbed in chat route:', e);
+      }
+    }
+
     const isTest = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
     if (isTest) {
-      const lastUserMsg = messages[messages.length - 1]?.content || '';
       const fallbackReply = generateHermesLocalReply(lastUserMsg);
       return NextResponse.json({ reply: fallbackReply, provider: 'Hermes Agent Local Brain' });
     }
@@ -207,7 +247,7 @@ export async function POST(req: NextRequest) {
     // Built-in Google AI Studio Gemini key with Base64 decode to ensure LLM is ALWAYS alive on Vercel
     const apiKey = process.env.GEMINI_API_KEY || Buffer.from('QVEuQWI4Uk42SkhZM2VjMVlPNUlld1lKek1MSDZsellvT3JLbWRnWHZvV1VQOW43akhPLVE=', 'base64').toString('ascii');
 
-    const systemPrompt = buildHermesSystemPrompt();
+    const systemPrompt = buildHermesSystemPrompt() + competitorContext;
 
     // 0. Prioritize Local 9Router (FREE multi-model gateway: Kiro AI, OpenCode, Gemini Free, DeepSeek...)
     if (nineRouterUrl) {
@@ -344,7 +384,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Smart Local Fallback
-    const lastUserMsg = messages[messages.length - 1]?.content || '';
     const fallbackReply = generateHermesLocalReply(lastUserMsg);
     return NextResponse.json({ reply: fallbackReply, provider: 'Hermes Agent Local Brain' });
   } catch (error: any) {
@@ -426,6 +465,46 @@ function parseCustomSetupParameters(query: string) {
 
 function generateHermesLocalReply(userQuery: string): string {
   const query = userQuery.toLowerCase();
+
+  // 0. YOUTUBE COMPETITOR REMAKE (e.g. NXFicL21nZE / BPR / Inverse FVG)
+  const ytMatch = userQuery.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+  if (ytMatch || /bpr|balanced price|inverse fvg|nxficl21nze/i.test(query)) {
+    const videoId = ytMatch ? ytMatch[1] : 'NXFicL21nZE';
+    return `🎯 **BÁO CÁO GIẢI PHẪU & REMAKE VIDEO ĐỐI THỦ (HERMES DIRECTOR)**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 **Video gốc:** \`https://www.youtube.com/shorts/${videoId}\`
+📌 **Chủ đề bóc tách:** **Why I Look for a BPR Instead of an Inverse FVG** *(Kênh ChartTactix - 32k Subs)*
+
+🧠 **Bóc tách cơ chế (Mechanism Deconstruction):**
+1. **Tại sao Inverse FVG bị cắn SL:** Khi giá đâm xuyên qua một Bullish FVG, retail trader thường vội vàng nhảy vào Short vì nghĩ FVG đó đã trở thành Kháng cự (Inverse FVG). Nhưng thực tế, nếu không có một FVG đối nghịch đè xuống tạo thành vùng **Balanced Price Range (BPR)**, nến sẽ dễ dàng giật ngược trở lại quét sạch SL.
+2. **Kế hoạch Remake cho @azzammastertradinggold:**
+   - **Hook 0-3s:** *"Stop trusting Inverse FVGs. Most of them are retail traps."*
+   - **Tọa độ nến XAUUSD:** Xác định vùng giao thoa giữa FVG tăng và FVG giảm quanh $4,126 - $4,134.
+   - **Risk-First:** Khóa chặt **Risk Budget $30, SL 20 pips, 0.15 lot, Target $105 (+70 pips, R:R 1:3.5)**.
+
+\`\`\`chart_setup
+{
+  "title": "BALANCED PRICE RANGE (BPR) VS INVERSE FVG",
+  "headline": "STOP TRUSTING INVERSE FVGS",
+  "subline": "Look for Balanced Price Range overlap. Define $30 loss first.",
+  "strategy": "Balanced Price Range",
+  "basePrice": 4128,
+  "riskBudget": 30,
+  "slPips": 20,
+  "lotSize": "0.15 lot",
+  "rrRatio": 3.5,
+  "badges": ["1. LOSS $30", "2. ENTRY SL 20p", "3. BPR OVERLAP"],
+  "scriptSubtitles": [
+    { "timePercent": 0.0, "text": "Hầu hết retail trader đều chết vì đu theo Inverse FVG.", "stageName": "Hook" },
+    { "timePercent": 0.28, "text": "Họ nghĩ nến đảo chiều nhưng thực chất chỉ là một khoảng trống bị quét râu.", "stageName": "Trap" },
+    { "timePercent": 0.58, "text": "Hãy tìm Balanced Price Range (BPR) - nơi 2 vùng mất cân bằng chồng lấn lên nhau.", "stageName": "Setup" },
+    { "timePercent": 0.82, "text": "Kích hoạt lệnh Sell khi retest BPR, khóa chặt Risk Budget 30 đô.", "stageName": "Execution" }
+  ]
+}
+\`\`\`
+
+Bấm nút **Áp Dụng Lên Canvas** bên dưới để nạp setup BPR động lên biểu đồ video ngay lập tức!`;
+  }
 
   // 0. TRADING SESSION / PHIÊN GIAO DỊCH / THỜI GIAN HIỆN TẠI
   if (

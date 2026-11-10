@@ -96,6 +96,45 @@ export function generateStrategySetup(
         label: `Buy FVG 50% CE | 1:${rrRatio} RR`,
       },
     ];
+  } else if (
+    stratLower.includes('bpr') ||
+    stratLower.includes('balanced price range') ||
+    stratLower.includes('inverse fvg') ||
+    stratLower.includes('inverse fair value')
+  ) {
+    // ⚖️ Balanced Price Range (BPR) & Inverse FVG Setup
+    const bprLow = basePrice - 2.0;
+    const bprHigh = basePrice + 6.0;
+    candles = [
+      { id: 'c-1', index: 0, open: basePrice - 10.0, high: bprLow, low: basePrice - 11.0, close: basePrice - 3.0 },
+      { id: 'c-2', index: 1, open: basePrice - 3.0, high: basePrice + 14.0, low: basePrice - 3.5, close: basePrice + 12.0 },
+      { id: 'c-3', index: 2, open: basePrice + 12.0, high: basePrice + 18.0, low: bprHigh, close: basePrice + 16.0 },
+      { id: 'c-4', index: 3, open: basePrice + 16.0, high: basePrice + 17.0, low: basePrice - 8.0, close: basePrice - 6.0 },
+      { id: 'c-5', index: 4, open: basePrice - 6.0, high: basePrice + 4.0, low: basePrice - 7.0, close: basePrice + 1.0 },
+      { id: 'c-6', index: 5, open: basePrice + 1.0, high: basePrice + 2.0, low: basePrice - 22.0, close: basePrice - 20.0 },
+    ];
+    overlays = [
+      {
+        id: 'bpr-box',
+        type: 'FVG',
+        startCandleIndex: 1,
+        endCandleIndex: 4,
+        priceStart: bprLow,
+        priceEnd: bprHigh,
+        color: '#F59E0B',
+        label: `BPR Zone [${bprLow.toFixed(1)} - ${bprHigh.toFixed(1)}]`,
+      },
+      {
+        id: 'bpr-rr',
+        type: 'LONG_SHORT',
+        startCandleIndex: 4,
+        endCandleIndex: 5,
+        priceStart: basePrice + 1.0,
+        priceEnd: basePrice - 20.0,
+        color: '#EF4444',
+        label: `Sell BPR Retest | 1:${rrRatio} RR`,
+      },
+    ];
   } else if (stratLower.includes('break') || stratLower.includes('bos') || stratLower.includes('retest')) {
     // 💥 Break & Retest Setup
     const resLevel = basePrice + 4.0;
