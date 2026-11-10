@@ -475,18 +475,21 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
     const finalHeadline = payload.headline;
     const finalSubline = payload.subline;
 
-    const isClean = payload.cleanMode || payload.stageTheme === 'white' || payload.strategy?.toLowerCase().includes('bpr');
-    const targetTheme = payload.stageTheme || (isClean ? 'white' : 'dark');
+    const isMarubozu = /marubozu|dwkppr0i8wg/i.test(`${payload.strategy} ${payload.headline} ${payload.title}`);
+    const effectiveStrategy = isMarubozu ? 'Marubozu Daily Bias' : payload.strategy;
+
+    const isClean = payload.cleanMode || payload.stageTheme === 'white' || payload.strategy?.toLowerCase().includes('bpr') || isMarubozu;
+    const targetTheme = isMarubozu ? 'white' : (payload.stageTheme || (isClean ? 'white' : 'dark'));
     const showPips = payload.showPipCounter !== undefined ? payload.showPipCounter : !isClean;
     const showExec = payload.showExecutionBadge !== undefined ? payload.showExecutionBadge : !isClean;
     const showPin = payload.showCalloutPin !== undefined ? payload.showCalloutPin : !isClean;
 
     setHeadlineText(finalHeadline);
     setSublineText(finalSubline);
-    setBadges(payload.badges || []);
+    setBadges(isClean ? [] : (payload.badges || []));
 
     // 2. Derive direction & mathematical execution order
-    const dir: 'BUY' | 'SELL' = /sell|supply|bearish/i.test(payload.strategy) ? 'SELL' : 'BUY';
+    const dir: 'BUY' | 'SELL' = /sell|supply|bearish/i.test(effectiveStrategy) ? 'SELL' : 'BUY';
     const baseP = payload.basePrice || 4128.0;
     const slPips = payload.slPips || 20;
     const rrRatio = payload.rrRatio || 3.5;
@@ -501,7 +504,7 @@ Bạn muốn tôi phân tích góc kịch bản nào hoặc yêu cầu tôi tạ
     // 3. Generate authentic strategy-specific candles & overlays
     clearAllCandles();
     const { candles, overlays } = generateStrategySetup(
-      payload.strategy,
+      effectiveStrategy,
       baseP,
       riskBudget,
       slPips,
