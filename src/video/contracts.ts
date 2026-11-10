@@ -91,6 +91,8 @@ export type StoryboardCue = {
 export type SceneDraft = {
   schema: 'scene-draft/1';
   source: SourceDocument;
+  headline?: string;
+  subline?: string;
   truthClass: 'EDUCATIONAL_ILLUSTRATION';
   language: 'en' | 'vi';
   direction: Direction | null;

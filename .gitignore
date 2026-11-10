@@ -32,3 +32,5 @@ scratch/
 .worktrees/
 livrables/s2v_runs/**/*.mp4
 livrables/s2v_runs/**/*.wav
+livrables/s2v_runs/mutant_*
+livrables/s2v_runs/test_run_*

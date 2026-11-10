@@ -57,11 +57,13 @@ export function renderFrame(
   ctx.textAlign = 'center';
   ctx.fillStyle = theme.textPrimary;
   ctx.font = '900 48px sans-serif';
-  ctx.fillText('RISK-FIRST XAUUSD', PROFILE_WIDTH / 2, 230);
+  const headline = (scene.draft.headline || 'RISK-FIRST XAUUSD').toUpperCase();
+  ctx.fillText(headline, PROFILE_WIDTH / 2, 230);
 
   ctx.fillStyle = theme.textSecondary;
   ctx.font = '700 32px sans-serif';
-  ctx.fillText('DEFINE LOSS BEFORE ENTRY', PROFILE_WIDTH / 2, 290);
+  const subline = (scene.draft.subline || 'DEFINE LOSS BEFORE ENTRY').toUpperCase();
+  ctx.fillText(subline, PROFILE_WIDTH / 2, 290);
   ctx.restore();
   bounds.push({ id: 'headline', x: SAFE_ZONES.horizontal.left, y: 160, width: SAFE_ZONES.horizontal.width, height: 180 });
 
@@ -214,7 +216,28 @@ export function renderFrame(
     ctx.fillStyle = '#DC2626';
     ctx.font = '900 32px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('❌ STOP LOSS HIT (-$30.00)', PROFILE_WIDTH / 2, 1320);
+    const lossUsd = scene.draft.budget?.riskUsd ?? 30;
+    ctx.fillText(`❌ STOP LOSS HIT (-$${lossUsd.toFixed(2)})`, PROFILE_WIDTH / 2, 1320);
+    ctx.restore();
+  } else if (currentOutcome === 'TAKE_PROFIT') {
+    visibleIds.push('outcome:TAKE_PROFIT');
+    ctx.save();
+    ctx.fillStyle = '#10B981';
+    ctx.font = '900 32px sans-serif';
+    ctx.textAlign = 'center';
+    const profitUsd =
+      scene.draft.order?.tp && scene.draft.order?.entry && scene.draft.budget
+        ? (Math.abs(scene.draft.order.tp - scene.draft.order.entry) * 10 * scene.draft.budget.usdPerPip).toFixed(2)
+        : '105.00';
+    ctx.fillText(`🎯 TAKE PROFIT HIT (+$${profitUsd})`, PROFILE_WIDTH / 2, 1320);
+    ctx.restore();
+  } else if (currentOutcome === 'NO_TRADE') {
+    visibleIds.push('outcome:NO_TRADE');
+    ctx.save();
+    ctx.fillStyle = '#F59E0B';
+    ctx.font = '900 32px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('⚠️ LIQUIDITY TRAP — NO TRADE', PROFILE_WIDTH / 2, 1320);
     ctx.restore();
   }
 

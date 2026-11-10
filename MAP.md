@@ -58,12 +58,16 @@ chart/
 │   │   ├── SPEC-DYNAMIC-CONTENT-RUNTIME-VALIDATOR-AND-AUTO-NORMALIZER-v1.md
 │   │   ├── CHARTANIMATOR-BRIDGE-CHART-CAPABILITY-MANIFEST-v1.md
 │   │   ├── SPEC-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md # P3 planning-only local renderer contract
+│   │   ├── SPEC-AI-COMPETITOR-REMAKE-TO-TRADING-SHORT-v1.md # Remake đối thủ → short ≤48s, spec v1.1.0, chưa build code
 │   │   └── HERMES-CLI-BRIEF-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md # Read-only Hermes handoff
 │   ├── architecture/           # Kế hoạch và decision record kiến trúc
 │   │   ├── PLAN-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md
 │   │   ├── DEBATE-P3-CHARTANIMATOR-LOCAL-RENDERER-v1.md
 │   │   ├── PLAN-SCRIPT-TO-VIDEO-RECOVERY-v1.md # Kế hoạch 9 task phục hồi S2V-R1
-│   │   └── DEBATE-SCRIPT-TO-VIDEO-RECOVERY-v1.md
+│   │   ├── DEBATE-SCRIPT-TO-VIDEO-RECOVERY-v1.md
+│   │   ├── DEBATE-AI-COMPETITOR-REMAKE-TO-TRADING-SHORT-v1.md # Chọn tool remake, không clone footage
+│   │   ├── DEBATE-REMAKE-RENDER-SYNC-v1.md # Đối soát claim khớp 100% với src/video
+│   │   └── PLAN-AI-COMPETITOR-REMAKE-TO-TRADING-SHORT-v1.md # 8 task, chưa thực thi
 │   ├── s2v_runs/               # Bằng chứng thực thi & media runs của S2V-R1
 │   │   └── s2v-r1-run-01/      # Run baseline, artifacts, acceptance-map
 │   └── test_reports/           # Báo cáo kiểm định & audit chất lượng
@@ -113,7 +117,10 @@ chart/
 │   │   ├── renderFrame.ts      # Hàm render đồng bộ renderFrame
 │   │   ├── audioTimeline.ts    # Lượng tử hóa audio 48kHz (1600 smp/frame)
 │   │   ├── audioIdentity.ts    # Cô lập phản hồi âm thanh cũ (Anti-stale)
-│   │   └── importAdapters.ts   # Cổng chuyển đổi kịch bản đa nguồn toDraft
+│   │   ├── importAdapters.ts   # Cổng chuyển đổi kịch bản đa nguồn toDraft
+│   │   ├── dynamicCandleChoreographer.ts # Sinh nến & overlay SMC động theo kịch bản
+│   │   ├── whisperWordSync.ts  # Đồng bộ mốc frame theo từng từ Whisper
+│   │   └── renderBridge.ts     # Cầu nối HeadlessRenderBridge cho Canvas
 │   └── server/video/           # Giám sát viên render & lưu trữ local
 │       ├── runRenderJob.ts     # Trình stream PNG sang FFmpeg image2pipe
 │       ├── verifyMedia.ts      # Thẩm định media bằng ffprobe & decode

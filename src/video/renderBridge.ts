@@ -3,7 +3,7 @@ import { renderFrame } from './renderFrame';
 
 export interface RenderBridge {
   loadScene(scene: FrozenScene): Promise<{ ok: boolean }>;
-  renderFrame(index: number): Promise<{ receipt: FrameReceipt }>;
+  renderFrame(index: number): Promise<{ receipt: FrameReceipt; pngDataUrl?: string }>;
   getStatus(): { loaded: boolean; frameCount: number };
 }
 
@@ -20,12 +20,15 @@ export class HeadlessRenderBridge implements RenderBridge {
     return { ok: true };
   }
 
-  async renderFrame(index: number): Promise<{ receipt: FrameReceipt }> {
+  async renderFrame(index: number): Promise<{ receipt: FrameReceipt; pngDataUrl?: string }> {
     if (!this.activeScene) {
       throw new Error('No scene loaded');
     }
     const receipt = renderFrame(this.ctx, this.activeScene, index);
-    return { receipt };
+    const canvas = this.ctx.canvas;
+    const pngDataUrl =
+      canvas && typeof canvas.toDataURL === 'function' ? canvas.toDataURL('image/png') : undefined;
+    return { receipt, pngDataUrl };
   }
 
   getStatus(): { loaded: boolean; frameCount: number } {
@@ -35,4 +38,3 @@ export class HeadlessRenderBridge implements RenderBridge {
     };
   }
 }
-
