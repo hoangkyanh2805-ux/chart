@@ -93,4 +93,30 @@ flowchart TD
    - [x] Runtime Server phản hồi 200 OK.
    - [x] Git working tree sạch, không sửa file ngoài phạm vi.
 
+---
+
+## 8. Quy trình Remake Video Đối Thủ Chuẩn (Competitor Remake SOP)
+
+Khi nhận link YouTube Shorts / TikTok của đối thủ (ví dụ `https://www.youtube.com/shorts/NXFicL21nZE` - ChartTactix), Agent kích hoạt workflow 4 bước tự động:
+
+```mermaid
+flowchart LR
+    Link["🔗 Copy Link YouTube/TikTok"] --> Step1["1. Ingest & Visual/Audio Deconstruction\n(yt-dlp + ffmpeg full-frames + Gemini Flash)"]
+    Step1 --> Step2["2. Skill: corpus-to-spec-mapper & hermes-director\n(Bóc tách nến OHLC, FVG, BPR & Visual Palette)"]
+    Step2 --> Step3["3. Chuẩn hóa Hermes Risk-First\n(Risk $30, SL 20p, XAUUSD bám giá thực)"]
+    Step3 --> Step4["4. Clean-Room Render trên Canvas & App\n(Auto White Theme, Yellow Pill Highlight, Teal/Black Candles)"]
+```
+
+### Các công cụ & Skill kích hoạt:
+1. **Agent:** `Hermes Native Director Agent` (phân tích kịch bản) + `Audit & Spec Agent` (đo tọa độ frame).
+2. **Skill:**
+   - `corpus-to-spec-mapper`: Bóc tách cơ chế kỹ thuật từ video/kênh đối thủ, ánh xạ vào pipeline.
+   - `hermes-director`: Định hình Hook 0-3s, cấu trúc Risk-First, lọc sạch AI-smell.
+   - `hermes-smc-verifier`: Kiểm định tỷ lệ R:R $\ge$ 1:3.5, SL 20 pips, Consequent Encroachment (C.E.) 50%.
+3. **Quy tắc hiển thị trên App (Trải nghiệm thực tế của người dùng):**
+   - Chỉ cần **copy link video dán thẳng vào khung chat Hermes** trên web `https://chart-inky-three.vercel.app/`.
+   - `/api/hermes/chat` tự động crawl metadata oEmbed, phân tích chủ đề, sinh khối `chart_setup` chuẩn.
+   - Giao diện tự động chuyển sang phong cách của video gốc: Nền trắng (`#FFFFFF`), tiêu đề có khối highlight vàng (`#FFED2E`), nến Teal rừng (`#11806C`) & Đen (`#000000`), FVG xanh lơ nhạt (`#CDEBFC`), tắt 100% rác indicator và box SL/TP che chart.
+
+
 
